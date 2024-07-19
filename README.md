@@ -1,6 +1,6 @@
 # autorouting-dataset
 
-[Problems](#problems) &middot; [Benchmarks](#benchmarks) &middot; [tscircuit](https://github.com/tscircuit/tscircuit) &middot; [Usage](#usage)
+[Problems](#problems) &middot; [Benchmarks](#benchmarks) &middot; [](#) &middot; [Usage](#usage) &middot; [tscircuit](https://github.com/tscircuit/tscircuit)
 
 A dataset of autorouting problems for benchmarking. Autorouting
 is the drawing of traces (wires) across a 2d surface to connect
@@ -20,30 +20,37 @@ very useful for human-assisted routing.
 | ------- | ----------- | ---------- |
 | `single-trace` | Route a single trace through obstacles | Easy |
 | `single-multi-point-trace` | Route a single trace through multiple points | Easy |
-| `multi-trace` | Route multiple traces to pairs of points, without crossing traces | Medium |
-| `multi-layer-trace` | Route a trace through multiple layers to connect two points | Easy |
-| `multi-trace-multi-point` | Route multiple traces to groups of points, without crossing traces | Medium |
-| `multi-layer-multi-trace` | Route multiple traces to pairs of points, without crossing traces across layers | Hard |
-| `multi-layer-multi-trace-multi-point` | Route multiple traces, through multiple places, to groups of points, without crossing traces | Hard |
+| `traces` | Route multiple traces to pairs of points, without crossing traces | Medium |
+| `layers-traces` | Route a trace through multiple layers to connect two points | Easy |
+| `traces-groups` | Route multiple traces to groups of points, without crossing traces | Medium |
+| `layers-traces` | Route multiple traces to pairs of points, without crossing traces across layers | Hard |
+| `layers-traces-groups` | Route multiple traces, through multiple places, to groups of points, without crossing traces | Hard |
+| `incremental-*` | The same dataset but a component is moved or a trace is changed. Tests cache efficiency | Hard+ |
 
 ## Benchmarks
 
-There are several criteria for assessing the speed of a benchmark:
+There are several criteria we use for running benchmarks:
 
 - Speed
 - Percent Completed
 - Quality
   - Compared to the ideal routing, how much longer are the traces? Shorter traces are usually better
+- Problem Type
+- Incremental Speed (speed if a single component is moved or a trace is changed)
+
+Over time, we'd like to have a simple 2d chart showing Speed and Quality.
 
 
 ## Usage
 
-This dataset is composed of thousands of files in the [tscircuit soup format](https://docs.tscircuit.com/api-reference/advanced/soup). tscircuit
+This dataset is composed of thousands of files in the [tscircuit soup format](https://docs.tscircuit.com/api-reference/advanced/soup). You
+can find a dataset for each problem tscircuit in the [datasets](./datasets) directory.
 soup can be easily visualized and contains a lot of metadata that can be used for constraints. However, you may want to use the `getSimpleRouteJson`
 utility function to convert it into a simple object with the following interface:
 
 ```tsx
 interface SimpleRouteJson {
+  layerCount: number
   obstacles: Array<{
     center: { x: number, y: number },
     width: number,
@@ -56,4 +63,4 @@ interface SimpleRouteJson {
 }
 ```
 
-Each directory in the `datasets` directory contains a dataset for each problem as well as the tscircuit code to generate the dataset.
+Each directory in the `datasets` directory contains a dataset for each problem. The `generate` directory contains the code to generate datasets.
