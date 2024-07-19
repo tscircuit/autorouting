@@ -27,6 +27,13 @@ very useful for human-assisted routing.
 | `layers-traces-groups` | Route multiple traces, through multiple places, to groups of points, without crossing traces | Hard |
 | `incremental-*` | The same dataset but a component is moved or a trace is changed. Tests cache efficiency | Hard+ |
 
+### Example Problems
+
+#### `simple-multi-point-trace`
+
+![image](https://github.com/user-attachments/assets/6f21ae45-191a-4f3a-aeb2-8b56576a1ece)
+
+
 ## Benchmarks
 
 There are several criteria we use for running benchmarks:
