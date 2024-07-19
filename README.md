@@ -94,7 +94,7 @@ const mySolver = (soup: AnySoupElement[]) => {
 
   // ...
 
-  // ...return a pcb_trace object with our solution!
+  // ...return one or more pcb_trace objects with our solution!
   return [
     {
       "type": "pcb_trace",
