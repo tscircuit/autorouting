@@ -67,7 +67,7 @@ interface SimpleRouteJson {
 }
 ```
 
-Each directory in the `datasets` directory contains a dataset for each problem. The `generate` directory contains the code to generate datasets.
+Each directory in the `datasets` directory contains a dataset for each problem. The `code` directory contains the code to generate datasets.
 
 
 ## Writing a Solver
