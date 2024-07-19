@@ -163,3 +163,9 @@ const result = await runBenchmark({
 
 console.log(result)
 ```
+
+## Community Solvers
+
+Coming soon! Please create an issue to add your solver to this repo, we will be listing benchmarks etc.!
+
+We are working on a dedicated test machine for measuring performance.
