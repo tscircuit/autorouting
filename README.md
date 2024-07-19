@@ -1,6 +1,6 @@
 # autorouting-dataset
 
-[Problems](#problems) &middot; [Benchmarks](#benchmarks) &middot; [Writing a Solver](#writing-a-solver) &middot; [Usage](#usage) &middot; [tscircuit](https://github.com/tscircuit/tscircuit)
+[Problems](#problems) &middot; [Benchmarks](#benchmarks) &middot; [Writing a Solver](#writing-a-solver) &middot; [Usage](#usage) &middot; [Running a Benchmark](#running-a-benchmark) &middot; [tscircuit](https://github.com/tscircuit/tscircuit)
 
 A dataset of autorouting problems for benchmarking. Autorouting
 is the drawing of traces (wires) across a 2d surface to connect
@@ -147,6 +147,12 @@ If you have a Typescript solver, you can run a benchmark programmatically using:
 
 ```tsx
 import { runBenchmark } from "autorouting-dataset"
+import mySolver from "./my-solver"
 
-await runBenchmark({
+const result = await runBenchmark({
+  mySolver,
+  verbose: true
+})
+
+console.log(result)
 ```
