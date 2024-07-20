@@ -1,5 +1,3 @@
-import {  } from "tscircuit"
-
 export const SingleTraceCircuit = ({ seed }: { seed: number }) => {
   return (
     <board width="10mm" height="10mm" center_x={0} center_y={0}>
