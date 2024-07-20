@@ -3,7 +3,8 @@
   "module": "index.ts",
   "type": "module",
   "scripts": {
-    "start": "concurrently 'vite' 'bun cli.ts server start'"
+    "start": "npm run build && bun cli.ts server start",
+    "build": "vite build"
   },
   "devDependencies": {
     "@biomejs/biome": "^1.8.3",
@@ -12,13 +13,15 @@
     "@tscircuit/soup-util": "^0.0.13",
     "@types/bun": "latest",
     "@types/mersenne-twister": "^1.1.7",
+    "@types/node": "^20.14.11",
     "@types/react": "^18.3.3",
     "@types/react-dom": "^18.3.0",
     "@vitejs/plugin-react": "^4.3.1",
     "concurrently": "^8.2.2",
     "react-dom": "^18.3.1",
     "react-query": "^3.39.3",
-    "vite": "^5.3.4"
+    "vite": "^5.3.4",
+    "vite-plugin-singlefile": "^2.0.2"
   },
   "peerDependencies": {
     "typescript": "^5.0.0"

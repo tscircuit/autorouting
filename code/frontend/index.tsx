@@ -1,6 +1,8 @@
+import { ContextProviders } from "./components/ContextProviders"
+import ViewProblemAndSolution from "./components/ViewProblemAndSolution"
+
 export default () => {
-  return <div>
-    <div>Problem</div>
-    <div>Solution</div>
-  </div>
+  return (<ContextProviders>
+    <ViewProblemAndSolution />
+  </ContextProviders>)
 }

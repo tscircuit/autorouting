@@ -1,5 +1,5 @@
 import type { AnySoupElement } from "@tscircuit/soup"
 
-export type ProblemGenerator = (params: {
-  seed: number
-}) => Promise<AnySoupElement>
+export type ProblemGenerator = {
+  getExample: (params: { seed: number }) => Promise<AnySoupElement[]>
+}

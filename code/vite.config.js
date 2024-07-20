@@ -1,9 +1,10 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
-import path from 'path'
+import { viteSingleFile } from "vite-plugin-singlefile"
+import path from 'node:path'
 
 export default defineConfig({
-  plugins: [react()],
+  plugins: [react(), viteSingleFile()],
   root: 'frontend',
   build: {
     outDir: '../dist',
