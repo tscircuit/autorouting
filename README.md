@@ -16,23 +16,22 @@ applies to a different autorouting scenario. A perfect autorouter
 can solve all of these problems, but partial autorouting is
 very useful for human-assisted routing.
 
-| Problem | Description | Difficulty |
-| ------- | ----------- | ---------- |
-| `single-trace` | Route a single trace through obstacles | Easy |
-| `single-multi-point-trace` | Route a single trace through multiple points | Easy |
-| `traces` | Route multiple traces to pairs of points, without crossing traces | Medium |
-| `layers-traces` | Route a trace through multiple layers to connect two points | Easy |
-| `traces-groups` | Route multiple traces to groups of points, without crossing traces | Medium |
-| `layers-traces` | Route multiple traces to pairs of points, without crossing traces across layers | Hard |
-| `layers-traces-groups` | Route multiple traces, through multiple places, to groups of points, without crossing traces | Hard |
-| `incremental-*` | The same dataset but a component is moved or a trace is changed. Tests cache efficiency | Hard+ |
+| Problem                    | Description                                                                                  | Difficulty |
+| -------------------------- | -------------------------------------------------------------------------------------------- | ---------- |
+| `single-trace`             | Route a single trace through obstacles                                                       | Easy       |
+| `single-multi-point-trace` | Route a single trace through multiple points                                                 | Easy       |
+| `traces`                   | Route multiple traces to pairs of points, without crossing traces                            | Medium     |
+| `layers-traces`            | Route a trace through multiple layers to connect two points                                  | Easy       |
+| `traces-groups`            | Route multiple traces to groups of points, without crossing traces                           | Medium     |
+| `layers-traces`            | Route multiple traces to pairs of points, without crossing traces across layers              | Hard       |
+| `layers-traces-groups`     | Route multiple traces, through multiple places, to groups of points, without crossing traces | Hard       |
+| `incremental-*`            | The same dataset but a component is moved or a trace is changed. Tests cache efficiency      | Hard+      |
 
 ### Example Problems
 
 #### `simple-multi-point-trace`
 
 ![image](https://github.com/user-attachments/assets/6f21ae45-191a-4f3a-aeb2-8b56576a1ece)
-
 
 ## Benchmarks
 
@@ -47,7 +46,6 @@ There are several criteria we use for running benchmarks:
 
 Over time, we'd like to have a simple 2d chart showing Speed and Quality.
 
-
 ## Usage
 
 This dataset is composed of thousands of files in the [tscircuit soup format](https://docs.tscircuit.com/api-reference/advanced/soup). You
@@ -61,21 +59,20 @@ utility function from `autorouting-dataset` to convert it into a simple object w
 interface SimpleRouteJson {
   layerCount: number
   obstacles: Array<{
-    type: "rect" | "oval", // NOTE: most datasets do not contain ovals
-    center: { x: number, y: number },
-    width: number,
+    type: "rect" | "oval" // NOTE: most datasets do not contain ovals
+    center: { x: number; y: number }
+    width: number
     height: number
-  }>,
+  }>
   connections: Array<{
-    name: string,
-    pointsToConnect: Array<{ x: number, y: number }>
-  }>,
-  bounds: { minX: number, maxX: number, minY: number, maxY: number }
+    name: string
+    pointsToConnect: Array<{ x: number; y: number }>
+  }>
+  bounds: { minX: number; maxX: number; minY: number; maxY: number }
 }
 ```
 
 Each directory in the `datasets` directory contains a dataset for each problem. The `code` directory contains the code to generate datasets.
-
 
 ## Writing a Solver
 
@@ -131,13 +128,12 @@ You can then run this file with `bun --hot ./solver-server.ts`
 
 ### Non-Typescript Solvers
 
-* Host a server with your algorithm (see the simple flask server below)
-* Run `npx autorouting-dataset server start` and configure the url to your server
+- Host a server with your algorithm (see the simple flask server below)
+- Run `npx autorouting-dataset server start` and configure the url to your server
 
 ```python
 # TODO insert flask server here
 ```
-
 
 ## Visualizing Problems/Solutions
 
@@ -158,7 +154,7 @@ import mySolver from "./my-solver"
 
 const result = await runBenchmark({
   mySolver,
-  verbose: true
+  verbose: true,
 })
 
 console.log(result)

@@ -18,7 +18,11 @@ export const DatasetNavigation = () => {
       {selectedProblemType && (
         <>
           <h2>
-            {selectedProblemType} - {seed}
+            {selectedProblemType} -{" "}
+            <a href={`/problem/${selectedProblemType}/${seed}.json`}>#{seed}</a>{" "}
+            <a href={`/problem/${selectedProblemType}/${seed}.json`}>
+              download
+            </a>
           </h2>
           <div>
             <button

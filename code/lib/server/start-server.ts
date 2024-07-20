@@ -11,8 +11,6 @@ import type { AnySoupElement } from "@tscircuit/soup"
 
 export const startServer = ({ solver }: { solver?: ProblemSolver } = {}) => {
   const server = http.createServer(async (req, res) => {
-    res.writeHead(200, { "Content-Type": "text/html" })
-
     let problemSoup: AnySoupElement[] | undefined
     let solutionSoup: AnySoupElement[] | undefined
     let userMessage: string | undefined
@@ -32,8 +30,22 @@ export const startServer = ({ solver }: { solver?: ProblemSolver } = {}) => {
 
     if (solver) {
       solutionSoup = await solver(problemSoup as AnySoupElement[])
+    } else if (req.url!.includes("/problem/")) {
+      const [, , problemType, seedStr] = req.url!.split("/")
+      const seed = seedStr ? Number.parseInt(seedStr) : 0
+
+      solutionSoup = await getDatasetGenerator(
+        problemType as any
+      ).getExampleWithTscircuitSolution({ seed: seed })
     }
 
+    if (req.url!.includes(".json")) {
+      res.writeHead(200, { "Content-Type": "application/json" })
+      res.end(JSON.stringify(solutionSoup, null, 2))
+      return
+    }
+
+    res.writeHead(200, { "Content-Type": "text/html" })
     res.end(
       frontend.replace(
         "<!-- INJECT_SCRIPT -->",

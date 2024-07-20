@@ -19,8 +19,8 @@ export const SingleTrace2Footprints = ({ seed }: { seed: number }) => {
       <A />
       <B />
       <trace
-        from={`.A > port.${rand(seed, "aFrom").int(0, aFoot.pinCount - 1)}`}
-        to={`.B > port.${rand(seed, "bFrom").int(0, bFoot.pinCount - 1)}`}
+        from={`.A > port.${rand(seed, "aFrom").int(1, aFoot.pinCount)}`}
+        to={`.B > port.${rand(seed, "bFrom").int(1, bFoot.pinCount)}`}
       />
     </board>
   )
