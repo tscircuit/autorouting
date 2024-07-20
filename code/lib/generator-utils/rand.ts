@@ -26,5 +26,13 @@ export const rand = (...seeds: (string | number)[]) => {
     seeds.length
   )
 
-  return generator.random()
+  return {
+    int: (min: number, max: number) =>
+      Math.floor(generator.random() * (max + 1 - min) + min),
+    float: () => generator.random(),
+    range: (min: number, max: number) => generator.random() * (max - min) + min,
+    select: <T>(options: Array<T>): T =>
+      options[Math.floor(generator.random() * options.length)],
+    bool: () => generator.random() < 0.5,
+  }
 }

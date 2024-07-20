@@ -2,12 +2,14 @@ import { PCBViewer } from "@tscircuit/pcb-viewer"
 import type { AnySoupElement } from "@tscircuit/soup"
 import { useState } from "react"
 import { DatasetNavigation } from "./DatasetNavigation"
+import { ErrorBoundary } from "react-error-boundary"
 
 declare global {
   interface Window {
     PROBLEM_SOUP: AnySoupElement[]
     SOLUTION_SOUP: AnySoupElement[]
     HAS_SOLVER?: string
+    USER_MESSAGE?: string
   }
 }
 
@@ -18,6 +20,8 @@ export default () => {
   // Derive problem from url (if present)
   const [, , selectedProblemType, seedStr] = window.location.pathname.split("/")
   const seed = seedStr ? Number.parseInt(seedStr) : 0
+  const problemSoup = window.PROBLEM_SOUP
+  const solutionSoup = window.SOLUTION_SOUP
 
   if (!hasPreloadedSoup) {
     return (
@@ -51,9 +55,20 @@ export default () => {
   return (
     <div>
       <DatasetNavigation />
-      <div>Problem</div>
-
-      <div>Solution</div>
+      <h2>Problem</h2>
+      {problemSoup ? <PCBViewer soup={problemSoup} /> : "No problem preloaded"}
+      <h2>Solution</h2>
+      <ErrorBoundary
+        fallbackRender={({ error }) => (
+          <div>Error rendering solution: {error.message}</div>
+        )}
+      >
+        {solutionSoup ? (
+          <PCBViewer soup={solutionSoup} />
+        ) : (
+          "No solution preloaded"
+        )}
+      </ErrorBoundary>
     </div>
   )
 }

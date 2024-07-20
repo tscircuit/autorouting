@@ -53,3 +53,26 @@ import { getSimpleRouteJson } from "autorouting-dataset"
 
 const routeJson = getSimpleRouteJson(soup)
 ```
+
+## Development
+
+Run `bun run start` to start the dev server. Then go to `http://localhost:3000` to view the dev server.
+
+This project uses a statically compiled frontend via vite. The server injects
+data into the frontend by placing a script tag in the html file that sets variables
+like `window.PROBLEM_SOUP`. Soup always refers to the [tscircuit json soup format](https://docs.tscircuit.com/api-reference/advanced/soup).
+
+When loading a page, the dev server uses the url to generate the problem soup,
+e.g. if the url is `/problem/single-trace/1` the dev server will generate a
+problem soup using `getDatasetGenerator("single-trace").getExample({ seed: 1 })`
+and set the `window.PROBLEM_SOUP` variable to the generated soup.
+
+If a `solver` is given to the dev server, it will run the solver and place the
+result inside the `window.SOLUTION_SOUP` variable.
+
+If a `solverUrl` is given to the dev server, it will make a request to the url
+with `{ problem_soup, simple_route_json }` and use the response `{ solution_soup }`
+to set the `window.SOLUTION_SOUP` variable.
+
+Note that the `solver` or `solverUrl` may return a soup with only `pcb_trace` elements,
+the rest of the elements (e.g. `pcb_component`) will be automatically added by the dev server.

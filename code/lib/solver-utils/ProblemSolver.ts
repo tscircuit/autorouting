@@ -1,3 +1,5 @@
 import type { AnySoupElement } from "@tscircuit/soup"
 
-export type ProblemSolver = (soup: AnySoupElement[]) => AnySoupElement[]
+export type ProblemSolver = (
+  soup: AnySoupElement[]
+) => AnySoupElement[] | Promise<AnySoupElement[]>

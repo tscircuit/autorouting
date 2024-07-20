@@ -10,9 +10,11 @@ const problemTypes = [
 export const DatasetNavigation = () => {
   const [, , selectedProblemType, seedStr] = window.location.pathname.split("/")
   const seed = seedStr ? Number.parseInt(seedStr) : 0
+  const userMessage = window.USER_MESSAGE ?? ""
 
   return (
     <div>
+      {userMessage && <div style={{ color: "red" }}>{userMessage}</div>}
       {selectedProblemType && (
         <>
           <h2>
