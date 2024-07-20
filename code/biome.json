@@ -28,6 +28,9 @@
       "suspicious": {
         "noExplicitAny": "off"
       },
+      "a11y": {
+        "useButtonType": "off"
+      },
       "style": {
         "noNonNullAssertion": "off",
         "useFilenamingConvention": {
