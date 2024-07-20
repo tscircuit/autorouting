@@ -1,5 +1,8 @@
-import { getSingleTraceGenerator } from "./single-trace"
+import { getSingleTraceProblemGenerator } from "./single-trace"
+import type { ProblemGenerator } from "./types"
 
-export const getDatasetGenerator = (problemType: "single-trace") => {
-  return getSingleTraceGenerator()
+export const getDatasetGenerator = (
+  problemType: "single-trace"
+): ProblemGenerator => {
+  return getSingleTraceProblemGenerator()
 }

@@ -6,12 +6,15 @@
     "@biomejs/biome": "^1.8.3",
     "@tscircuit/soup": "^0.0.39",
     "@tscircuit/soup-util": "^0.0.13",
-    "@types/bun": "latest"
+    "@types/bun": "latest",
+    "@types/mersenne-twister": "^1.1.7"
   },
   "peerDependencies": {
     "typescript": "^5.0.0"
   },
   "dependencies": {
-    "commander": "^12.1.0"
+    "commander": "^12.1.0",
+    "mersenne-twister": "^1.1.0",
+    "tscircuit": "^0.0.228"
   }
 }
