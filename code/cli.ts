@@ -28,7 +28,7 @@ program
   .requiredOption(
     "--seed <number>",
     "Seed for random generation",
-    Number.parseInt
+    Number.parseInt,
   )
   .requiredOption("--output <path>", "Output file path")
   .action(async (options) => {
@@ -46,7 +46,7 @@ program
   .requiredOption("--problem-type <type>", "Type of problem to generate")
   .requiredOption(
     "--output <pattern>",
-    "Output file pattern (e.g., ./problem-XXX.json)"
+    "Output file pattern (e.g., ./problem-XXX.json)",
   )
   .action(async (options) => {
     const generator = getDatasetGenerator(options.problemType)
@@ -57,11 +57,11 @@ program
 
       const outputPath = options.output.replace(
         "XXX",
-        i.toString().padStart(3, "0")
+        i.toString().padStart(3, "0"),
       )
       await fs.writeFile(outputPath, JSON.stringify(soup, null, 2))
       console.log(
-        `Problem ${i + 1}/${datasetSize} generated and saved to ${outputPath}`
+        `Problem ${i + 1}/${datasetSize} generated and saved to ${outputPath}`,
       )
     }
   })

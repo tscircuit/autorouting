@@ -35,7 +35,7 @@ export const startServer = ({ solver }: { solver?: ProblemSolver } = {}) => {
       const seed = seedStr ? Number.parseInt(seedStr) : 0
 
       solutionSoup = await getDatasetGenerator(
-        problemType as any
+        problemType as any,
       ).getExampleWithTscircuitSolution({ seed: seed })
     }
 
@@ -49,8 +49,8 @@ export const startServer = ({ solver }: { solver?: ProblemSolver } = {}) => {
     res.end(
       frontend.replace(
         "<!-- INJECT_SCRIPT -->",
-        getScriptContent({ problemSoup, solutionSoup, userMessage })
-      )
+        getScriptContent({ problemSoup, solutionSoup, userMessage }),
+      ),
     )
   })
 

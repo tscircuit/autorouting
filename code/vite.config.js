@@ -1,18 +1,18 @@
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
+import { defineConfig } from "vite"
+import react from "@vitejs/plugin-react"
 import { viteSingleFile } from "vite-plugin-singlefile"
-import path from 'node:path'
+import path from "node:path"
 
 export default defineConfig({
   plugins: [react(), viteSingleFile()],
-  root: 'frontend',
+  root: "frontend",
   build: {
-    outDir: '../dist',
+    outDir: "../dist",
     emptyOutDir: true,
   },
   resolve: {
     alias: {
-      '@': path.resolve(__dirname, './frontend'),
+      "@": path.resolve(__dirname, "./frontend"),
     },
   },
 })

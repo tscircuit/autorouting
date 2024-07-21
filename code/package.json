@@ -4,7 +4,8 @@
   "type": "module",
   "scripts": {
     "start": "npm run build && bun cli.ts server start",
-    "build": "vite build"
+    "build": "vite build",
+    "format": "biome format --write ."
   },
   "devDependencies": {
     "@biomejs/biome": "^1.8.3",
