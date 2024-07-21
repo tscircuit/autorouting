@@ -1,10 +1,10 @@
 const problemTypes = [
   "single-trace",
-  "single-multi-point-trace",
+  // "single-multi-point-trace",
   "traces",
-  "layers-traces",
-  "traces-groups",
-  "layers-traces-groups",
+  // "layers-traces",
+  // "traces-groups",
+  // "layers-traces-groups",
 ]
 
 export const DatasetNavigation = () => {
@@ -43,7 +43,10 @@ export const DatasetNavigation = () => {
           </div>
         </>
       )}
-      <h2>Select a problem to view below</h2>
+      <h2 style={{marginBottom: 0}}>Select a problem to view below</h2>
+      <a style={{marginBottom: 8, display: "block"}} href="https://github.com/tscircuit/autorouting-dataset#problems">
+        View problem dataset descriptions
+      </a>
       <div>
         {problemTypes.map((problemType) => (
           <button

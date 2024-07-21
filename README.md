@@ -16,16 +16,16 @@ applies to a different autorouting scenario. A perfect autorouter
 can solve all of these problems, but partial autorouting is
 very useful for human-assisted routing.
 
-| Problem                    | Description                                                                                  | Difficulty |
-| -------------------------- | -------------------------------------------------------------------------------------------- | ---------- |
-| `single-trace`             | Route a single trace through obstacles                                                       | Easy       |
-| `single-multi-point-trace` | Route a single trace through multiple points                                                 | Easy       |
-| `traces`                   | Route multiple traces to pairs of points, without crossing traces                            | Medium     |
-| `layers-traces`            | Route a trace through multiple layers to connect two points                                  | Easy       |
-| `traces-groups`            | Route multiple traces to groups of points, without crossing traces                           | Medium     |
-| `layers-traces`            | Route multiple traces to pairs of points, without crossing traces across layers              | Hard       |
-| `layers-traces-groups`     | Route multiple traces, through multiple places, to groups of points, without crossing traces | Hard       |
-| `incremental-*`            | The same dataset but a component is moved or a trace is changed. Tests cache efficiency      | Hard+      |
+| Problem                | Description                                                                                  | Difficulty |
+| ---------------------- | -------------------------------------------------------------------------------------------- | ---------- |
+| `single-trace`         | Route a single trace through obstacles                                                       | Easy       |
+| `single-trace-group`   | Route a single trace through multiple points                                                 | Easy       |
+| `traces`               | Route multiple traces to pairs of points, without crossing traces                            | Medium     |
+| `layers-traces`        | Route a trace through multiple layers to connect two points                                  | Easy       |
+| `traces-groups`        | Route multiple traces to groups of points, without crossing traces                           | Medium     |
+| `layers-traces`        | Route multiple traces to pairs of points, without crossing traces across layers              | Hard       |
+| `layers-traces-groups` | Route multiple traces, through multiple places, to groups of points, without crossing traces | Hard       |
+| `incremental-*`        | The same dataset but a component is moved or a trace is changed. Tests cache efficiency      | Hard+      |
 
 ### Example Problems
 

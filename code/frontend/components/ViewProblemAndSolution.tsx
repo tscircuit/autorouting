@@ -8,14 +8,14 @@ declare global {
   interface Window {
     PROBLEM_SOUP: AnySoupElement[]
     SOLUTION_SOUP: AnySoupElement[]
-    HAS_SOLVER?: string
+    HAS_CUSTOM_SOLVER?: string
     USER_MESSAGE?: string
   }
 }
 
 export default () => {
   const hasPreloadedSoup = Boolean(window.PROBLEM_SOUP || window.SOLUTION_SOUP)
-  const hasSolver = Boolean(window.HAS_SOLVER)
+  const hasSolver = Boolean(window.HAS_CUSTOM_SOLVER)
   const [pastedSoup, setPastedSoup] = useState<AnySoupElement[]>()
   // Derive problem from url (if present)
   const [, , selectedProblemType, seedStr] = window.location.pathname.split("/")
@@ -45,7 +45,13 @@ export default () => {
           </>
         ) : (
           <div style={{ width: "100vw", height: "100vh" }}>
+            <ErrorBoundary
+              fallbackRender={({ error }) => (
+                <div>Error rendering problem: {error.message}</div>
+              )}
+            >
             <PCBViewer soup={pastedSoup} />
+            </ErrorBoundary>
           </div>
         )}
       </div>
@@ -57,7 +63,7 @@ export default () => {
       <DatasetNavigation />
       <h2>Problem</h2>
       {problemSoup ? <PCBViewer soup={problemSoup} /> : "No problem preloaded"}
-      <h2>Solution</h2>
+      <h2>Solution {hasSolver ? "" : "(tscircuit solver)"}</h2>
       <ErrorBoundary
         fallbackRender={({ error }) => (
           <div>Error rendering solution: {error.message}</div>
