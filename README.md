@@ -28,10 +28,10 @@ applies to a different autorouting scenario. A perfect autorouter
 can solve all of these problems, but partial autorouting is
 very useful for human-assisted routing.
 
-| Problem                | Status                                                                 | Description                                                                                  | Difficulty |
+| Problem                | Ready Status                                                                 | Description                                                                                  | Difficulty |
 | ---------------------- | -------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------- | ---------- |
-| `single-trace` | [view](https://dataset.autorouting.com/problem/single-trace/1) | Route a single trace through obstacles | Easy |
-| `traces` | [view](https://dataset.autorouting.com/problem/traces/1) | Route multiple traces to pairs of points, without crossing traces | Medium |
+| `single-trace` | [🟢 view](https://dataset.autorouting.com/problem/single-trace/1) | Route a single trace through obstacles | Easy |
+| `traces` | [🟢 view](https://dataset.autorouting.com/problem/traces/1) | Route multiple traces to pairs of points, without crossing traces | Medium |
 | `single-trace-group` | 🔴 [TBA](https://blog.autorouting.com) | Route a single trace through multiple points | Easy |
 | `layers-traces` | 🔴 [TBA](https://blog.autorouting.com) | Route a trace through multiple layers to connect two points | Easy |
 | `traces-groups` | 🔴 [TBA](https://blog.autorouting.com) | Route multiple traces to groups of points, without crossing traces | Medium |
