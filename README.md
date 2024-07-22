@@ -1,6 +1,6 @@
 # autorouting-dataset
 
-[Problems](#problems) &middot; [Benchmarks](#benchmarks) &middot; [Writing a Solver](#writing-a-solver) &middot; [Usage](#usage) &middot; [Running a Benchmark](#running-a-benchmark) &middot; [tscircuit](https://github.com/tscircuit/tscircuit)
+[discord](https://tscircuit.com/community/join-redirect) &middot; [tscircuit](https://github.com/tscircuit/tscircuit)
 
 A dataset of autorouting problems for benchmarking. Autorouting
 is the drawing of traces (wires) across a 2d surface to connect
@@ -8,6 +8,12 @@ copper pads together. Traces can go underneath pads using a
 copper-plated hole called a "via". Traces must also avoid "obstacles"
 which are other pads or blocked areas where a trace cannot pass
 such as a hole or region designated for an antenna.
+
+* [Problems](#problems)
+* [Benchmarks](#benchmarks)
+* [Writing a Solver](#writing-a-solver)
+* [Usage](#usage)
+* [Running a Benchmark](#running-a-benchmark)
 
 ## Problems
 
