@@ -21,7 +21,7 @@ export const DatasetNavigation = () => {
             {selectedProblemType} -{" "}
             <a href={`/problem/${selectedProblemType}/${seed}.json`}>#{seed}</a>{" "}
             <a href={`/problem/${selectedProblemType}/${seed}.json`}>
-              download
+              download (json)
             </a>
           </h2>
           <div>
@@ -43,8 +43,11 @@ export const DatasetNavigation = () => {
           </div>
         </>
       )}
-      <h2 style={{marginBottom: 0}}>Select a problem to view below</h2>
-      <a style={{marginBottom: 8, display: "block"}} href="https://github.com/tscircuit/autorouting-dataset#problems">
+      <h2 style={{ marginBottom: 0 }}>Select a problem to view below</h2>
+      <a
+        style={{ marginBottom: 8, display: "block" }}
+        href="https://github.com/tscircuit/autorouting-dataset#problems"
+      >
         View problem dataset descriptions
       </a>
       <div>

@@ -15,10 +15,12 @@ export const startServer = ({ solver }: { solver?: ProblemSolver } = {}) => {
     let solutionSoup: AnySoupElement[] | undefined
     let userMessage: string | undefined
 
+    // For /problem/* urls...
+    const [, , problemType, seedStr] = req.url!.split("/")
+    const seed = seedStr ? Number.parseInt(seedStr) : 0
+
     if (req.url!.includes("/problem/")) {
       try {
-        const [, , problemType, seedStr] = req.url!.split("/")
-        const seed = seedStr ? Number.parseInt(seedStr) : 0
         problemSoup = await getDatasetGenerator(problemType as any).getExample({
           seed,
         })
@@ -31,9 +33,6 @@ export const startServer = ({ solver }: { solver?: ProblemSolver } = {}) => {
     if (solver && problemSoup) {
       solutionSoup = await solver(problemSoup as AnySoupElement[])
     } else if (problemSoup && req.url!.includes("/problem/")) {
-      const [, , problemType, seedStr] = req.url!.split("/")
-      const seed = seedStr ? Number.parseInt(seedStr) : 0
-
       solutionSoup = await getDatasetGenerator(
         problemType as any
       ).getExampleWithTscircuitSolution({ seed: seed })
@@ -41,7 +40,17 @@ export const startServer = ({ solver }: { solver?: ProblemSolver } = {}) => {
 
     if (req.url!.includes(".json")) {
       res.writeHead(200, { "Content-Type": "application/json" })
-      res.end(JSON.stringify(solutionSoup, null, 2))
+      if (req.url!.includes(".solution.json")) {
+        res.writeHead(200, {
+          "content-disposition": `attachment; filename=${problemType}-${seed}.solution.json`,
+        })
+        res.end(JSON.stringify(solutionSoup, null, 2))
+      } else {
+        res.writeHead(200, {
+          "content-disposition": `attachment; filename=${problemType}-${seed}.problem.json`,
+        })
+        res.end(JSON.stringify(problemSoup, null, 2))
+      }
       return
     }
 

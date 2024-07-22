@@ -50,7 +50,7 @@ export default () => {
                 <div>Error rendering problem: {error.message}</div>
               )}
             >
-            <PCBViewer soup={pastedSoup} />
+              <PCBViewer soup={pastedSoup} />
             </ErrorBoundary>
           </div>
         )}
@@ -61,20 +61,33 @@ export default () => {
   return (
     <div>
       <DatasetNavigation />
-      <h2>Problem</h2>
-      {problemSoup ? <PCBViewer soup={problemSoup} /> : "No problem preloaded"}
-      <h2>Solution {hasSolver ? "" : "(tscircuit solver)"}</h2>
-      <ErrorBoundary
-        fallbackRender={({ error }) => (
-          <div>Error rendering solution: {error.message}</div>
-        )}
-      >
-        {solutionSoup ? (
-          <PCBViewer soup={solutionSoup} />
-        ) : (
-          "No solution preloaded"
-        )}
-      </ErrorBoundary>
+      <div style={{ display: "flex", justifyContent: "space-between" }}>
+        <div style={{ flex: 1, marginRight: "10px" }}>
+          <h2>Problem</h2>
+          {problemSoup ? (
+            <PCBViewer soup={problemSoup} />
+          ) : (
+            "No problem preloaded"
+          )}
+        </div>
+        <div style={{ flex: 1, marginLeft: "10px" }}>
+          <h2>
+            Solution {hasSolver ? "" : "(tscircuit solver)"}{" "}
+            <a href="/problem/single-trace/1.solution.json">download (json)</a>
+          </h2>
+          <ErrorBoundary
+            fallbackRender={({ error }) => (
+              <div>Error rendering solution: {error.message}</div>
+            )}
+          >
+            {solutionSoup ? (
+              <PCBViewer soup={solutionSoup} />
+            ) : (
+              "No solution preloaded"
+            )}
+          </ErrorBoundary>
+        </div>
+      </div>
     </div>
   )
 }
