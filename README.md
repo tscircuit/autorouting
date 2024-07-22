@@ -5,6 +5,8 @@
 A dataset of autorouting problems for benchmarking 🥇, plus a ton of utilities 🔨 including a viewer and testing server
 for developing new autorouting algorithms.
 
+![image](https://github.com/user-attachments/assets/bad8e749-1c84-4b6f-bbdf-12bf7e9c3e7b)
+
 * [What is autorouting?](#what-is-autorouting)
 * [Problems](#problems)
 * [Benchmarks](#benchmarks)
