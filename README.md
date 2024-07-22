@@ -28,16 +28,18 @@ applies to a different autorouting scenario. A perfect autorouter
 can solve all of these problems, but partial autorouting is
 very useful for human-assisted routing.
 
-| Problem                | Description                                                                                  | Difficulty |
-| ---------------------- | -------------------------------------------------------------------------------------------- | ---------- |
-| `single-trace`         | Route a single trace through obstacles                                                       | Easy       |
-| `single-trace-group`   | Route a single trace through multiple points                                                 | Easy       |
-| `traces`               | Route multiple traces to pairs of points, without crossing traces                            | Medium     |
-| `layers-traces`        | Route a trace through multiple layers to connect two points                                  | Easy       |
-| `traces-groups`        | Route multiple traces to groups of points, without crossing traces                           | Medium     |
-| `layers-traces`        | Route multiple traces to pairs of points, without crossing traces across layers              | Hard       |
-| `layers-traces-groups` | Route multiple traces, through multiple places, to groups of points, without crossing traces | Hard       |
-| `incremental-*`        | The same dataset but a component is moved or a trace is changed. Tests cache efficiency      | Hard+      |
+        | Problem                | Status                                                                 | Description                                                                                  | Difficulty |
+
+| ---------------------- | -------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------- | ---------- |
+| `single-trace` | [🟢 ready](https://dataset.autorouting.com/problem/single-trace/1) | Route a single trace through obstacles | Easy |
+| `traces` | [🟢 ready](https://dataset.autorouting.com/problem/traces/1) | Route multiple traces to pairs of points, without crossing traces | Medium |
+| `single-trace-group` | 🔴 [TBA](https://blog.autorouting.com) | Route a single trace through multiple points | Easy |
+| `layers-traces` | 🔴 [TBA](https://blog.autorouting.com) | Route a trace through multiple layers to connect two points | Easy |
+| `traces-groups` | 🔴 [TBA](https://blog.autorouting.com) | Route multiple traces to groups of points, without crossing traces | Medium |
+| `layers-traces` | 🔴 [TBA](https://blog.autorouting.com) | Route multiple traces to pairs of points, without crossing traces across layers | Hard |
+| `layers-traces-groups` | 🔴 [TBA](https://blog.autorouting.com) | Route multiple traces, through multiple places, to groups of points, without crossing traces | Hard |
+| `hyperdense-*` | 🔴 [TBA](https://blog.autorouting.com) | Super dense BGA routing | Hard+ |
+| `incremental-*` | 🔴 [TBA](https://blog.autorouting.com) | The same dataset but a component is moved or a trace is changed. Tests cache efficiency | Hard+ |
 
 ### Example Problems
 
