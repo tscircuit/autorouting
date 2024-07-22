@@ -28,8 +28,7 @@ applies to a different autorouting scenario. A perfect autorouter
 can solve all of these problems, but partial autorouting is
 very useful for human-assisted routing.
 
-        | Problem                | Status                                                                 | Description                                                                                  | Difficulty |
-
+| Problem                | Status                                                                 | Description                                                                                  | Difficulty |
 | ---------------------- | -------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------- | ---------- |
 | `single-trace` | [🟢 ready](https://dataset.autorouting.com/problem/single-trace/1) | Route a single trace through obstacles | Easy |
 | `traces` | [🟢 ready](https://dataset.autorouting.com/problem/traces/1) | Route multiple traces to pairs of points, without crossing traces | Medium |
