@@ -21,9 +21,9 @@ const generator = new MersenneTwister(1)
 export const rand = (...seeds: (string | number)[]) => {
   generator.init_by_array(
     seeds.map((seed) =>
-      typeof seed === "string" ? hashCode(seed.toString()) : seed,
+      typeof seed === "string" ? hashCode(seed.toString()) : seed
     ),
-    seeds.length,
+    seeds.length
   )
 
   return {
@@ -34,5 +34,13 @@ export const rand = (...seeds: (string | number)[]) => {
     select: <T>(options: Array<T>): T =>
       options[Math.floor(generator.random() * options.length)],
     bool: () => generator.random() < 0.5,
+    shuffle: <T>(arr: Array<T>) => {
+      const shuffled = [...arr]
+      for (let i = shuffled.length - 1; i > 0; i--) {
+        const j = Math.floor(generator.random() * (i + 1))
+        ;[shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]
+      }
+      return shuffled
+    },
   }
 }
