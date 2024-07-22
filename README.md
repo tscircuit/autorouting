@@ -5,6 +5,13 @@
 A dataset of autorouting problems for benchmarking 🥇, plus a ton of utilities 🔨 including a viewer and testing server
 for developing new autorouting algorithms.
 
+* [What is autorouting?](#what-is-autorouting)
+* [Problems](#problems)
+* [Benchmarks](#benchmarks)
+* [Writing a Solver](#writing-a-solver)
+* [Usage](#usage)
+* [Running a Benchmark](#running-a-benchmark)
+
 ## What is autorouting?
 
 Autorouting
@@ -13,12 +20,6 @@ copper pads together. Traces can go underneath pads using a
 copper-plated hole called a "via". Traces must also avoid "obstacles"
 which are other pads or blocked areas where a trace cannot pass
 such as a hole or region designated for an antenna.
-
-* [Problems](#problems)
-* [Benchmarks](#benchmarks)
-* [Writing a Solver](#writing-a-solver)
-* [Usage](#usage)
-* [Running a Benchmark](#running-a-benchmark)
 
 ## Problems
 
