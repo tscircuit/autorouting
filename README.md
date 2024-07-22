@@ -2,7 +2,12 @@
 
 [discord](https://tscircuit.com/community/join-redirect) &middot; [tscircuit](https://github.com/tscircuit/tscircuit)
 
-A dataset of autorouting problems for benchmarking. Autorouting
+A dataset of autorouting problems for benchmarking 🥇, plus a ton of utilities 🔨 including a viewer and testing server
+for developing new autorouting algorithms.
+
+## What is autorouting?
+
+Autorouting
 is the drawing of traces (wires) across a 2d surface to connect
 copper pads together. Traces can go underneath pads using a
 copper-plated hole called a "via". Traces must also avoid "obstacles"
