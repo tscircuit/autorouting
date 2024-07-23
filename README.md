@@ -53,7 +53,7 @@ very useful for human-assisted routing.
 There are several criteria we use for running benchmarks:
 
 - Speed
-- Percent Completed
+- Percent of Boards fully routed inside category
 - Quality
   - Compared to the ideal routing, how much longer are the traces? Shorter traces are usually better
 - Problem Type
