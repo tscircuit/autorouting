@@ -73,7 +73,9 @@ export default () => {
         <div style={{ flex: 1, marginLeft: "10px" }}>
           <h2>
             Solution {hasSolver ? "" : "(tscircuit solver)"}{" "}
-            <a href="/problem/single-trace/1.solution.json">download (json)</a>
+            <a href={`/problem/${selectedProblemType}/${seed}.solution.json`}>
+              download (json)
+            </a>
           </h2>
           <ErrorBoundary
             fallbackRender={({ error }) => (

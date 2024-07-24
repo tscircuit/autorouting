@@ -32,6 +32,7 @@
     "typescript": "^5.0.0"
   },
   "dependencies": {
+    "@tscircuit/checks": "0.0.11",
     "commander": "^12.1.0",
     "mersenne-twister": "^1.1.0",
     "tscircuit": "^0.0.228"
