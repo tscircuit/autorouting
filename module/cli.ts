@@ -4,6 +4,7 @@ import { getSimpleRouteJson } from "./lib/solver-utils/getSimpleRouteJson"
 import fs from "node:fs/promises"
 import path from "node:path"
 import { startDevServer } from "./lib/server/start-dev-server"
+import { autoroute } from "../algos/simple-grid-based"
 
 const program = new Command()
 
@@ -17,8 +18,10 @@ program
   .description("Start the dev server")
   .action(() => {
     console.log("Starting dev server...")
-    startDevServer()
-    // Implement server start logic here
+    startDevServer({
+      solver: autoroute,
+      solverName: "simple-grid-based",
+    })
   })
 
 program
