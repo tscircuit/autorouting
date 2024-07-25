@@ -1,5 +1,5 @@
 {
-  "name": "code",
+  "name": "autorouting-dataset",
   "module": "index.ts",
   "type": "module",
   "scripts": {

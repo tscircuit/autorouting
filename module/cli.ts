@@ -3,7 +3,7 @@ import { getDatasetGenerator } from "./lib/generators"
 import { getSimpleRouteJson } from "./lib/solver-utils/getSimpleRouteJson"
 import fs from "node:fs/promises"
 import path from "node:path"
-import { startServer } from "./lib/server/start-server"
+import { startDevServer } from "./lib/server/start-dev-server"
 
 const program = new Command()
 
@@ -17,7 +17,7 @@ program
   .description("Start the dev server")
   .action(() => {
     console.log("Starting dev server...")
-    startServer()
+    startDevServer()
     // Implement server start logic here
   })
 

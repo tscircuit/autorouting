@@ -19,6 +19,9 @@ for developing new autorouting algorithms.
     - [Non-Typescript Solvers](#non-typescript-solvers)
   - [Visualizing Problems/Solutions](#visualizing-problemssolutions)
   - [Running a Benchmark](#running-a-benchmark)
+    - [Running Benchmarks with Typescript](#running-benchmarks-with-typescript)
+    - [Running Benchmarks without Typescript](#running-benchmarks-without-typescript)
+    - [Customizing Benchmarks](#customizing-benchmarks)
   - [Community Solvers](#community-solvers)
 
 ## What is autorouting?
@@ -199,6 +202,8 @@ If you are using Typescript, you may want to visualize your solution incremental
 
 ## Running a Benchmark
 
+### Running Benchmarks with Typescript
+
 If you have a Typescript solver, you can run a benchmark programmatically using:
 
 ```tsx
@@ -206,12 +211,38 @@ import { runBenchmark } from "autorouting-dataset"
 import mySolver from "./my-solver"
 
 const result = await runBenchmark({
-  mySolver,
+  solver: mySolver,
   verbose: true,
 })
 
 console.log(result)
 ```
+
+### Running Benchmarks without Typescript
+
+```bash
+autorouting-dataset benchmark --solver-url http://localhost:1234
+```
+
+### Customizing Benchmarks
+
+| Option        | Flag             | Description                                       |
+| ------------- | ---------------- | ------------------------------------------------- |
+| `sampleCount` | `--sample-count` | Number of samples to run for each problem type    |
+| `problemType` | `--problem-type` | Problem type to run benchmarks for (default: all) |
+| `verbose`     | `--verbose`      | Prints out more information                       |
+| `solverUrl`   | `--solver-url`   | URL of the solver to benchmark                    |
+| `sampleSeed`  | `--sample-seed`  | Seed to randomize sampling                        |
+| `noSkipping`  | `--no-skipping`  | Disables skipping of problem types                |
+
+By default, running a benchmark will run for 100 samples against all problem types.
+
+> If no `problemType` is provided and the solver fails on the first 10 samples, it will
+> not run the remaining samples of the problem type. You can disable this behavior
+> by setting `noSkipping` to `true`
+
+The sample count can be changed with the `--sample-count` flag. For public evaluations
+the sample count should be set to at least 1,000.
 
 ## Community Solvers
 
