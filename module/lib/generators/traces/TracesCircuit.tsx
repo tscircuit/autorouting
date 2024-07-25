@@ -36,7 +36,7 @@ export const Traces2Footprints = ({ seed }: { seed: number }) => {
   }
 
   return (
-    <board width="10mm" height="10mm" center_x={0} center_y={0}>
+    <board width="20mm" height="20mm" center_x={0} center_y={0}>
       <A />
       <B />
       {pinPairs.map(([a, b]) => (
