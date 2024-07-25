@@ -7,12 +7,19 @@ for developing new autorouting algorithms.
 
 ![image](https://github.com/user-attachments/assets/bad8e749-1c84-4b6f-bbdf-12bf7e9c3e7b)
 
-* [What is autorouting?](#what-is-autorouting)
-* [Problems](#problems)
-* [Benchmarks](#benchmarks)
-* [Writing a Solver](#writing-a-solver)
-* [Usage](#usage)
-* [Running a Benchmark](#running-a-benchmark)
+- [autorouting-dataset](#autorouting-dataset)
+  - [What is autorouting?](#what-is-autorouting)
+  - [Problems](#problems)
+    - [Example Problems](#example-problems)
+      - [`simple-multi-point-trace`](#simple-multi-point-trace)
+  - [Benchmarks](#benchmarks)
+  - [Usage](#usage)
+  - [Writing a Solver](#writing-a-solver)
+    - [Typescript Solvers](#typescript-solvers)
+    - [Non-Typescript Solvers](#non-typescript-solvers)
+  - [Visualizing Problems/Solutions](#visualizing-problemssolutions)
+  - [Running a Benchmark](#running-a-benchmark)
+  - [Community Solvers](#community-solvers)
 
 ## What is autorouting?
 
@@ -30,17 +37,17 @@ applies to a different autorouting scenario. A perfect autorouter
 can solve all of these problems, but partial autorouting is
 very useful for human-assisted routing.
 
-| Problem                | Ready Status                                                                 | Description                                                                                  | Difficulty |
-| ---------------------- | -------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------- | ---------- |
-| `single-trace` | [🟢 view](https://dataset.autorouting.com/problem/single-trace/1) | Route a single trace through obstacles | Easy |
-| `traces` | [🟢 view](https://dataset.autorouting.com/problem/traces/1) | Route multiple traces to pairs of points, without crossing traces | Medium |
-| `single-trace-group` | 🔴 [TBA](https://blog.autorouting.com) | Route a single trace through multiple points | Easy |
-| `layers-traces` | 🔴 [TBA](https://blog.autorouting.com) | Route a trace through multiple layers to connect two points | Easy |
-| `traces-groups` | 🔴 [TBA](https://blog.autorouting.com) | Route multiple traces to groups of points, without crossing traces | Medium |
-| `layers-traces` | 🔴 [TBA](https://blog.autorouting.com) | Route multiple traces to pairs of points, without crossing traces across layers | Hard |
-| `layers-traces-groups` | 🔴 [TBA](https://blog.autorouting.com) | Route multiple traces, through multiple places, to groups of points, without crossing traces | Hard |
-| `hyperdense-*` | 🔴 [TBA](https://blog.autorouting.com) | Super dense BGA routing | Hard+ |
-| `incremental-*` | 🔴 [TBA](https://blog.autorouting.com) | The same dataset but a component is moved or a trace is changed. Tests cache efficiency | Hard+ |
+| Problem                | Ready Status                                                      | Description                                                                                  | Difficulty |
+| ---------------------- | ----------------------------------------------------------------- | -------------------------------------------------------------------------------------------- | ---------- |
+| `single-trace`         | [🟢 view](https://dataset.autorouting.com/problem/single-trace/1) | Route a single trace through obstacles                                                       | Easy       |
+| `traces`               | [🟢 view](https://dataset.autorouting.com/problem/traces/1)       | Route multiple traces to pairs of points, without crossing traces                            | Medium     |
+| `single-trace-group`   | 🔴 [TBA](https://blog.autorouting.com)                            | Route a single trace through multiple points                                                 | Easy       |
+| `layers-traces`        | 🔴 [TBA](https://blog.autorouting.com)                            | Route a trace through multiple layers to connect two points                                  | Easy       |
+| `traces-groups`        | 🔴 [TBA](https://blog.autorouting.com)                            | Route multiple traces to groups of points, without crossing traces                           | Medium     |
+| `layers-traces`        | 🔴 [TBA](https://blog.autorouting.com)                            | Route multiple traces to pairs of points, without crossing traces across layers              | Hard       |
+| `layers-traces-groups` | 🔴 [TBA](https://blog.autorouting.com)                            | Route multiple traces, through multiple places, to groups of points, without crossing traces | Hard       |
+| `hyperdense-*`         | 🔴 [TBA](https://blog.autorouting.com)                            | Super dense BGA routing                                                                      | Hard+      |
+| `incremental-*`        | 🔴 [TBA](https://blog.autorouting.com)                            | The same dataset but a component is moved or a trace is changed. Tests cache efficiency      | Hard+      |
 
 ### Example Problems
 
@@ -93,6 +100,9 @@ Each directory in the `datasets` directory contains a dataset for each problem. 
 
 You can write a solver in any language you want, but there is currently first-class support for Typescript solvers.
 
+> [!NOTE]
+> There are tons of examples of solvers inside the [algos directory!](./algos/)
+
 ### Typescript Solvers
 
 Typescript solvers can accept either [tscircuit soup](https://docs.tscircuit.com/api-reference/advanced/soup) or [`SimpleRouteJson`](#usage). To develop
@@ -144,10 +154,38 @@ You can then run this file with `bun --hot ./solver-server.ts`
 ### Non-Typescript Solvers
 
 - Host a server with your algorithm (see the simple flask server below)
-- Run `npx autorouting-dataset server start` and configure the url to your server
+- Run `npx autorouting-dataset server start --solver-url http://localhost:1234` (replace `localhost:1234` with your solver server url
 
 ```python
 # TODO insert flask server here
+```
+
+The autorouting-dataset dev server will send a `POST` request to the provided
+url with the a JSON payload containing the following fields:
+
+```ts
+interface Payload {
+  problem_soup: Array<AnySoupElement>
+  simple_route_json: SimpleRouteJson
+}
+```
+
+You must return a JSON array containing `pcb_trace` elements in the following
+format:
+
+```ts
+interface Response {
+  solution_soup: Array<{
+    type: "pcb_trace"
+    route: Array<{
+      route_type: "wire" | "via"
+      x: number
+      y: number
+      width: number
+      layer: string
+    }>
+  }>
+}
 ```
 
 ## Visualizing Problems/Solutions

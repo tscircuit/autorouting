@@ -8,6 +8,18 @@ problems and solutions.
 This project is developed using `bun` but builds using `tsup` into node-compatible
 javascript.
 
+> [!NOTE]
+> Looking to create an autorouting solver? Check out [this README instead](../README.md#writing-a-solver)
+
+- [autorouting-dataset module](#autorouting-dataset-module)
+  - [CLI Usage](#cli-usage)
+    - [Start Dev Server](#start-dev-server)
+    - [Generating Datasets](#generating-datasets)
+  - [Programmatic Usage](#programmatic-usage)
+    - [`generateDataset`](#generatedataset)
+    - [`getSimpleRouteJson`](#getsimpleroutejson)
+  - [Development](#development)
+
 ## CLI Usage
 
 ### Start Dev Server
