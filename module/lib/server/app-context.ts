@@ -3,4 +3,5 @@ import type { ProblemSolver } from "../solver-utils/ProblemSolver"
 
 export type AppContext = {
   solver?: ProblemSolver
+  solverName?: string
 }

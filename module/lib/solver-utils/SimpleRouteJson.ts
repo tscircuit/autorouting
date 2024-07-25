@@ -5,6 +5,7 @@ export interface SimpleRouteJson {
     center: { x: number; y: number }
     width: number
     height: number
+    connectedTo: string[]
   }>
   connections: Array<{
     name: string

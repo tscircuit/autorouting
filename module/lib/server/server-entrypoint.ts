@@ -72,6 +72,7 @@ export const serverEntrypoint = async (
         problemSoup,
         solutionSoup,
         userMessage,
+        solverName: ctx.solverName,
         hasCustomSolver: Boolean(ctx.solver),
       }),
     ),

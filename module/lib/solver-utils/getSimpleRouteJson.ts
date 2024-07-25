@@ -96,14 +96,44 @@ export const getSimpleRouteJson = (soup: AnySoupElement[]): SimpleRouteJson => {
       routeJson.connections.push({
         name: element.source_trace_id,
         pointsToConnect: element.connected_source_port_ids.map((portId) => {
+          const pcb_port = su(soup).pcb_port.getWhere({
+            source_port_id: portId,
+          })
+          if (!pcb_port) {
+            throw new Error(
+              `Could not find pcb_port for source_port_id "${portId}"`,
+            )
+          }
           return {
-            x: su(soup).pcb_port.getUsing({ source_port_id: portId })!.x,
-            y: su(soup).pcb_port.getUsing({ source_port_id: portId })!.y,
+            x: pcb_port.x,
+            y: pcb_port.y,
           }
         }),
       })
     }
   }
+
+  const bounds = {
+    minX: Infinity,
+    maxX: -Infinity,
+    minY: Infinity,
+    maxY: -Infinity,
+  }
+  for (const obstacle of routeJson.obstacles) {
+    bounds.minX = Math.min(bounds.minX, obstacle.center.x - obstacle.width / 2)
+    bounds.maxX = Math.max(bounds.maxX, obstacle.center.x + obstacle.width / 2)
+    bounds.minY = Math.min(bounds.minY, obstacle.center.y - obstacle.height / 2)
+    bounds.maxY = Math.max(bounds.maxY, obstacle.center.y + obstacle.height / 2)
+  }
+  for (const connection of routeJson.connections) {
+    for (const point of connection.pointsToConnect) {
+      bounds.minX = Math.min(bounds.minX, point.x)
+      bounds.maxX = Math.max(bounds.maxX, point.x)
+      bounds.minY = Math.min(bounds.minY, point.y)
+      bounds.maxY = Math.max(bounds.maxY, point.y)
+    }
+  }
+  routeJson.bounds = bounds
 
   return routeJson
 }
