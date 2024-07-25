@@ -232,7 +232,7 @@ autorouting-dataset benchmark --solver-url http://localhost:1234
 | `problemType` | `--problem-type` | Problem type to run benchmarks for (default: all) |
 | `verbose`     | `--verbose`      | Prints out more information                       |
 | `solverUrl`   | `--solver-url`   | URL of the solver to benchmark                    |
-| `sampleSeed`  | `--sample-seed`  | Seed to randomize sampling                        |
+| `sampleSeed`  | `--sample-seed`  | Seed to randomize sampling (default: 0)           |
 | `noSkipping`  | `--no-skipping`  | Disables skipping of problem types                |
 
 By default, running a benchmark will run for 100 samples against all problem types.
