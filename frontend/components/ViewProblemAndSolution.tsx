@@ -10,6 +10,7 @@ declare global {
     SOLUTION_SOUP: AnySoupElement[]
     HAS_CUSTOM_SOLVER?: string
     USER_MESSAGE?: string
+    SOLVER_NAME?: string
   }
 }
 
@@ -72,7 +73,8 @@ export default () => {
         </div>
         <div style={{ flex: 1, marginLeft: "10px" }}>
           <h2>
-            Solution {hasSolver ? "" : "(tscircuit solver)"}{" "}
+            Solution {"["}solver: {window.SOLVER_NAME ?? "???"}
+            {"] "}
             <a href={`/problem/${selectedProblemType}/${seed}.solution.json`}>
               download (json)
             </a>

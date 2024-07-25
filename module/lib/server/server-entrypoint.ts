@@ -1,5 +1,5 @@
 // @ts-ignore
-import frontend from "../../dist/index.html" with { type: "text" }
+import frontend from "../../../frontend-dist/index.html" with { type: "text" }
 import { getScriptContent } from "./get-script-content"
 import { getDatasetGenerator } from "../generators"
 import type { AnySoupElement } from "@tscircuit/soup"

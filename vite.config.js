@@ -7,7 +7,7 @@ export default defineConfig({
   plugins: [react(), viteSingleFile()],
   root: "frontend",
   build: {
-    outDir: "../dist",
+    outDir: "../frontend-dist",
     emptyOutDir: true,
   },
   resolve: {

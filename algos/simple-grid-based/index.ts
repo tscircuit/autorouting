@@ -1,5 +1,8 @@
 import { Grid, AStarFinder, DiagonalMovement } from "pathfinding"
-import { getSimpleRouteJson, SimplifiedPcbTrace } from "autorouting-dataset"
+import {
+  getSimpleRouteJson,
+  type SimplifiedPcbTrace,
+} from "autorouting-dataset"
 import type { AnySoupElement } from "@tscircuit/soup"
 
 export function autoroute(soup: AnySoupElement[]): SimplifiedPcbTrace[] {
@@ -50,7 +53,7 @@ export function autoroute(soup: AnySoupElement[]): SimplifiedPcbTrace[] {
   })
 
   const finder = new AStarFinder({
-    diagonalMovement: DiagonalMovement.Never,
+    diagonalMovement: DiagonalMovement.OnlyWhenNoObstacles,
   })
 
   const solution: SimplifiedPcbTrace[] = []

@@ -8,6 +8,7 @@ import { last } from "lodash"
 
 interface BenchmarkOptions {
   solver: ProblemSolver
+  solverName?: string
   verbose?: boolean
   sampleCount?: number
   problemType?: ProblemType | "all"

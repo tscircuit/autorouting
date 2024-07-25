@@ -19,7 +19,7 @@ export const getScriptContent = ({
   window.SOLUTION_SOUP = ${JSON.stringify(solutionSoup ?? null, null, 2)}
   window.USER_MESSAGE = ${JSON.stringify(userMessage ?? null, null, 2)}
   window.HAS_CUSTOM_SOLVER = ${(hasCustomSolver ?? false).toString()}
-  window.SOLVER_NAME = ${solverName ?? "unknown"}
+  window.SOLVER_NAME = "${solverName ?? "unknown"}"
   </script>
   `
 }
