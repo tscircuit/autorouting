@@ -18,8 +18,9 @@ export const getSimpleRouteJson = (soup: AnySoupElement[]): SimpleRouteJson => {
             x: element.x,
             y: element.y,
           },
-          width: element.radius,
-          height: element.radius,
+          width: element.radius * 2,
+          height: element.radius * 2,
+          connectedTo: [],
         })
       } else if (element.shape === "rect") {
         routeJson.obstacles.push({
@@ -30,6 +31,7 @@ export const getSimpleRouteJson = (soup: AnySoupElement[]): SimpleRouteJson => {
           },
           width: element.width,
           height: element.height,
+          connectedTo: [],
         })
       }
     } else if (element.type === "pcb_hole") {
@@ -42,6 +44,7 @@ export const getSimpleRouteJson = (soup: AnySoupElement[]): SimpleRouteJson => {
           },
           width: element.hole_width,
           height: element.hole_height,
+          connectedTo: [],
         })
       } else if (element.hole_shape === "square") {
         routeJson.obstacles.push({
@@ -52,6 +55,7 @@ export const getSimpleRouteJson = (soup: AnySoupElement[]): SimpleRouteJson => {
           },
           width: element.hole_diameter,
           height: element.hole_diameter,
+          connectedTo: [],
         })
       }
     } else if (element.type === "pcb_plated_hole") {
@@ -64,8 +68,9 @@ export const getSimpleRouteJson = (soup: AnySoupElement[]): SimpleRouteJson => {
           },
           width: element.outer_diameter,
           height: element.outer_diameter,
+          connectedTo: [],
         })
-      } else if (element.shape === "oval") {
+      } else if (element.shape === "oval" || element.shape === "pill") {
         routeJson.obstacles.push({
           type: "oval",
           center: {
@@ -74,16 +79,7 @@ export const getSimpleRouteJson = (soup: AnySoupElement[]): SimpleRouteJson => {
           },
           width: element.outer_width,
           height: element.outer_height,
-        })
-      } else if (element.shape === "pill") {
-        routeJson.obstacles.push({
-          type: "oval",
-          center: {
-            x: element.x,
-            y: element.y,
-          },
-          width: element.outer_width,
-          height: element.outer_height,
+          connectedTo: [],
         })
       }
     }
@@ -93,7 +89,7 @@ export const getSimpleRouteJson = (soup: AnySoupElement[]): SimpleRouteJson => {
   routeJson.connections = []
   for (const element of soup) {
     if (element.type === "source_trace") {
-      routeJson.connections.push({
+      const connection = {
         name: element.source_trace_id,
         pointsToConnect: element.connected_source_port_ids.map((portId) => {
           const pcb_port = su(soup).pcb_port.getWhere({
@@ -109,7 +105,17 @@ export const getSimpleRouteJson = (soup: AnySoupElement[]): SimpleRouteJson => {
             y: pcb_port.y,
           }
         }),
-      })
+      }
+      routeJson.connections.push(connection)
+
+      // Check if any points are inside obstacles
+      for (const point of connection.pointsToConnect) {
+        for (const obstacle of routeJson.obstacles) {
+          if (isPointInsideObstacle(point, obstacle)) {
+            obstacle.connectedTo.push(connection.name)
+          }
+        }
+      }
     }
   }
 
@@ -136,4 +142,33 @@ export const getSimpleRouteJson = (soup: AnySoupElement[]): SimpleRouteJson => {
   routeJson.bounds = bounds
 
   return routeJson
+}
+
+// Helper function to check if a point is inside an obstacle
+function isPointInsideObstacle(
+  point: { x: number; y: number },
+  obstacle: {
+    type: string
+    center: { x: number; y: number }
+    width: number
+    height: number
+  },
+): boolean {
+  const halfWidth = obstacle.width / 2
+  const halfHeight = obstacle.height / 2
+
+  if (obstacle.type === "rect") {
+    return (
+      point.x >= obstacle.center.x - halfWidth &&
+      point.x <= obstacle.center.x + halfWidth &&
+      point.y >= obstacle.center.y - halfHeight &&
+      point.y <= obstacle.center.y + halfHeight
+    )
+  } else if (obstacle.type === "oval") {
+    const normalizedX = (point.x - obstacle.center.x) / halfWidth
+    const normalizedY = (point.y - obstacle.center.y) / halfHeight
+    return normalizedX * normalizedX + normalizedY * normalizedY <= 1
+  }
+
+  return false
 }
