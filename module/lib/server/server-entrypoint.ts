@@ -9,6 +9,7 @@ import {
   checkEachPcbPortConnected,
   checkEachPcbTraceNonOverlapping,
 } from "@tscircuit/checks"
+import {runChecks} from "../benchmark/run-checks"
 
 export const serverEntrypoint = async (
   req: IncomingMessage,
@@ -45,12 +46,7 @@ export const serverEntrypoint = async (
 
   // Add errors to solutionSoup for overlapping traces etc. (run eval)
   if (solutionSoup) {
-    const errors = [
-      ...checkEachPcbTraceNonOverlapping(solutionSoup),
-      // Currently broken see https://github.com/tscircuit/tscircuit/issues/293
-      // ...checkEachPcbPortConnected(solutionSoup),
-    ]
-    solutionSoup.push(...errors)
+    solutionSoup.push(...runChecks(problemSoup!, solutionSoup))
   }
 
   if (req.url!.includes(".json")) {
