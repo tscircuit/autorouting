@@ -181,3 +181,4 @@ tmp
 .vscode
 .aider*
 frontend-dist
+static-server
