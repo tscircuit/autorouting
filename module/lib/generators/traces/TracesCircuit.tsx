@@ -8,13 +8,17 @@ export const Traces2Footprints = ({ seed }: { seed: number }) => {
   const maxConns = Math.min(aFoot.pinCount, bFoot.pinCount)
   let traceCount: number
   if (seed < 50) {
-    traceCount =Math.min(maxConns, 2 + Math.floor(seed/10))
+    traceCount = Math.min(maxConns, 2 + Math.floor(seed / 10))
   } else {
     traceCount = rand(seed, "traceCount").int(2, maxConns)
   }
 
-  const aPinNums = rand(seed, "aPinNums").shuffle(Array.from({ length: aFoot.pinCount }, (_, i) => i + 1))
-  const bPinNums = rand(seed, "bPinNums").shuffle(Array.from({ length: bFoot.pinCount }, (_, i) => i + 1))
+  const aPinNums = rand(seed, "aPinNums").shuffle(
+    Array.from({ length: aFoot.pinCount }, (_, i) => i + 1),
+  )
+  const bPinNums = rand(seed, "bPinNums").shuffle(
+    Array.from({ length: bFoot.pinCount }, (_, i) => i + 1),
+  )
 
   const pinPairs = Array.from({ length: traceCount }, (_, i) => {
     const a = aPinNums[i]
@@ -37,6 +41,8 @@ export const Traces2Footprints = ({ seed }: { seed: number }) => {
       <B />
       {pinPairs.map(([a, b]) => (
         <trace
+          // @ts-ignore
+          key={`${a}-${b}`}
           from={`.A > port.${a}`}
           to={`.B > port.${b}`}
         />
