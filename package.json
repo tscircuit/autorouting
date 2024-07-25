@@ -3,9 +3,9 @@
   "module": "index.ts",
   "type": "module",
   "scripts": {
-    "start": "nodemon --watch frontend --watch lib --ext ts,tsx frontend --exec 'bun run build-and-serve'",
+    "start": "nodemon --watch frontend --watch module --ext ts,tsx frontend --exec 'bun run build-and-serve'",
     "build": "vite build",
-    "build-and-serve": "npm run build && bun cli.ts server start",
+    "build-and-serve": "npm run build && bun module/cli.ts server start",
     "format": "biome format --write ."
   },
   "devDependencies": {

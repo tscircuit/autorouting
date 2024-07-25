@@ -1,1 +1,3 @@
-export const tscircuitBuiltinSolver = (soup: AnySoupElement[]) => {}
+export const tscircuitBuiltinSolver = (soup: AnySoupElement[]) => {
+  return []
+}
