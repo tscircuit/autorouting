@@ -10,6 +10,7 @@
   },
   "devDependencies": {
     "@biomejs/biome": "^1.8.3",
+    "@tscircuit/builder": "^1.5.150",
     "@tscircuit/pcb-viewer": "^1.4.2",
     "@tscircuit/props": "^0.0.21",
     "@tscircuit/soup": "^0.0.39",
@@ -32,7 +33,7 @@
     "typescript": "^5.0.0"
   },
   "dependencies": {
-    "@tscircuit/checks": "0.0.11",
+    "@tscircuit/checks": "0.0.12",
     "commander": "^12.1.0",
     "kleur": "^4.1.5",
     "mersenne-twister": "^1.1.0",

@@ -94,7 +94,7 @@ export async function runBenchmark(
         if (verbose) console.error(`Error in sample ${i + 1}:`, error)
       }
 
-      if (!noSkipping && failedSamples >= 10 && samplesRun < sampleCount) {
+      if (!noSkipping && failedSamples >= 10 && samplesRun < 10) {
         if (verbose)
           console.log(
             `Skipping remaining samples for ${problemType} due to high failure rate`,

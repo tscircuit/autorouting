@@ -9,14 +9,15 @@ import {
   checkEachPcbPortConnected,
   checkEachPcbTraceNonOverlapping,
 } from "@tscircuit/checks"
-import {runChecks} from "../benchmark/run-checks"
+import { runChecks } from "../benchmark/run-checks"
+import { tscircuitBuiltinSolver } from "../../../algos/tscircuit-builtin"
 
 export const serverEntrypoint = async (
   req: IncomingMessage,
   res: ServerResponse<IncomingMessage>,
   ctx: AppContext,
 ) => {
-  const { solver } = ctx
+  const { solver = tscircuitBuiltinSolver } = ctx
   let problemSoup: AnySoupElement[] | undefined
   let solutionSoup: AnySoupElement[] | undefined
   let userMessage: string | undefined
@@ -36,12 +37,10 @@ export const serverEntrypoint = async (
     }
   }
 
-  if (solver && problemSoup) {
-    solutionSoup = await solver(problemSoup as AnySoupElement[])
-  } else if (problemSoup && req.url!.includes("/problem/")) {
-    solutionSoup = await getDatasetGenerator(
-      problemType as any,
-    ).getExampleWithTscircuitSolution({ seed })
+  if (problemSoup) {
+    solutionSoup = (await solver(problemSoup as AnySoupElement[])).concat(
+      problemSoup,
+    )
   }
 
   // Add errors to solutionSoup for overlapping traces etc. (run eval)
@@ -69,7 +68,12 @@ export const serverEntrypoint = async (
   res.end(
     frontend.replace(
       "<!-- INJECT_SCRIPT -->",
-      getScriptContent({ problemSoup, solutionSoup, userMessage }),
+      getScriptContent({
+        problemSoup,
+        solutionSoup,
+        userMessage,
+        hasCustomSolver: Boolean(ctx.solver),
+      }),
     ),
   )
 }

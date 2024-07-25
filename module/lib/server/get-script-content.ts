@@ -16,7 +16,7 @@ export const getScriptContent = ({
   window.PROBLEM_SOUP = ${JSON.stringify(problemSoup ?? null, null, 2)}
   window.SOLUTION_SOUP = ${JSON.stringify(solutionSoup ?? null, null, 2)}
   window.USER_MESSAGE = ${JSON.stringify(userMessage ?? null, null, 2)}
-  window.HAS_CUSTOM_SOLVER = ${hasCustomSolver ?? false}
+  window.HAS_CUSTOM_SOLVER = ${(hasCustomSolver ?? false).toString()}
   </script>
   `
 }

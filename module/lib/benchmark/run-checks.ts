@@ -6,7 +6,7 @@ export const runChecks = (
   solutionSoup: AnySoupElement[],
 ): AnySoupElement[] => {
   const errors = [
-    ...checkEachPcbTraceNonOverlapping(solutionSoup),
+    ...checkEachPcbTraceNonOverlapping(problemSoup.concat(solutionSoup)),
     // Currently broken see https://github.com/tscircuit/tscircuit/issues/293
     // ...checkEachPcbPortConnected(solutionSoup),
   ]

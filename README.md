@@ -150,6 +150,9 @@ startAutoroutingDevServer({
 
 You can then run this file with `bun --hot ./solver-server.ts`
 
+> [!TIP]
+> Try it out with `bun ./algos/tscircuit-builtin/server.ts`
+
 > [!NOTE]
 > We recommend putting the solver in a separate file then importing it inside your server file, this way
 > you can easily export your solver as a library!
@@ -214,9 +217,12 @@ const result = await runBenchmark({
   solver: mySolver,
   verbose: true,
 })
-
-console.log(result)
 ```
+
+You can then just run your file with `bun ./benchmark.ts`
+
+> [!TIP]
+> Try it out with `bun ./algos/tscircuit-builtin/benchmark.ts`
 
 ### Running Benchmarks without Typescript
 

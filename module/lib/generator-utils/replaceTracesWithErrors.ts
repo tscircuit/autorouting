@@ -18,16 +18,16 @@ export const replaceTracesWithErrors = (
         )
         .filter(Boolean)
 
-      newSoup.push({
-        type: "pcb_error",
-        error_type: "pcb_trace_error",
-        message: "Trace is not connected",
-        source_trace_id: source_trace_id!,
-        pcb_trace_id: pcb_trace_id,
-        pcb_error_id: `error_${pcb_trace_id}`,
-        pcb_component_ids: pcb_component_id ? [pcb_component_id] : [],
-        pcb_port_ids: pcb_port_ids,
-      })
+      // newSoup.push({
+      //   type: "pcb_error",
+      //   error_type: "pcb_trace_error",
+      //   message: "Trace is not connected",
+      //   source_trace_id: source_trace_id!,
+      //   pcb_trace_id: pcb_trace_id,
+      //   pcb_error_id: `error_${pcb_trace_id}`,
+      //   pcb_component_ids: pcb_component_id ? [pcb_component_id] : [],
+      //   pcb_port_ids: pcb_port_ids,
+      // })
       newSoup.push({
         ...element,
         route: [],
