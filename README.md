@@ -49,6 +49,7 @@ very useful for human-assisted routing.
 | `traces-groups`        | 🔴 [TBA](https://blog.autorouting.com)                            | Route multiple traces to groups of points, without crossing traces                           | Medium     |
 | `layers-traces`        | 🔴 [TBA](https://blog.autorouting.com)                            | Route multiple traces to pairs of points, without crossing traces across layers              | Hard       |
 | `layers-traces-groups` | 🔴 [TBA](https://blog.autorouting.com)                            | Route multiple traces, through multiple places, to groups of points, without crossing traces | Hard       |
+| `distant-*`            | 🔴 [TBA](https://blog.autorouting.com)                            | Long (200mm+) traces                                                                         | Easy       |
 | `width-constraints-*`  | 🔴 [TBA](https://blog.autorouting.com)                            | Maintain the optimal trace widths, given target ranges for each trace                        | Hard       |
 | `hyperdense-*`         | 🔴 [TBA](https://blog.autorouting.com)                            | Super dense BGA routing                                                                      | Hard+      |
 | `incremental-*`        | 🔴 [TBA](https://blog.autorouting.com)                            | The same dataset but a component is moved or a trace is changed. Tests cache efficiency      | Hard+      |
