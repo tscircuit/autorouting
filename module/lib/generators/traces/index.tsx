@@ -13,13 +13,7 @@ export const getTracesProblemGenerator = (): ProblemGenerator => {
     )
   }
 
-  const getExampleWithTscircuitSolution: ProblemGenerator["getExampleWithTscircuitSolution"] =
-    async ({ seed }) => {
-      return renderCircuitToSoup(<TracesCircuit seed={seed} />)
-    }
-
   return {
     getExample: generateTracesProblem,
-    getExampleWithTscircuitSolution,
   }
 }

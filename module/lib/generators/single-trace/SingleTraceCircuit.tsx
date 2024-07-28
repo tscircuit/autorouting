@@ -1,7 +1,15 @@
 import { getRandomFootprint } from "../../generator-utils/getRandomFootprint"
 import { rand } from "../../generator-utils/rand"
 
-export const SingleTrace2Footprints = ({ seed }: { seed: number }) => {
+export type SingleTrace2FootprintsProps = {
+  seed: number
+  distance?: number
+}
+
+export const SingleTrace2Footprints = ({
+  seed,
+  distance = 10,
+}: SingleTrace2FootprintsProps) => {
   const rotation = rand(seed, "rotation").range(0, Math.PI * 2)
   const aFoot = getRandomFootprint([seed, "AFootprint"])
   const bFoot = getRandomFootprint([seed, "BFootprint"])
@@ -9,13 +17,13 @@ export const SingleTrace2Footprints = ({ seed }: { seed: number }) => {
     return <bug name="A" footprint={aFoot.footprint} pcbX={0} pcbY={0} />
   }
   const B = () => {
-    const pcbX = Math.cos(rotation) * 10
-    const pcbY = Math.sin(rotation) * 10
+    const pcbX = Math.cos(rotation) * distance
+    const pcbY = Math.sin(rotation) * distance
     return <bug name="B" footprint={bFoot.footprint} pcbX={pcbX} pcbY={pcbY} />
   }
 
   return (
-    <board width="20mm" height="20mm" center_x={0} center_y={0}>
+    <board width="20mm" height="20mm" pcbX={0} pcbY={0}>
       <A />
       <B />
       <trace
@@ -26,7 +34,10 @@ export const SingleTrace2Footprints = ({ seed }: { seed: number }) => {
   )
 }
 
-export const SingleTraceCircuit = ({ seed }: { seed: number }) => {
+export const SingleTraceCircuit = ({
+  seed,
+  distance,
+}: SingleTrace2FootprintsProps) => {
   // TODO randomly select a layout configuration using rand(seed).int(0, NUM_CONFIGURATIONS)
-  return <SingleTrace2Footprints seed={seed} />
+  return <SingleTrace2Footprints seed={seed} distance={distance} />
 }

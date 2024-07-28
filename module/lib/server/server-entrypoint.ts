@@ -11,6 +11,7 @@ import {
 } from "@tscircuit/checks"
 import { runChecks } from "../benchmark/run-checks"
 import { tscircuitBuiltinSolver } from "../../../algos/tscircuit-builtin"
+import { isValidSolution } from "../benchmark/is-valid-solution"
 
 export const serverEntrypoint = async (
   req: IncomingMessage,
@@ -32,7 +33,7 @@ export const serverEntrypoint = async (
         seed,
       })
     } catch (e: any) {
-      userMessage = `Error generating problem: ${e.message}`
+      userMessage = `Error generating problem: ${e.message}\n\n${e.stack}`
       console.error(userMessage)
     }
   }
@@ -40,7 +41,7 @@ export const serverEntrypoint = async (
   if (problemSoup) {
     solutionSoup = (await solver(problemSoup as AnySoupElement[])).concat(
       problemSoup,
-    )
+    ) as any
   }
 
   // Add errors to solutionSoup for overlapping traces etc. (run eval)
@@ -74,6 +75,10 @@ export const serverEntrypoint = async (
         userMessage,
         solverName: ctx.solverName,
         hasCustomSolver: Boolean(ctx.solver),
+        isSolutionCorrect: isValidSolution(
+          problemSoup as any,
+          solutionSoup as any,
+        ),
       }),
     ),
   )

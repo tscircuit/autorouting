@@ -1,5 +1,6 @@
 import type { AnySoupElement } from "@tscircuit/soup"
-import { createRoot, createProjectBuilder } from "tscircuit"
+import { createRoot } from "@tscircuit/react-fiber"
+import { createProjectBuilder } from "@tscircuit/builder"
 
 export const renderCircuitToSoup = (
   circuitReact: any,

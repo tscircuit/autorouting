@@ -13,14 +13,7 @@ export const getSingleTraceProblemGenerator = (): ProblemGenerator => {
     )
   }
 
-  const getExampleWithTscircuitSolution: ProblemGenerator["getExampleWithTscircuitSolution"] =
-    async ({ seed }) => {
-      const soup = await generateSingleTraceProblem({ seed })
-      return renderCircuitToSoup(<SingleTraceCircuit seed={seed} />)
-    }
-
   return {
     getExample: generateSingleTraceProblem,
-    getExampleWithTscircuitSolution,
   }
 }

@@ -11,9 +11,8 @@
   },
   "devDependencies": {
     "@biomejs/biome": "^1.8.3",
-    "@tscircuit/builder": "^1.5.150",
-    "@tscircuit/pcb-viewer": "^1.4.2",
-    "@tscircuit/props": "^0.0.21",
+    "@tscircuit/pcb-viewer": "^1.4.4",
+    "@tscircuit/props": "^0.0.26",
     "@tscircuit/soup": "^0.0.39",
     "@tscircuit/soup-util": "^0.0.13",
     "@types/bun": "latest",
@@ -36,10 +35,10 @@
     "typescript": "^5.0.0"
   },
   "dependencies": {
-    "@tscircuit/checks": "0.0.12",
+    "@tscircuit/checks": "0.0.23",
     "commander": "^12.1.0",
     "kleur": "^4.1.5",
     "mersenne-twister": "^1.1.0",
-    "tscircuit": "^0.0.228"
+    "tscircuit": "^0.0.246"
   }
 }

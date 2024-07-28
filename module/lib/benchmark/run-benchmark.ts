@@ -39,7 +39,7 @@ export async function runBenchmark(
   const problemTypes: ProblemType[] =
     problemType && problemType !== "all"
       ? [problemType]
-      : ["single-trace", "traces"] // Add more problem types as they become available
+      : ["single-trace", "traces", "distant-single-trace"] // Add more problem types as they become available
 
   const results: BenchmarkResult[] = []
 

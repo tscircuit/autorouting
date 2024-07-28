@@ -2,6 +2,7 @@ const problemTypes = [
   "single-trace",
   // "single-multi-point-trace",
   "traces",
+  "distant-single-trace",
   // "layers-traces",
   // "traces-groups",
   // "layers-traces-groups",
@@ -14,7 +15,11 @@ export const DatasetNavigation = () => {
 
   return (
     <div>
-      {userMessage && <div style={{ color: "red" }}>{userMessage}</div>}
+      {userMessage && (
+        <div style={{ color: "red", whiteSpace: "pre-wrap" }}>
+          {userMessage}
+        </div>
+      )}
       {selectedProblemType && (
         <>
           <h2>

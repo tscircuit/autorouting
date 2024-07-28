@@ -11,6 +11,7 @@ declare global {
     HAS_CUSTOM_SOLVER?: string
     USER_MESSAGE?: string
     SOLVER_NAME?: string
+    IS_SOLUTION_CORRECT?: boolean
   }
 }
 
@@ -51,7 +52,12 @@ export default () => {
                 <div>Error rendering problem: {error.message}</div>
               )}
             >
-              <PCBViewer soup={pastedSoup} />
+              <PCBViewer
+                initialState={{
+                  is_showing_rats_nest: true,
+                }}
+                soup={pastedSoup}
+              />
             </ErrorBoundary>
           </div>
         )}
@@ -66,13 +72,32 @@ export default () => {
         <div style={{ flex: 1, marginRight: "10px" }}>
           <h2>Problem</h2>
           {problemSoup ? (
-            <PCBViewer soup={problemSoup} />
+            <PCBViewer
+              initialState={{
+                is_showing_rats_nest: true,
+              }}
+              soup={problemSoup}
+            />
           ) : (
             "No problem preloaded"
           )}
         </div>
         <div style={{ flex: 1, marginLeft: "10px" }}>
-          <h2>
+          <h2 style={{ display: "flex", alignItems: "center" }}>
+            <div
+              style={{
+                backgroundColor: window.IS_SOLUTION_CORRECT ? "green" : "red",
+                color: "white",
+                padding: "2px",
+                marginRight: "5px",
+                fontFamily: "sans-serif",
+                fontWeight: "bold",
+                display: "inline-block",
+                fontSize: 12,
+              }}
+            >
+              {window.IS_SOLUTION_CORRECT ? "CORRECT" : "WRONG"}
+            </div>
             Solution {"["}solver: {window.SOLVER_NAME ?? "???"}
             {"] "}
             <a href={`/problem/${selectedProblemType}/${seed}.solution.json`}>
