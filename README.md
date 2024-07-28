@@ -49,6 +49,7 @@ very useful for human-assisted routing.
 | `traces-groups`        | 🔴 [TBA](https://blog.autorouting.com)                            | Route multiple traces to groups of points, without crossing traces                           | Medium     |
 | `layers-traces`        | 🔴 [TBA](https://blog.autorouting.com)                            | Route multiple traces to pairs of points, without crossing traces across layers              | Hard       |
 | `layers-traces-groups` | 🔴 [TBA](https://blog.autorouting.com)                            | Route multiple traces, through multiple places, to groups of points, without crossing traces | Hard       |
+| `width-constraints-*`  | 🔴 [TBA](https://blog.autorouting.com)                            | Maintain the optimal trace widths, given target ranges for each trace                        | Hard       |
 | `hyperdense-*`         | 🔴 [TBA](https://blog.autorouting.com)                            | Super dense BGA routing                                                                      | Hard+      |
 | `incremental-*`        | 🔴 [TBA](https://blog.autorouting.com)                            | The same dataset but a component is moved or a trace is changed. Tests cache efficiency      | Hard+      |
 
@@ -64,10 +65,12 @@ There are several criteria we use for running benchmarks:
 
 - Speed (machine specs TBD)
 - Percent of Boards fully routed inside category
-- Quality
-  - Compared to the ideal routing, how much longer are the traces? Shorter traces are usually better
+- Quality (as compared to "ideal routing")
+  - How much longer are the traces? Shorter traces are usually better
+  - How good is the trace width relative to the ideal routing
 - Problem Type
 - Incremental Speed (speed if a single component is moved or a trace is changed)
+- Memory Usage
 
 Over time, we'd like to have a simple 2d chart showing Speed and Quality.
 
