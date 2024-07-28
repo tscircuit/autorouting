@@ -23,7 +23,13 @@ export const SingleTrace2Footprints = ({
   }
 
   return (
-    <board width="20mm" height="20mm" pcbX={0} pcbY={0}>
+    <board
+      width={distance + 10}
+      height={distance + 10}
+      pcbX={0}
+      pcbY={0}
+      routingDisabled
+    >
       <A />
       <B />
       <trace
