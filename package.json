@@ -35,7 +35,7 @@
     "typescript": "^5.0.0"
   },
   "dependencies": {
-    "@tscircuit/checks": "0.0.23",
+    "@tscircuit/checks": "0.0.24",
     "commander": "^12.1.0",
     "kleur": "^4.1.5",
     "mersenne-twister": "^1.1.0",

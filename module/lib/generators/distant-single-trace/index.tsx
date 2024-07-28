@@ -8,7 +8,9 @@ export const getDistantSingleTraceProblemGenerator = (): ProblemGenerator => {
   const generateDistantSingleTraceProblem: ProblemGenerator["getExample"] =
     async ({ seed }): Promise<AnySoupElement[]> => {
       return replaceTracesWithErrors(
-        await renderCircuitToSoup(<SingleTraceCircuit seed={seed} />),
+        await renderCircuitToSoup(
+          <SingleTraceCircuit seed={seed} distance={100} />,
+        ),
       )
     }
 
