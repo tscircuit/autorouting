@@ -40,19 +40,19 @@ applies to a different autorouting scenario. A perfect autorouter
 can solve all of these problems, but partial autorouting is
 very useful for human-assisted routing.
 
-| Problem                | Ready Status                                                      | Description                                                                                  | Difficulty |
-| ---------------------- | ----------------------------------------------------------------- | -------------------------------------------------------------------------------------------- | ---------- |
-| `single-trace`         | [🟢 view](https://dataset.autorouting.com/problem/single-trace/1) | Route a single trace through obstacles                                                       | Easy       |
-| `traces`               | [🟢 view](https://dataset.autorouting.com/problem/traces/1)       | Route multiple traces to pairs of points, without crossing traces                            | Medium     |
-| `single-trace-group`   | 🔴 [TBA](https://blog.autorouting.com)                            | Route a single trace through multiple points                                                 | Easy       |
-| `layers-traces`        | 🔴 [TBA](https://blog.autorouting.com)                            | Route a trace through multiple layers to connect two points                                  | Easy       |
-| `traces-groups`        | 🔴 [TBA](https://blog.autorouting.com)                            | Route multiple traces to groups of points, without crossing traces                           | Medium     |
-| `layers-traces`        | 🔴 [TBA](https://blog.autorouting.com)                            | Route multiple traces to pairs of points, without crossing traces across layers              | Hard       |
-| `layers-traces-groups` | 🔴 [TBA](https://blog.autorouting.com)                            | Route multiple traces, through multiple places, to groups of points, without crossing traces | Hard       |
-| `distant-*`            | 🔴 [TBA](https://blog.autorouting.com)                            | Long (200mm+) traces                                                                         | Easy       |
-| `width-constraints-*`  | 🔴 [TBA](https://blog.autorouting.com)                            | Maintain the optimal trace widths, given target ranges for each trace                        | Hard       |
-| `hyperdense-*`         | 🔴 [TBA](https://blog.autorouting.com)                            | Super dense BGA routing                                                                      | Hard+      |
-| `incremental-*`        | 🔴 [TBA](https://blog.autorouting.com)                            | The same dataset but a component is moved or a trace is changed. Tests cache efficiency      | Hard+      |
+| Problem                | Ready Status                                                              | Description                                                                                  | Difficulty |
+| ---------------------- | ------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------- | ---------- |
+| `single-trace`         | [🟢 view](https://dataset.autorouting.com/problem/single-trace/1)         | Route a single trace through obstacles                                                       | Easy       |
+| `traces`               | [🟢 view](https://dataset.autorouting.com/problem/traces/1)               | Route multiple traces to pairs of points, without crossing traces                            | Medium     |
+| `distant-single-trace` | [🟢 view](https://dataset.autorouting.com/problem/distant-single-trace/1) | Long (200mm+) single trace                                                                   | Easy       |
+| `single-trace-group`   | 🔴 [TBA](https://blog.autorouting.com)                                    | Route a single trace through multiple points                                                 | Easy       |
+| `layers-traces`        | 🔴 [TBA](https://blog.autorouting.com)                                    | Route a trace through multiple layers to connect two points                                  | Easy       |
+| `traces-groups`        | 🔴 [TBA](https://blog.autorouting.com)                                    | Route multiple traces to groups of points, without crossing traces                           | Medium     |
+| `layers-traces`        | 🔴 [TBA](https://blog.autorouting.com)                                    | Route multiple traces to pairs of points, without crossing traces across layers              | Hard       |
+| `layers-traces-groups` | 🔴 [TBA](https://blog.autorouting.com)                                    | Route multiple traces, through multiple places, to groups of points, without crossing traces | Hard       |
+| `width-constraints-*`  | 🔴 [TBA](https://blog.autorouting.com)                                    | Maintain the optimal trace widths, given target ranges for each trace                        | Hard       |
+| `hyperdense-*`         | 🔴 [TBA](https://blog.autorouting.com)                                    | Super dense BGA routing                                                                      | Hard+      |
+| `incremental-*`        | 🔴 [TBA](https://blog.autorouting.com)                                    | The same dataset but a component is moved or a trace is changed. Tests cache efficiency      | Hard+      |
 
 ### Example Problems
 
