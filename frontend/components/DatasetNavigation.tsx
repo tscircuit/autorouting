@@ -11,41 +11,15 @@ export const DatasetNavigation = () => {
           {userMessage}
         </div>
       )}
-      {selectedProblemType && (
-        <>
-          <h2>
-            {selectedProblemType} -{" "}
-            <a href={`/problem/${selectedProblemType}/${seed}.json`}>#{seed}</a>{" "}
-            <a href={`/problem/${selectedProblemType}/${seed}.json`}>
-              download (json)
-            </a>
-          </h2>
-          <div>
-            <button
-              disabled={seed === 0}
-              onClick={() => {
-                window.location.href = `/problem/${selectedProblemType}/${seed - 1}`
-              }}
-            >
-              Prev
-            </button>
-            <button
-              onClick={() => {
-                window.location.href = `/problem/${selectedProblemType}/${seed + 1}`
-              }}
-            >
-              Next
-            </button>
-          </div>
-        </>
-      )}
-      <h2 style={{ marginBottom: 0 }}>Select a problem to view below</h2>
-      <a
-        style={{ marginBottom: 8, display: "block" }}
-        href="https://github.com/tscircuit/autorouting-dataset#problems"
-      >
-        View problem dataset descriptions
-      </a>
+      <h2 style={{ display: "flex", alignItems: "center" }}>
+        <span>Select a dataset to view below</span>
+        <a
+          style={{ fontSize: 14, marginLeft: 12 }}
+          href="https://github.com/tscircuit/autorouting-dataset#problems"
+        >
+          view dataset descriptions
+        </a>
+      </h2>
       <div>
         {problemTypes.map((problemType) => (
           <button
@@ -61,6 +35,34 @@ export const DatasetNavigation = () => {
           </button>
         ))}
       </div>
+      {selectedProblemType && (
+        <>
+          <h2>
+            {selectedProblemType} -{" "}
+            <a href={`/problem/${selectedProblemType}/${seed}.json`}>#{seed}</a>{" "}
+            <a href={`/problem/${selectedProblemType}/${seed}.json`}>
+              download (json)
+            </a>
+          </h2>
+          <div style={{ display: "flex", gap: 10 }}>
+            <button
+              disabled={seed === 0}
+              onClick={() => {
+                window.location.href = `/problem/${selectedProblemType}/${seed - 1}`
+              }}
+            >
+              Prev Sample
+            </button>
+            <button
+              onClick={() => {
+                window.location.href = `/problem/${selectedProblemType}/${seed + 1}`
+              }}
+            >
+              Next Sample
+            </button>
+          </div>
+        </>
+      )}
     </div>
   )
 }

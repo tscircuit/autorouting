@@ -105,7 +105,9 @@ Each directory in the `datasets` directory contains a dataset for each problem. 
 
 ## Writing a Solver
 
-You can write a solver in any language you want, but there is currently first-class support for Typescript solvers.
+You can write a solver in any language you want, but currently most of the examples are in Typescript.
+
+> Hate Javascript? Skip to [building a non-typescript solver](#non-typescript-solvers)
 
 > [!NOTE]
 > There are tons of examples of solvers inside the [algos directory!](./algos/)

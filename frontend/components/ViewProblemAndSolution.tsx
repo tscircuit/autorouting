@@ -3,6 +3,7 @@ import type { AnySoupElement } from "@tscircuit/soup"
 import { useState } from "react"
 import { DatasetNavigation } from "./DatasetNavigation"
 import { ErrorBoundary } from "react-error-boundary"
+import { Header } from "./Header"
 
 declare global {
   interface Window {
@@ -33,6 +34,7 @@ export default () => {
       <div>
         {!pastedSoup ? (
           <>
+            <Header />
             <h1>autorouting-dataset</h1>
             <p>
               You're viewing the{" "}
@@ -89,22 +91,7 @@ export default () => {
 
   return (
     <div>
-      <div style={{ display: "flex", gap: 10 }}>
-        <a href="https://github.com/tscircuit/autorouting-dataset">
-          autorouting-dataset
-        </a>
-        <a href="https://github.com/tscircuit/autorouting-dataset">
-          <img
-            alt="GitHub Repo stars"
-            src="https://img.shields.io/github/stars/tscircuit/autorouting-dataset"
-          />
-        </a>
-        <div>MIT-licensed</div>
-        <div style={{ flexGrow: 1 }} />
-        <a href="https://github.com/tscircuit/tscircuit">tscircuit github</a>
-        <a href="https://blog.autorouting.com">blog</a>
-        <a href="https://x.com/seveibar">twitter</a>
-      </div>
+      <Header />
       <DatasetNavigation />
       <div style={{ display: "flex", justifyContent: "space-between" }}>
         <div style={{ flex: 1, marginRight: "10px" }}>
