@@ -1,14 +1,5 @@
-const problemTypes = [
-  "single-trace",
-  // "single-multi-point-trace",
-  "traces",
-  "distant-single-trace",
-  // "layers-traces",
-  // "traces-groups",
-  // "layers-traces-groups",
-]
-
 export const DatasetNavigation = () => {
+  const problemTypes = window.AVAILABLE_DATASETS ?? ["single-trace"]
   const [, , selectedProblemType, seedStr] = window.location.pathname.split("/")
   const seed = seedStr ? Number.parseInt(seedStr) : 0
   const userMessage = window.USER_MESSAGE ?? ""

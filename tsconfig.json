@@ -24,7 +24,8 @@
     "noUnusedParameters": false,
     "noPropertyAccessFromIndexSignature": false,
     "paths": {
-      "autorouting-dataset": ["./module"]
+      "autorouting-dataset": ["./module"],
+      "algos/*": ["./algos/*"]
     }
   }
 }

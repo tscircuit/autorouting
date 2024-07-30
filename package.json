@@ -7,7 +7,7 @@
     "build": "vite build",
     "build-and-serve": "npm run build && bun module/cli.ts server start",
     "format": "biome format --write .",
-    "download-server": "wget --mirror --convert-links --level=100 --adjust-extension --page-requisites --no-parent -P ./static-server http://localhost:3000"
+    "build:static": "bun scripts/build-static.ts"
   },
   "devDependencies": {
     "@biomejs/biome": "^1.8.3",

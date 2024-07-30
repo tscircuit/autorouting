@@ -3,5 +3,5 @@ import { tscircuitBuiltinSolver } from "./index"
 
 await startDevServer({
   solver: tscircuitBuiltinSolver,
-  port: 3000,
+  port: 3080,
 })

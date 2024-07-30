@@ -68,7 +68,7 @@ const routeJson = getSimpleRouteJson(soup)
 
 ## Development
 
-Run `bun run start` to start the dev server. Then go to `http://localhost:3000` to view the dev server.
+Run `bun run start` to start the dev server. Then go to `http://localhost:3080` to view the dev server.
 
 This project uses a statically compiled frontend via vite. The server injects
 data into the frontend by placing a script tag in the html file that sets variables

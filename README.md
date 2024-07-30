@@ -148,7 +148,7 @@ const mySolver = (soup: AnySoupElement[]) => {
 
 startAutoroutingDevServer({
   solver: mySolver,
-  port: 3000
+  port: 3080
 })
 ```
 

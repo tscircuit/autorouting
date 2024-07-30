@@ -12,6 +12,7 @@ import {
 import { runChecks } from "../benchmark/run-checks"
 import { tscircuitBuiltinSolver } from "../../../algos/tscircuit-builtin"
 import { isValidSolution } from "../benchmark/is-valid-solution"
+import { AVAILABLE_DATASETS } from "./available-datasets"
 
 export const serverEntrypoint = async (
   req: IncomingMessage,
@@ -22,6 +23,12 @@ export const serverEntrypoint = async (
   let problemSoup: AnySoupElement[] | undefined
   let solutionSoup: AnySoupElement[] | undefined
   let userMessage: string | undefined
+
+  if (req.url!.includes("/available-datasets.json")) {
+    res.writeHead(200, { "Content-Type": "application/json" })
+    res.end(JSON.stringify({ available_datasets: AVAILABLE_DATASETS }, null, 2))
+    return
+  }
 
   // For /problem/* urls...
   const [, , problemType, seedStr] = req.url!.split("/")
@@ -38,10 +45,14 @@ export const serverEntrypoint = async (
     }
   }
 
+  let solutionComputeTime: number | undefined
   if (problemSoup) {
-    solutionSoup = (await solver(problemSoup as AnySoupElement[])).concat(
-      problemSoup,
-    ) as any
+    const startTime = performance.now()
+    const solvedResult = await solver(problemSoup as AnySoupElement[])
+    const endTime = performance.now()
+    solutionComputeTime = endTime - startTime
+
+    solutionSoup = solvedResult.concat(problemSoup) as any
   }
 
   // Add errors to solutionSoup for overlapping traces etc. (run eval)
@@ -72,6 +83,7 @@ export const serverEntrypoint = async (
       getScriptContent({
         problemSoup,
         solutionSoup,
+        solutionComputeTime,
         userMessage,
         solverName: ctx.solverName,
         hasCustomSolver: Boolean(ctx.solver),
