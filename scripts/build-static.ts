@@ -31,10 +31,16 @@ const sampleCount = 5
 
 await downloadAndSave(`/available-datasets.json`)
 await downloadAndSave(`/index.html`)
-// for (let i = 0; i < sampleCount; i++) {
-//   await downloadAndSave(`/problem/single-trace/${i + 1}.json`)
-//   await downloadAndSave(`/problem/single-trace/${i + 1}.solution.json`)
-// }
+for (const problemType of AVAILABLE_DATASETS) {
+  for (let i = 0; i < sampleCount; i++) {
+    await fs.mkdir(Path.join(outputDir, "problem", problemType), {
+      recursive: true,
+    })
+    await downloadAndSave(`/problem/${problemType}/${i + 1}.html`)
+    await downloadAndSave(`/problem/${problemType}/${i + 1}.json`)
+    await downloadAndSave(`/problem/${problemType}/${i + 1}.solution.json`)
+  }
+}
 
 // Clean up
 devServer.close()

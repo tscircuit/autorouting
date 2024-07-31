@@ -165,11 +165,36 @@ You can then run this file with `bun --hot ./solver-server.ts`
 
 ### Non-Typescript Solvers
 
+> [!TIP]
+> Check out a [simple python autorouter](./algos/python-simple-grid-based)
+
 - Host a server with your algorithm (see the simple flask server below)
 - Run `npx autorouting-dataset server start --solver-url http://localhost:1234` (replace `localhost:1234` with your solver server url
+- To benchmark your solver, run `npx autorouting-dataset benchmark --solver-url http://localhost:1234` [see running benchmarks without typescript](#running-benchmarks-without-typescript)
 
 ```python
-# TODO insert flask server here
+from flask import Flask, request, jsonify
+from autoroute import autoroute  # Import your autoroute function
+
+app = Flask(__name__)
+
+@app.route('/solve', methods=['POST'])
+def solve():
+    data = request.json
+    simple_route_json = data['simple_route_json']
+
+    # Call your autoroute function
+    solution = autoroute(simple_route_json)
+
+    # Prepare the response
+    response = {
+        "solution_soup": solution
+    }
+
+    return jsonify(response)
+
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=1234)
 ```
 
 The autorouting-dataset dev server will send a `POST` request to the provided
