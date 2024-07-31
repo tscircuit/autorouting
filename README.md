@@ -31,6 +31,7 @@ problem.
     - [Running Benchmarks](#running-benchmarks)
       - [Customizing Benchmarks](#customizing-benchmarks)
     - [Generating Datasets](#generating-datasets)
+    - [Generating Single Problems](#generating-single-problems)
   - [Community Solvers](#community-solvers)
 
 ## What is autorouting?
@@ -386,8 +387,20 @@ the sample count should be set to at least 1,000.
 ### Generating Datasets
 
 ```bash
-autorouting-dataset generate-dataset --problem-type single-trace --seed 0 --output ./single-trace-problem-0.json
+autorouting-dataset generate-dataset --problem-type single-trace --output ./single-trace-problem-XXX.json
 ```
+
+This command will generate a dataset of 100 problems (by default) for the specified problem type, saving each problem as a separate JSON file.
+
+### Generating Single Problems
+
+To generate a single problem:
+
+```bash
+autorouting-dataset generate-problem --problem-type single-trace --seed 0 --output ./single-trace-problem-0.json
+```
+
+This command generates a single problem of the specified type with the given seed and saves it to the specified output file.
 
 ## Community Solvers
 

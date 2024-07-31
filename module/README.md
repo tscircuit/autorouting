@@ -31,15 +31,25 @@ results while you develop your solver. You can start the dev server with:
 autorouting-dataset server start
 ```
 
-### Generating Datasets
+### Generating Single Problems
+
+To generate a single problem:
 
 ```bash
-# Generate a single soup json for the single-trace problem
 autorouting-dataset generate-problem --problem-type single-trace --seed 0 --output ./single-trace-problem-0.json
+```
 
-# Generate a full dataset
+This command generates a single problem of the specified type with the given seed and saves it to the specified output file.
+
+### Generating Datasets
+
+To generate a full dataset:
+
+```bash
 autorouting-dataset generate-dataset --problem-type single-trace --output ./single-trace-problem-XXX.json
 ```
+
+This command will generate a dataset of 100 problems (by default) for the specified problem type, saving each problem as a separate JSON file.
 
 ## Programmatic Usage
 
