@@ -1,5 +1,5 @@
 // @ts-ignore
-import frontend from "../../../frontend-dist/index.html"
+import frontend from "../../../frontend-dist/index.html" with { type: "text" }
 import { getScriptContent } from "./get-script-content"
 import { getDatasetGenerator } from "../generators"
 import type { AnySoupElement } from "@tscircuit/soup"
@@ -14,7 +14,6 @@ import { tscircuitBuiltinSolver } from "../../../algos/tscircuit-builtin"
 import { isValidSolution } from "../benchmark/is-valid-solution"
 import { AVAILABLE_DATASETS } from "./available-datasets"
 import getRawBody from "raw-body"
-import fetch from "node-fetch"
 
 export const serverEntrypoint = async (
   req: IncomingMessage,

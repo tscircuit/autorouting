@@ -41,6 +41,6 @@
     "kleur": "^4.1.5",
     "mersenne-twister": "^1.1.0",
     "raw-body": "^3.0.0",
-    "tscircuit": "^0.0.246"
+    "tscircuit": "^0.0.254"
   }
 }
