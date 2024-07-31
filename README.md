@@ -115,7 +115,7 @@ Each directory in the `datasets` directory contains a dataset for each problem. 
 
 ## Writing a Solver
 
-You can write a solver in any language you want, but currently most of the examples are in Typescript.
+You can write a solver in any language you want, but currently most of the examples are in Typescript. You can read about building a "hello world" autorouter in [this blog post.](https://blog.autorouting.com/p/building-a-grid-based-pcb-autorouter)
 
 > Hate Javascript? Skip to [building a non-typescript solver](#non-typescript-solvers)
 
