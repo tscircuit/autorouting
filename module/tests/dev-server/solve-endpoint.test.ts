@@ -4,6 +4,7 @@ import { getDatasetGenerator } from "../../lib/generators"
 import type { AnySoupElement } from "@tscircuit/soup"
 import { runChecks } from "../../lib/benchmark/run-checks"
 import { autoroute } from "algos/simple-grid-based"
+import { getSimpleRouteJson } from "../../lib/solver-utils/getSimpleRouteJson"
 
 test("solve endpoint", async () => {
   const generator = getDatasetGenerator("single-trace")
@@ -22,17 +23,7 @@ test("solve endpoint", async () => {
     },
     body: JSON.stringify({
       problem_soup: soup,
-      simple_route_json: {
-        layerCount: 1,
-        obstacles: [],
-        connections: [],
-        bounds: {
-          minX: 0,
-          maxX: 10,
-          minY: 0,
-          maxY: 10,
-        },
-      },
+      simple_route_json: getSimpleRouteJson(soup),
     }),
   })
 

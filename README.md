@@ -26,6 +26,11 @@ problem.
     - [Running Benchmarks with Typescript](#running-benchmarks-with-typescript)
     - [Running Benchmarks without Typescript](#running-benchmarks-without-typescript)
     - [Customizing Benchmarks](#customizing-benchmarks)
+  - [CLI Usage](#cli-usage)
+    - [Installation](#installation)
+    - [Starting Dev Servers](#starting-dev-servers)
+    - [Running Benchmarks](#running-benchmarks)
+    - [Generating Datasets](#generating-datasets)
   - [Community Solvers](#community-solvers)
 
 ## What is autorouting?
@@ -296,8 +301,32 @@ By default, running a benchmark will run for 100 samples against all problem typ
 The sample count can be changed with the `--sample-count` flag. For public evaluations
 the sample count should be set to at least 1,000.
 
+## CLI Usage
+
+You can use the CLI to generate datasets, run benchmarks, and start a dev server.
+
+### Installation
+
+```bash
+npm install -g autorouting-dataset
+```
+
+### Starting Dev Servers
+
+```bash
+
+```
+
+### Running Benchmarks
+
+### Generating Datasets
+
+```bash
+auto
+
 ## Community Solvers
 
 Coming soon! Please create an issue to add your solver to this repo, we will be listing benchmarks etc.!
 
 We are working on a dedicated test machine for measuring performance.
+```
