@@ -5,6 +5,8 @@ import fs from "node:fs/promises"
 import path from "node:path"
 import { startDevServer } from "./lib/server/start-dev-server"
 import { autoroute } from "../algos/simple-grid-based"
+import { runBenchmark } from "./lib/benchmark/run-benchmark"
+import { createSolverFromUrl } from "./lib/solver-utils/createSolverFromUrl"
 
 const program = new Command()
 
@@ -16,11 +18,18 @@ program
 program
   .command("server")
   .description("Start the dev server")
-  .action(() => {
+  .option("--solver-url <url>", "URL of the solver to use")
+  .option("--solver-name <name>", "Name of the solver to use")
+  .option("--port <number>", "Port to run the server on", parseInt)
+  .action((options) => {
     console.log("Starting dev server...")
     startDevServer({
-      solver: autoroute,
-      solverName: "simple-grid-based",
+      solver: options.solverUrl ? undefined : autoroute,
+      solverName:
+        options.solveName ??
+        (options.solverUrl ? undefined : "simple-grid-based"),
+      solverUrl: options.solverUrl,
+      port: options.port || 3080,
     })
   })
 
@@ -51,11 +60,16 @@ program
     "--output <pattern>",
     "Output file pattern (e.g., ./problem-XXX.json)",
   )
+  .option(
+    "--sample-count <number>",
+    "Number of samples to generate",
+    parseInt,
+    100,
+  )
   .action(async (options) => {
     const generator = getDatasetGenerator(options.problemType)
 
-    const datasetSize = 100 // TODO make this configurable
-    for (let i = 0; i < datasetSize; i++) {
+    for (let i = 0; i < options.sampleCount; i++) {
       const soup = await generator.getExample({ seed: i })
 
       const outputPath = options.output.replace(
@@ -64,9 +78,51 @@ program
       )
       await fs.writeFile(outputPath, JSON.stringify(soup, null, 2))
       console.log(
-        `Problem ${i + 1}/${datasetSize} generated and saved to ${outputPath}`,
+        `Problem ${i + 1}/${options.sampleCount} generated and saved to ${outputPath}`,
       )
     }
+  })
+
+program
+  .command("benchmark")
+  .description("Run benchmarks against a solver")
+  .requiredOption("--solver-url <url>", "URL of the solver to benchmark")
+  .option(
+    "--sample-count <number>",
+    "Number of samples to run for each problem type",
+    parseInt,
+    100,
+  )
+  .option(
+    "--problem-type <type>",
+    "Problem type to run benchmarks for (default: all)",
+  )
+  .option("--verbose", "Prints out more information")
+  .option("--sample-seed <number>", "Seed to randomize sampling", parseInt, 0)
+  .option("--no-skipping", "Disables skipping of problem types")
+  .action(async (options) => {
+    const solver = await createSolverFromUrl(options.solverUrl)
+    const results = await runBenchmark({
+      solver,
+      solverName: options.solverUrl,
+      verbose: options.verbose,
+      sampleCount: options.sampleCount,
+      problemType: options.problemType,
+      sampleSeed: options.sampleSeed,
+      noSkipping: options.noSkipping,
+    })
+
+    console.log("Benchmark Results:")
+    console.table(
+      results.map((result) => ({
+        "Problem Type": result.problemType,
+        "Samples Run": result.samplesRun,
+        "Successful Samples": result.successfulSamples,
+        "Failed Samples": result.failedSamples,
+        "Average Time (ms)": result.averageTime.toFixed(2),
+        "Completion Rate": `${((result.successfulSamples / result.samplesRun) * 100).toFixed(2)}%`,
+      }))
+    )
   })
 
 program.parse(process.argv)

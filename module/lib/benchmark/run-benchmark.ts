@@ -1,6 +1,6 @@
-import { ProblemSolver } from "../solver-utils/ProblemSolver"
+import type { ProblemSolver } from "../solver-utils/ProblemSolver"
 import { getDatasetGenerator } from "../generators"
-import { AnySoupElement } from "@tscircuit/soup"
+import type { AnySoupElement } from "@tscircuit/soup"
 import type { ProblemType } from "../generators/types"
 import { isValidSolution } from "./is-valid-solution"
 import kleur from "kleur"

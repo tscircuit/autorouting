@@ -30,10 +30,13 @@ export const serverEntrypoint = async (
     const reqJson = await getRawBody(req, { encoding: "utf-8" })
     const { problem_soup } = JSON.parse(reqJson)
     res.writeHead(200, { "Content-Type": "application/json" })
+
+    const solution_soup = await solver(problem_soup)
+
     res.end(
       JSON.stringify(
         {
-          solution_soup: await solver(problem_soup),
+          solution_soup,
         },
         null,
         2,

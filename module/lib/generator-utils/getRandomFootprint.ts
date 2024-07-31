@@ -23,12 +23,12 @@ export const getRandomFootprint = (seeds: Array<number | string>) => {
 
   let pinCount: number
   if (footprintType === "bga") {
-    pinCount = rand(...seeds, "bgaPinCount").int(2, 8) ** 2
+    pinCount = rand(...seeds, "bgaPinCount").int(4, 8) ** 2
   } else if (footprintType === "qfn") {
-    const topSide = rand(...seeds, "topSide").int(4, 8)
+    const topSide = rand(...seeds, "topSide").int(4, 10)
     pinCount = 2 * topSide + 2 * (topSide - 1)
   } else {
-    pinCount = 2 * rand(...seeds, "pinCount").int(2, 8)
+    pinCount = 2 * rand(...seeds, "pinCount").int(8, 16)
   }
 
   return {

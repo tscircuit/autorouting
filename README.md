@@ -25,7 +25,13 @@ problem.
   - [Running a Benchmark](#running-a-benchmark)
     - [Running Benchmarks with Typescript](#running-benchmarks-with-typescript)
     - [Running Benchmarks without Typescript](#running-benchmarks-without-typescript)
-    - [Customizing Benchmarks](#customizing-benchmarks)
+  - [CLI Usage](#cli-usage)
+    - [Installation](#installation)
+    - [Starting Dev Servers](#starting-dev-servers)
+    - [Running Benchmarks](#running-benchmarks)
+      - [Customizing Benchmarks](#customizing-benchmarks)
+    - [Generating Datasets](#generating-datasets)
+    - [Generating Single Problems](#generating-single-problems)
   - [Community Solvers](#community-solvers)
 
 ## What is autorouting?
@@ -230,6 +236,48 @@ You can visualization your algorithm against a sample using the dev server. To
 start the dev server, just run `npx autorouting-dataset server start --solver-url <solver-url>`
 and run your solver server.
 
+When you're debugging your solver, you may want to insert additional elements
+into your solution_soup to help debug visually. To do this, just return elements
+in addition to or instead of the `pcb_trace` element. A full list of elements
+can be found in the [tscircuit json format (soup)](https://docs.tscircuit.com/api-reference/advanced/soup).
+
+One easy element you can add is a [`fabrication_note_path`](https://docs.tscircuit.com/api-reference/advanced/soup#pcb-fabrication-note-path), which is shown in gray on the PCB viewer. Here's an example:
+
+```json
+{
+  "type": "pcb_fabrication_note_path",
+  "layer": "top",
+  "route": [
+    {
+      "x": "3mm",
+      "y": "1mm"
+    },
+    {
+      "x": "3mm",
+      "y": "1mm"
+    }
+  ],
+  "stroke_width": "0.1mm"
+}
+```
+
+You could also add a [`pcb_fabrication_note_text`](https://docs.tscircuit.com/api-reference/advanced/soup#pcb-fabrication-note-text) to add helpful text annotations:
+
+```json
+{
+  "type": "pcb_fabrication_note_text",
+  "font": "tscircuit2024",
+  "font_size": "1mm",
+  "text": "Hello, World!",
+  "layer": "top",
+  "anchor_position": {
+    "x": "3mm",
+    "y": "1mm"
+  },
+  "anchor_alignment": "top_left"
+}
+```
+
 ### Running a Dev Server with Typescript
 
 If you're using Typescript, you can run a dev server
@@ -276,7 +324,47 @@ You can then just run your file with `bun ./benchmark.ts`
 autorouting-dataset benchmark --solver-url http://localhost:1234
 ```
 
-### Customizing Benchmarks
+See the section on [customizing benchmarks](#customizing-benchmarks) for more details
+on how to change the sample count, customize the problem type etc.
+
+## CLI Usage
+
+You can use the CLI to generate datasets, run benchmarks, and start a dev server.
+
+### Installation
+
+```bash
+npm install -g autorouting-dataset
+```
+
+### Starting Dev Servers
+
+The dev server helps you visualize a dataset and will automatically send data
+to your solver to test it.
+
+The dev server will start on port 3080 by default, after you start the dev server
+you can visit `http://localhost:3080` to view the dev server.
+
+```bash
+# Start the dev server with the default grid-based solver
+autorouting-dataset server start
+
+# Start the dev server with a custom solver url
+autorouting-dataset server start --solver-url http://localhost:1234
+
+# You can send specify
+autorouting-dataset server start --port 3080
+```
+
+### Running Benchmarks
+
+Runs a benchmark against a solver server. See [running benchmarks without typescript](#running-benchmarks-without-typescript) for more details.
+
+```bash
+autorouting-dataset benchmark --solver-url http://localhost:1234
+```
+
+#### Customizing Benchmarks
 
 | Option        | Flag             | Description                                       |
 | ------------- | ---------------- | ------------------------------------------------- |
@@ -295,6 +383,24 @@ By default, running a benchmark will run for 100 samples against all problem typ
 
 The sample count can be changed with the `--sample-count` flag. For public evaluations
 the sample count should be set to at least 1,000.
+
+### Generating Datasets
+
+```bash
+autorouting-dataset generate-dataset --problem-type single-trace --output ./single-trace-problem-XXX.json
+```
+
+This command will generate a dataset of 100 problems (by default) for the specified problem type, saving each problem as a separate JSON file.
+
+### Generating Single Problems
+
+To generate a single problem:
+
+```bash
+autorouting-dataset generate-problem --problem-type single-trace --seed 0 --output ./single-trace-problem-0.json
+```
+
+This command generates a single problem of the specified type with the given seed and saves it to the specified output file.
 
 ## Community Solvers
 
