@@ -25,11 +25,11 @@ problem.
   - [Running a Benchmark](#running-a-benchmark)
     - [Running Benchmarks with Typescript](#running-benchmarks-with-typescript)
     - [Running Benchmarks without Typescript](#running-benchmarks-without-typescript)
-    - [Customizing Benchmarks](#customizing-benchmarks)
   - [CLI Usage](#cli-usage)
     - [Installation](#installation)
     - [Starting Dev Servers](#starting-dev-servers)
     - [Running Benchmarks](#running-benchmarks)
+      - [Customizing Benchmarks](#customizing-benchmarks)
     - [Generating Datasets](#generating-datasets)
   - [Community Solvers](#community-solvers)
 
@@ -281,7 +281,38 @@ You can then just run your file with `bun ./benchmark.ts`
 autorouting-dataset benchmark --solver-url http://localhost:1234
 ```
 
-### Customizing Benchmarks
+See the section on [customizing benchmarks](#customizing-benchmarks) for more details
+on how to change the sample count, customize the problem type etc.
+
+## CLI Usage
+
+You can use the CLI to generate datasets, run benchmarks, and start a dev server.
+
+### Installation
+
+```bash
+npm install -g autorouting-dataset
+```
+
+### Starting Dev Servers
+
+```bash
+# Start the dev server with the default grid-based solver
+autorouting-dataset server start
+
+# Start the dev server with a custom solver url
+autorouting-dataset server start --solver-url http://localhost:1234
+```
+
+### Running Benchmarks
+
+Runs a benchmark against a solver server. See [running benchmarks without typescript](#running-benchmarks-without-typescript) for more details.
+
+```bash
+autorouting-dataset benchmark --solver-url http://localhost:1234
+```
+
+#### Customizing Benchmarks
 
 | Option        | Flag             | Description                                       |
 | ------------- | ---------------- | ------------------------------------------------- |
@@ -301,32 +332,18 @@ By default, running a benchmark will run for 100 samples against all problem typ
 The sample count can be changed with the `--sample-count` flag. For public evaluations
 the sample count should be set to at least 1,000.
 
-## CLI Usage
-
-You can use the CLI to generate datasets, run benchmarks, and start a dev server.
-
-### Installation
-
-```bash
-npm install -g autorouting-dataset
-```
-
-### Starting Dev Servers
-
-```bash
-
-```
-
-### Running Benchmarks
-
 ### Generating Datasets
 
 ```bash
-auto
+autorouting-dataset generate-dataset --problem-type single-trace --seed 0 --output ./single-trace-problem-0.json
+```
 
 ## Community Solvers
 
 Coming soon! Please create an issue to add your solver to this repo, we will be listing benchmarks etc.!
 
 We are working on a dedicated test machine for measuring performance.
+
+```
+
 ```
