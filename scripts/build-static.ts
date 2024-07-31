@@ -27,16 +27,19 @@ const downloadAndSave = async (path: string) => {
 }
 
 // Download all the relevant urls
-const sampleCount = 5
+const sampleCount = 40
 
 await downloadAndSave(`/available-datasets.json`)
 await downloadAndSave(`/index.html`)
 for (const problemType of AVAILABLE_DATASETS) {
   for (let i = 0; i < sampleCount; i++) {
-    await fs.mkdir(Path.join(outputDir, "problem", problemType), {
-      recursive: true,
-    })
-    await downloadAndSave(`/problem/${problemType}/${i + 1}.html`)
+    await fs.mkdir(
+      Path.join(outputDir, "problem", problemType, (i + 1).toString()),
+      {
+        recursive: true,
+      },
+    )
+    await downloadAndSave(`/problem/${problemType}/${i + 1}/index.html`)
     await downloadAndSave(`/problem/${problemType}/${i + 1}.json`)
     await downloadAndSave(`/problem/${problemType}/${i + 1}.solution.json`)
   }

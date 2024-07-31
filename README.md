@@ -175,24 +175,19 @@ You can then run this file with `bun --hot ./solver-server.ts`
 
 ```python
 from flask import Flask, request, jsonify
-from autoroute import autoroute  # Import your autoroute function
+from autoroute import autoroute
 
 app = Flask(__name__)
 
 @app.route('/solve', methods=['POST'])
 def solve():
-    data = request.json
-    simple_route_json = data['simple_route_json']
+    simple_route_json = request.json['simple_route_json']
 
-    # Call your autoroute function
     solution = autoroute(simple_route_json)
 
-    # Prepare the response
-    response = {
+    return jsonify({
         "solution_soup": solution
-    }
-
-    return jsonify(response)
+    })
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=1234)
