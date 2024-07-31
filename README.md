@@ -235,6 +235,48 @@ You can visualization your algorithm against a sample using the dev server. To
 start the dev server, just run `npx autorouting-dataset server start --solver-url <solver-url>`
 and run your solver server.
 
+When you're debugging your solver, you may want to insert additional elements
+into your solution_soup to help debug visually. To do this, just return elements
+in addition to or instead of the `pcb_trace` element. A full list of elements
+can be found in the [tscircuit json format (soup)](https://docs.tscircuit.com/api-reference/advanced/soup).
+
+One easy element you can add is a [`fabrication_note_path`](https://docs.tscircuit.com/api-reference/advanced/soup#pcb-fabrication-note-path), which is shown in gray on the PCB viewer. Here's an example:
+
+```json
+{
+  "type": "pcb_fabrication_note_path",
+  "layer": "top",
+  "route": [
+    {
+      "x": "3mm",
+      "y": "1mm"
+    },
+    {
+      "x": "3mm",
+      "y": "1mm"
+    }
+  ],
+  "stroke_width": "0.1mm"
+}
+```
+
+You could also add a [`pcb_fabrication_note_text`](https://docs.tscircuit.com/api-reference/advanced/soup#pcb-fabrication-note-text) to add helpful text annotations:
+
+```json
+{
+  "type": "pcb_fabrication_note_text",
+  "font": "tscircuit2024",
+  "font_size": "1mm",
+  "text": "Hello, World!",
+  "layer": "top",
+  "anchor_position": {
+    "x": "3mm",
+    "y": "1mm"
+  },
+  "anchor_alignment": "top_left"
+}
+```
+
 ### Running a Dev Server with Typescript
 
 If you're using Typescript, you can run a dev server
@@ -296,12 +338,21 @@ npm install -g autorouting-dataset
 
 ### Starting Dev Servers
 
+The dev server helps you visualize a dataset and will automatically send data
+to your solver to test it.
+
+The dev server will start on port 3080 by default, after you start the dev server
+you can visit `http://localhost:3080` to view the dev server.
+
 ```bash
 # Start the dev server with the default grid-based solver
 autorouting-dataset server start
 
 # Start the dev server with a custom solver url
 autorouting-dataset server start --solver-url http://localhost:1234
+
+# You can send specify
+autorouting-dataset server start --port 3080
 ```
 
 ### Running Benchmarks
@@ -343,7 +394,3 @@ autorouting-dataset generate-dataset --problem-type single-trace --seed 0 --outp
 Coming soon! Please create an issue to add your solver to this repo, we will be listing benchmarks etc.!
 
 We are working on a dedicated test machine for measuring performance.
-
-```
-
-```
