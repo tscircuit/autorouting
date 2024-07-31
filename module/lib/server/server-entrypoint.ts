@@ -13,6 +13,7 @@ import { runChecks } from "../benchmark/run-checks"
 import { tscircuitBuiltinSolver } from "../../../algos/tscircuit-builtin"
 import { isValidSolution } from "../benchmark/is-valid-solution"
 import { AVAILABLE_DATASETS } from "./available-datasets"
+import getRawBody from "raw-body"
 
 export const serverEntrypoint = async (
   req: IncomingMessage,
@@ -23,6 +24,22 @@ export const serverEntrypoint = async (
   let problemSoup: AnySoupElement[] | undefined
   let solutionSoup: AnySoupElement[] | undefined
   let userMessage: string | undefined
+
+  if (req.url!.endsWith("/solve")) {
+    // Read request body
+    const reqJson = await getRawBody(req, { encoding: "utf-8" })
+    const { problem_soup } = JSON.parse(reqJson)
+    res.writeHead(200, { "Content-Type": "application/json" })
+    res.end(
+      JSON.stringify(
+        {
+          solution_soup: await solver(problem_soup),
+        },
+        null,
+        2,
+      ),
+    )
+  }
 
   if (req.url!.includes("/available-datasets.json")) {
     res.writeHead(200, { "Content-Type": "application/json" })
