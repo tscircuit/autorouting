@@ -39,6 +39,7 @@ export const serverEntrypoint = async (
         2,
       ),
     )
+    return
   }
 
   if (req.url!.includes("/available-datasets.json")) {
