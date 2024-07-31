@@ -18,6 +18,7 @@ for developing new autorouting algorithms.
     - [Typescript Solvers](#typescript-solvers)
     - [Non-Typescript Solvers](#non-typescript-solvers)
   - [Visualizing Problems/Solutions](#visualizing-problemssolutions)
+    - [Running a Dev Server with Typescript](#running-a-dev-server-with-typescript)
   - [Running a Benchmark](#running-a-benchmark)
     - [Running Benchmarks with Typescript](#running-benchmarks-with-typescript)
     - [Running Benchmarks without Typescript](#running-benchmarks-without-typescript)
@@ -227,12 +228,28 @@ interface Response {
 
 ## Visualizing Problems/Solutions
 
-tscircuit runs a debugging service at [debug.tscircuit.com](https://debug.tscircuit.com) that you can use to visualize a solved or unsolved problem,
-just follow the instructions of the [logSoup](https://github.com/tscircuit/log-soup) function. If you are using a language other than Typescript,
-you can follow the instructions here (TODO)
+You can visualization your algorithm against a sample using the dev server. To
+start the dev server, just run `npx autorouting-dataset server start --solver-url <solver-url>`
+and run your solver server.
 
-If you are using Typescript, you may want to visualize your solution incrementally or customize your own visualization. For that, there is an easy-to-use
-[RouterPlayground](#) component that allows visualizing your solution.
+### Running a Dev Server with Typescript
+
+If you're using Typescript, you can run a dev server
+with the code below:
+
+```ts
+import { startDevServer } from "autorouting-dataset"
+import { autoroute } from "./my-autorouter"
+
+await startDevServer({
+  solver: autoroute,
+  solverName: "my-autorouter",
+  port: 3080,
+})
+```
+
+> [!TIP]
+> Check out [this directory](./algos/simple-grid-based/) for a typical Typescript autorouter configuration
 
 ## Running a Benchmark
 
