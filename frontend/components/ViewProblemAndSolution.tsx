@@ -3,6 +3,7 @@ import type { AnySoupElement } from "@tscircuit/soup"
 import { useState } from "react"
 import { DatasetNavigation } from "./DatasetNavigation"
 import { ErrorBoundary } from "react-error-boundary"
+import { Header } from "./Header"
 
 declare global {
   interface Window {
@@ -11,6 +12,9 @@ declare global {
     HAS_CUSTOM_SOLVER?: string
     USER_MESSAGE?: string
     SOLVER_NAME?: string
+    SOLVER_LINK?: string
+    AVAILABLE_DATASETS?: string[]
+    SOLUTION_COMPUTE_TIME?: number
     IS_SOLUTION_CORRECT?: boolean
   }
 }
@@ -30,8 +34,20 @@ export default () => {
       <div>
         {!pastedSoup ? (
           <>
+            <Header />
+            <h1>autorouting-dataset</h1>
+            <p>
+              You're viewing the{" "}
+              <a href="https://github.com/tscircuit/autorouting-dataset">
+                autorouting-dataset
+              </a>
+              . Click a dataset below to explore it.
+            </p>
             <DatasetNavigation />
-            <h2>No soup preloaded, paste soup json below to display it</h2>
+            <h2>
+              No circuit json preloaded, click a dataset above or paste circuit
+              json (soup) below to display it
+            </h2>
             <textarea
               style={{ minWidth: "50vw", minHeight: "50vh" }}
               onChange={(e) => {
@@ -65,12 +81,21 @@ export default () => {
     )
   }
 
+  const solverElm = window.SOLVER_LINK ? (
+    <a
+      href={window.SOLVER_LINK}
+    >{`[solver: ${window.SOLVER_NAME ?? "???"}]`}</a>
+  ) : (
+    <span>{`[solver: ${window.SOLVER_NAME ?? "???"}]`}</span>
+  )
+
   return (
     <div>
+      <Header />
       <DatasetNavigation />
       <div style={{ display: "flex", justifyContent: "space-between" }}>
         <div style={{ flex: 1, marginRight: "10px" }}>
-          <h2>Problem</h2>
+          <h2 style={{ fontSize: 18 }}>Problem</h2>
           {problemSoup ? (
             <PCBViewer
               initialState={{
@@ -83,23 +108,46 @@ export default () => {
           )}
         </div>
         <div style={{ flex: 1, marginLeft: "10px" }}>
-          <h2 style={{ display: "flex", alignItems: "center" }}>
-            <div
-              style={{
-                backgroundColor: window.IS_SOLUTION_CORRECT ? "green" : "red",
-                color: "white",
-                padding: "2px",
-                marginRight: "5px",
-                fontFamily: "sans-serif",
-                fontWeight: "bold",
-                display: "inline-block",
-                fontSize: 12,
-              }}
-            >
-              {window.IS_SOLUTION_CORRECT ? "CORRECT" : "WRONG"}
+          <h2 style={{ display: "flex", alignItems: "center", fontSize: 18 }}>
+            <div>
+              Solution {solverElm}
+              <div
+                style={{
+                  backgroundColor: window.IS_SOLUTION_CORRECT ? "green" : "red",
+                  color: "white",
+                  padding: "2px",
+                  borderRadius: 4,
+                  paddingLeft: 4,
+                  paddingRight: 4,
+                  marginRight: "5px",
+                  fontFamily: "sans-serif",
+                  fontWeight: "bold",
+                  display: "inline-block",
+                  fontSize: 12,
+                }}
+              >
+                {window.IS_SOLUTION_CORRECT ? "CORRECT" : "WRONG"}
+              </div>
+              {window.SOLUTION_COMPUTE_TIME && (
+                <div
+                  style={{
+                    backgroundColor: "rgba(0,0,0,0.8)",
+                    color: "white",
+                    padding: "2px",
+                    borderRadius: 4,
+                    paddingLeft: 4,
+                    paddingRight: 4,
+                    marginRight: "5px",
+                    fontFamily: "sans-serif",
+                    fontWeight: "bold",
+                    display: "inline-block",
+                    fontSize: 12,
+                  }}
+                >
+                  {window.SOLUTION_COMPUTE_TIME.toFixed(1)}ms
+                </div>
+              )}
             </div>
-            Solution {"["}solver: {window.SOLVER_NAME ?? "???"}
-            {"] "}
             <a href={`/problem/${selectedProblemType}/${seed}.solution.json`}>
               download (json)
             </a>

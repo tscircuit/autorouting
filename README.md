@@ -18,6 +18,7 @@ for developing new autorouting algorithms.
     - [Typescript Solvers](#typescript-solvers)
     - [Non-Typescript Solvers](#non-typescript-solvers)
   - [Visualizing Problems/Solutions](#visualizing-problemssolutions)
+    - [Running a Dev Server with Typescript](#running-a-dev-server-with-typescript)
   - [Running a Benchmark](#running-a-benchmark)
     - [Running Benchmarks with Typescript](#running-benchmarks-with-typescript)
     - [Running Benchmarks without Typescript](#running-benchmarks-without-typescript)
@@ -105,7 +106,9 @@ Each directory in the `datasets` directory contains a dataset for each problem. 
 
 ## Writing a Solver
 
-You can write a solver in any language you want, but there is currently first-class support for Typescript solvers.
+You can write a solver in any language you want, but currently most of the examples are in Typescript.
+
+> Hate Javascript? Skip to [building a non-typescript solver](#non-typescript-solvers)
 
 > [!NOTE]
 > There are tons of examples of solvers inside the [algos directory!](./algos/)
@@ -148,7 +151,7 @@ const mySolver = (soup: AnySoupElement[]) => {
 
 startAutoroutingDevServer({
   solver: mySolver,
-  port: 3000
+  port: 3080
 })
 ```
 
@@ -163,11 +166,31 @@ You can then run this file with `bun --hot ./solver-server.ts`
 
 ### Non-Typescript Solvers
 
+> [!TIP]
+> Check out a [simple python autorouter](./algos/python-simple-grid-based)
+
 - Host a server with your algorithm (see the simple flask server below)
 - Run `npx autorouting-dataset server start --solver-url http://localhost:1234` (replace `localhost:1234` with your solver server url
+- To benchmark your solver, run `npx autorouting-dataset benchmark --solver-url http://localhost:1234` [see running benchmarks without typescript](#running-benchmarks-without-typescript)
 
 ```python
-# TODO insert flask server here
+from flask import Flask, request, jsonify
+from autoroute import autoroute
+
+app = Flask(__name__)
+
+@app.route('/solve', methods=['POST'])
+def solve():
+    simple_route_json = request.json['simple_route_json']
+
+    solution = autoroute(simple_route_json)
+
+    return jsonify({
+        "solution_soup": solution
+    })
+
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=1234)
 ```
 
 The autorouting-dataset dev server will send a `POST` request to the provided
@@ -200,12 +223,28 @@ interface Response {
 
 ## Visualizing Problems/Solutions
 
-tscircuit runs a debugging service at [debug.tscircuit.com](https://debug.tscircuit.com) that you can use to visualize a solved or unsolved problem,
-just follow the instructions of the [logSoup](https://github.com/tscircuit/log-soup) function. If you are using a language other than Typescript,
-you can follow the instructions here (TODO)
+You can visualization your algorithm against a sample using the dev server. To
+start the dev server, just run `npx autorouting-dataset server start --solver-url <solver-url>`
+and run your solver server.
 
-If you are using Typescript, you may want to visualize your solution incrementally or customize your own visualization. For that, there is an easy-to-use
-[RouterPlayground](#) component that allows visualizing your solution.
+### Running a Dev Server with Typescript
+
+If you're using Typescript, you can run a dev server
+with the code below:
+
+```ts
+import { startDevServer } from "autorouting-dataset"
+import { autoroute } from "./my-autorouter"
+
+await startDevServer({
+  solver: autoroute,
+  solverName: "my-autorouter",
+  port: 3080,
+})
+```
+
+> [!TIP]
+> Check out [this directory](./algos/simple-grid-based/) for a typical Typescript autorouter configuration
 
 ## Running a Benchmark
 
