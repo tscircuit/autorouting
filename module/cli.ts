@@ -5,6 +5,8 @@ import fs from "node:fs/promises"
 import path from "node:path"
 import { startDevServer } from "./lib/server/start-dev-server"
 import { autoroute } from "../algos/simple-grid-based"
+import { runBenchmark } from "./lib/benchmark/run-benchmark"
+import { createSolverFromUrl } from "./lib/solver-utils/createSolverFromUrl"
 
 const program = new Command()
 
@@ -99,9 +101,28 @@ program
   .option("--sample-seed <number>", "Seed to randomize sampling", parseInt, 0)
   .option("--no-skipping", "Disables skipping of problem types")
   .action(async (options) => {
-    // TODO: Implement benchmark logic
-    console.log("Benchmark functionality not yet implemented")
-    console.log("Options:", options)
+    const solver = await createSolverFromUrl(options.solverUrl)
+    const results = await runBenchmark({
+      solver,
+      solverName: options.solverUrl,
+      verbose: options.verbose,
+      sampleCount: options.sampleCount,
+      problemType: options.problemType,
+      sampleSeed: options.sampleSeed,
+      noSkipping: options.noSkipping,
+    })
+
+    console.log("Benchmark Results:")
+    console.table(
+      results.map((result) => ({
+        "Problem Type": result.problemType,
+        "Samples Run": result.samplesRun,
+        "Successful Samples": result.successfulSamples,
+        "Failed Samples": result.failedSamples,
+        "Average Time (ms)": result.averageTime.toFixed(2),
+        "Completion Rate": `${((result.successfulSamples / result.samplesRun) * 100).toFixed(2)}%`,
+      }))
+    )
   })
 
 program.parse(process.argv)
