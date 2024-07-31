@@ -5,6 +5,9 @@
 A dataset of autorouting problems for benchmarking 🥇, plus a ton of utilities 🔨 including a viewer and testing server
 for developing new autorouting algorithms.
 
+Autorouting is the process of drawing traces (wires) to connect chips on a PCB. It is a decades-old largely unsolved
+problem.
+
 ![image](https://github.com/user-attachments/assets/bad8e749-1c84-4b6f-bbdf-12bf7e9c3e7b)
 
 - [autorouting-dataset](#autorouting-dataset)
