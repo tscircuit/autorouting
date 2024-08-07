@@ -1,12 +1,8 @@
+import type { Obstacle } from "../types"
+
 export interface SimpleRouteJson {
   layerCount: number
-  obstacles: Array<{
-    type: "rect" | "oval" // NOTE: most datasets do not contain ovals
-    center: { x: number; y: number }
-    width: number
-    height: number
-    connectedTo: string[]
-  }>
+  obstacles: Obstacle[]
   connections: Array<{
     name: string
     pointsToConnect: Array<{ x: number; y: number }>
