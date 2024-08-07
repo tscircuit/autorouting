@@ -10,10 +10,11 @@ import type {
 
 import { Graph } from "@dagrejs/graphlib"
 import { getUnclusteredOptimalPointsFromObstacles } from "./lib/get-unclustered-optimal-points-from-obstacles"
-import { constructGraphFromOptimalPoints } from "./lib/construct-graph-from-optimal-points"
+import { constructGraphFromPois } from "./lib/construct-graph-from-pois"
 import { getDistanceToSegment } from "./lib/get-distance-to-segment"
 import Debug from "debug"
 import { Timer } from "../../module/lib/solver-utils/timer"
+import { constructGraphFromPoisWithQuadtree } from "./lib/construct-graph-from-pois-quadtree"
 
 const debug = Debug("autorouting-dataset:gridless-poi")
 
@@ -55,8 +56,11 @@ export function autoroute(soup: AnySoupElement[]): SimplifiedPcbTrace[] {
   }
 
   // Construct graph from optimal points
-  timer.start("constructGraphFromOptimalPoints")
-  const G = constructGraphFromOptimalPoints(optimalPoints, input.obstacles)
+  timer.start("constructGraphFromPois")
+  const G = constructGraphFromPoisWithQuadtree(
+    optimalPoints,
+    input.obstacles as any,
+  )
   timer.end()
 
   // Add start and end points for each connection

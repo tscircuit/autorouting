@@ -15,15 +15,18 @@ interface Obstacle {
   connectedTo: string[]
 }
 
-export const constructGraphFromOptimalPoints = (
-  optimalPoints: Point[],
+export const constructGraphFromPois = (
+  pointsOfInterest: Point[],
   obstacles: Obstacle[],
 ): Graph => {
   const G = new Graph({ directed: false })
 
-  for (let i = 0; i < optimalPoints.length; i++) {
-    G.setNode(i.toString(), { x: optimalPoints[i].x, y: optimalPoints[i].y })
-    optimalPoints[i].nodeName = i.toString()
+  for (let i = 0; i < pointsOfInterest.length; i++) {
+    G.setNode(i.toString(), {
+      x: pointsOfInterest[i].x,
+      y: pointsOfInterest[i].y,
+    })
+    pointsOfInterest[i].nodeName = i.toString()
   }
 
   function addEdgeToGraph(p1: Point, p2: Point) {
@@ -87,9 +90,9 @@ export const constructGraphFromOptimalPoints = (
     }
   }
 
-  for (let i = 0; i < optimalPoints.length; i++) {
-    for (let u = i + 1; u < optimalPoints.length; u++) {
-      addEdgeToGraph(optimalPoints[i], optimalPoints[u])
+  for (let i = 0; i < pointsOfInterest.length; i++) {
+    for (let u = i + 1; u < pointsOfInterest.length; u++) {
+      addEdgeToGraph(pointsOfInterest[i], pointsOfInterest[u])
     }
   }
 

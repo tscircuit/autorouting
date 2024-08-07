@@ -12,6 +12,7 @@
   },
   "devDependencies": {
     "@biomejs/biome": "^1.8.3",
+    "@timohausmann/quadtree-ts": "^2.2.2",
     "@tscircuit/pcb-viewer": "^1.4.4",
     "@tscircuit/props": "^0.0.26",
     "@tscircuit/soup": "^0.0.39",
