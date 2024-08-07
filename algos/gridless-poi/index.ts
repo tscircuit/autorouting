@@ -2,54 +2,72 @@ import {
   getSimpleRouteJson,
   type SimplifiedPcbTrace,
 } from "autorouting-dataset"
-import type { AnySoupElement } from "@tscircuit/soup"
+import type {
+  AnySoupElement,
+  PcbFabricationNotePath,
+  PcbFabricationNoteText,
+} from "@tscircuit/soup"
 
 import { Graph } from "@dagrejs/graphlib"
-import {
-  getSimpleRouteJson,
-  type SimplifiedPcbTrace,
-} from "autorouting-dataset"
-import { getUnclusteredOptimalPointsFromObstacles } from "./get-unclustered-optimal-points-from-obstacles"
-import { constructGraphFromOptimalPoints } from "./construct-graph-from-optimal-points"
-import { getDistanceToSegment } from "./get-distance-to-segment"
+import { getUnclusteredOptimalPointsFromObstacles } from "./lib/get-unclustered-optimal-points-from-obstacles"
+import { constructGraphFromOptimalPoints } from "./lib/construct-graph-from-optimal-points"
+import { getDistanceToSegment } from "./lib/get-distance-to-segment"
+import Debug from "debug"
+import { Timer } from "../../module/lib/solver-utils/timer"
+
+const debug = Debug("autorouting-dataset:gridless-poi")
 
 export function autoroute(soup: AnySoupElement[]): SimplifiedPcbTrace[] {
+  const timer = new Timer({ logOnEnd: debug.enabled })
+  timer.start("getSimpleRouteJson")
   const input = getSimpleRouteJson(soup)
-  const solution: SimplifiedPcbTrace[] = []
-
-  // Convert obstacles to the format expected by getUnclusteredOptimalPointsFromObstacles
-  const obstacles = input.obstacles.map((obstacle) => ({
-    obstacleType: "line" as const,
-    linePoints: [
-      {
-        x: obstacle.center.x - obstacle.width / 2,
-        y: obstacle.center.y - obstacle.height / 2,
-      },
-      {
-        x: obstacle.center.x + obstacle.width / 2,
-        y: obstacle.center.y + obstacle.height / 2,
-      },
-    ],
-    width: Math.min(obstacle.width, obstacle.height),
-  }))
+  timer.end()
+  const solution: (SimplifiedPcbTrace | PcbFabricationNotePath)[] = []
 
   // Get optimal points
+  timer.start("getUnclusteredOptimalPointsFromObstacles")
   const optimalPoints = getUnclusteredOptimalPointsFromObstacles(
-    obstacles,
-    0.02,
+    input.obstacles,
+    0.2,
   )
+  timer.end()
+
+  if (debug.enabled) {
+    solution.push(
+      ...optimalPoints.map((point) => ({
+        type: "pcb_fabrication_note_path" as const,
+        pcb_component_id: "",
+        fabrication_note_path_id: `note_path_${point.x}_${point.y}`,
+        layer: "top" as const,
+        route: [
+          [-0.1, 0],
+          [0, 0.1],
+          [0.1, 0],
+          [0, -0.1],
+          [-0.1, 0],
+        ].map(([dx, dy]) => ({
+          x: point.x + dx,
+          y: point.y + dy,
+        })),
+        stroke_width: 0.01,
+      })),
+    )
+  }
 
   // Construct graph from optimal points
-  const G = constructGraphFromOptimalPoints(optimalPoints, obstacles)
+  timer.start("constructGraphFromOptimalPoints")
+  const G = constructGraphFromOptimalPoints(optimalPoints, input.obstacles)
+  timer.end()
 
   // Add start and end points for each connection
+  timer.start("add start and end points for each connection")
   input.connections.forEach((connection, index) => {
-    const startNode = `START_${index}`
-    const endNode = `END_${index}`
+    const startNodeId = `START_${index}`
+    const endNodeId = `END_${index}`
 
-    G.setNode(startNode, connection.pointsToConnect[0])
+    G.setNode(startNodeId, connection.pointsToConnect[0])
     G.setNode(
-      endNode,
+      endNodeId,
       connection.pointsToConnect[connection.pointsToConnect.length - 1],
     )
 
@@ -66,16 +84,22 @@ export function autoroute(soup: AnySoupElement[]): SimplifiedPcbTrace[] {
           connection.pointsToConnect[connection.pointsToConnect.length - 1].y,
       )
 
-      if (startDist < 0.1) {
-        G.setEdge(startNode, i.toString(), { d: startDist })
+      // TODO, if the optimal point was generated from an obstacle that was
+      // connected to the start/end, we should just mark it as connected
+      // without doing any distance measurements
+      if (startDist < 1) {
+        G.setEdge(startNodeId, i.toString(), { d: startDist })
       }
-      if (endDist < 0.1) {
-        G.setEdge(i.toString(), endNode, { d: endDist })
+      if (endDist < 1) {
+        G.setEdge(i.toString(), endNodeId, { d: endDist })
       }
     })
+    timer.end()
 
     // Find optimal path
-    const optPath = findOptimalPath(G, startNode, endNode)
+    timer.start("findOptimalPath")
+    const optPath = findOptimalPath(G, startNodeId, endNodeId)
+    timer.end()
 
     if (optPath) {
       const route: SimplifiedPcbTrace["route"] = optPath.path.map(
@@ -99,7 +123,7 @@ export function autoroute(soup: AnySoupElement[]): SimplifiedPcbTrace[] {
     }
   })
 
-  return solution
+  return solution as any
 }
 
 function findOptimalPath(G: Graph, startNode: string, endNode: string) {

@@ -9,3 +9,10 @@ export type SimplifiedPcbTrace = {
     layer: string
   }>
 }
+export type Obstacle = {
+  type: "rect" | "oval" // NOTE: most datasets do not contain ovals
+  center: { x: number; y: number }
+  width: number
+  height: number
+  connectedTo: string[]
+}

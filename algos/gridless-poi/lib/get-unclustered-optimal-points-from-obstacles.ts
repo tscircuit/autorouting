@@ -1,17 +1,24 @@
-import type { Obstacle, Point } from "../types"
+import type { Obstacle } from "autorouting-dataset"
 import { computeOptimalPoints } from "./compute-optimal-points"
 import { getDistanceToSegment } from "./get-distance-to-segment"
+import type { LineObstacle } from "./types"
+import { convertObstacleToLineObstacle } from "./convert-obstacle-to-line-obstacle"
+
+type Point = { x: number; y: number; nodeName?: string }
 
 export const getUnclusteredOptimalPointsFromObstacles = (
   obstacles: Obstacle[],
   margin: number = 0,
 ): Point[] => {
   const optimalPoints: Point[] = []
+  const lineObstacles: LineObstacle[] = obstacles.map((obstacle) =>
+    convertObstacleToLineObstacle(obstacle),
+  )
 
-  for (const obstacle of obstacles) {
+  for (const lineObstacle of lineObstacles) {
     optimalPoints.push(
-      ...computeOptimalPoints(obstacle, margin).filter((p) => {
-        for (const obstacle of obstacles) {
+      ...computeOptimalPoints(lineObstacle, margin).filter((p) => {
+        for (const obstacle of lineObstacles) {
           if (obstacle.obstacleType === "line") {
             const [start, end] = obstacle.linePoints
             if (
@@ -56,5 +63,8 @@ export const getUnclusteredOptimalPointsFromObstacles = (
     }
   }
 
-  return unclusteredOptimalPoints
+  return unclusteredOptimalPoints.map((p, i) => ({
+    ...p,
+    nodeName: i.toString(),
+  }))
 }

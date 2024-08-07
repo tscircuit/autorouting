@@ -6,13 +6,21 @@ export type SingleTrace2FootprintsProps = {
   distance?: number
 }
 
+const seed1Footprint = {
+  footprint: "0402",
+  pinCount: 2,
+  footprintType: "passive",
+}
+
 export const SingleTrace2Footprints = ({
   seed,
   distance = 10,
 }: SingleTrace2FootprintsProps) => {
   const rotation = rand(seed, "rotation").range(0, Math.PI * 2)
-  const aFoot = getRandomFootprint([seed, "AFootprint"])
-  const bFoot = getRandomFootprint([seed, "BFootprint"])
+  const aFoot =
+    seed === 1 ? seed1Footprint : getRandomFootprint([seed, "AFootprint"])
+  const bFoot =
+    seed === 1 ? seed1Footprint : getRandomFootprint([seed, "BFootprint"])
   const A = () => {
     return <bug name="A" footprint={aFoot.footprint} pcbX={0} pcbY={0} />
   }
