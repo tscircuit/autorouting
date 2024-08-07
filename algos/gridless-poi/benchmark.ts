@@ -4,6 +4,6 @@ import { autoroute } from "./index"
 await runBenchmark({
   solver: autoroute,
   solverName: "gridless-poi",
-  sampleCount: 5,
+  sampleCount: 30,
   verbose: true,
 })

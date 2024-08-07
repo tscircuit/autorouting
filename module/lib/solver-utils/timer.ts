@@ -30,7 +30,6 @@ export class Timer {
 
   end(label?: string): void {
     if (this.activeTimers.length === 0) {
-      console.warn("No active timers to end")
       return
     }
 
