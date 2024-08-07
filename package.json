@@ -36,6 +36,7 @@
     "typescript": "^5.0.0"
   },
   "dependencies": {
+    "@dagrejs/graphlib": "^2.2.3",
     "@tscircuit/checks": "0.0.24",
     "commander": "^12.1.0",
     "kleur": "^4.1.5",
