@@ -16,15 +16,21 @@ import Debug from "debug"
 import { Timer } from "../../module/lib/solver-utils/timer"
 import { constructGraphFromPoisWithQuadtree } from "./lib/construct-graph-from-pois-quadtree"
 import { constructGraphFromPoisWithDelaunay } from "./lib/construct-graph-from-pois-quadtree-mesh"
+import type { SolutionWithDebugInfo } from "autorouting-dataset/lib/solver-utils/ProblemSolver"
 
 const debug = Debug("autorouting-dataset:gridless-poi")
 
-export function autoroute(soup: AnySoupElement[]): SimplifiedPcbTrace[] {
+export function autoroute(soup: AnySoupElement[]): SolutionWithDebugInfo {
   const timer = new Timer({ logOnEnd: debug.enabled })
+
   timer.start("getSimpleRouteJson")
   const input = getSimpleRouteJson(soup)
   timer.end()
+
   const solution: (SimplifiedPcbTrace | PcbFabricationNotePath)[] = []
+  const debugSolutions: Record<string, AnySoupElement[]> = {
+    mesh: [],
+  }
 
   // Get optimal points
   timer.start("getUnclusteredOptimalPointsFromObstacles")
@@ -51,7 +57,7 @@ export function autoroute(soup: AnySoupElement[]): SimplifiedPcbTrace[] {
           x: point.x + dx,
           y: point.y + dy,
         })),
-        stroke_width: 0.01,
+        stroke_width: 0.001,
       })),
     )
   }
@@ -63,6 +69,32 @@ export function autoroute(soup: AnySoupElement[]): SimplifiedPcbTrace[] {
     input.obstacles as any,
   )
   timer.end()
+
+  if (debug.enabled) {
+    // Iterate over the graph and add a "fabrication_note_path" for each edge
+    for (const edge of G.edges()) {
+      const [source, target] = [edge.v, edge.w]
+      const sourceNode = G.node(source)
+      const targetNode = G.node(target)
+      debugSolutions.mesh.push({
+        type: "pcb_fabrication_note_path",
+        pcb_component_id: "",
+        fabrication_note_path_id: `note_path_${sourceNode.x}_${sourceNode.y}_${targetNode.x}_${targetNode.y}`,
+        layer: "top" as const,
+        route: [
+          {
+            x: sourceNode.x,
+            y: sourceNode.y,
+          },
+          {
+            x: targetNode.x,
+            y: targetNode.y,
+          },
+        ],
+        stroke_width: 0.01,
+      })
+    }
+  }
 
   // Add start and end points for each connection
   timer.start("add start and end points for each connection")
@@ -128,7 +160,7 @@ export function autoroute(soup: AnySoupElement[]): SimplifiedPcbTrace[] {
     }
   })
 
-  return solution as any
+  return { solution, debugSolutions }
 }
 
 function findOptimalPath(G: Graph, startNode: string, endNode: string) {

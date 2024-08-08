@@ -12,5 +12,6 @@ declare global {
     AVAILABLE_DATASETS?: string[]
     SOLUTION_COMPUTE_TIME?: number
     IS_SOLUTION_CORRECT?: boolean
+    DEBUG_SOLUTIONS?: Record<string, AnySoupElement[]>
   }
 }

@@ -8,6 +8,9 @@ import { Header } from "./Header"
 export default () => {
   const hasPreloadedSoup = Boolean(window.PROBLEM_SOUP || window.SOLUTION_SOUP)
   const hasSolver = Boolean(window.HAS_CUSTOM_SOLVER)
+  const [selectedDebugSolution, setSelectedDebugSolution] = useState<
+    null | string
+  >(null)
   const [pastedSoup, setPastedSoup] = useState<AnySoupElement[]>()
   // Derive problem from url (if present)
   const [, , selectedProblemType, seedStr] = window.location.pathname.split("/")
@@ -137,14 +140,41 @@ export default () => {
             <a href={`/problem/${selectedProblemType}/${seed}.solution.json`}>
               download (json)
             </a>
+            <div style={{ flexGrow: 1 }} />
+            {window.DEBUG_SOLUTIONS && (
+              <select
+                onChange={(e) => {
+                  const selectionValue = (e.target as HTMLSelectElement).value
+                  if (selectionValue === "main solution") {
+                    setSelectedDebugSolution(null)
+                    return
+                  }
+                  setSelectedDebugSolution(selectionValue)
+                }}
+              >
+                <option value="main solution">main solution</option>
+                {Object.keys(window.DEBUG_SOLUTIONS).map((key) => (
+                  <option value={key} key={key}>
+                    {key}
+                  </option>
+                ))}
+              </select>
+            )}
           </h2>
           <ErrorBoundary
             fallbackRender={({ error }) => (
               <div>Error rendering solution: {error.message}</div>
             )}
           >
-            {solutionSoup ? (
-              <PCBViewer soup={solutionSoup} />
+            {selectedDebugSolution ? (
+              <PCBViewer
+                key={selectedDebugSolution}
+                soup={problemSoup.concat(
+                  window.DEBUG_SOLUTIONS![selectedDebugSolution as any],
+                )}
+              />
+            ) : solutionSoup ? (
+              <PCBViewer key="main solution" soup={solutionSoup} />
             ) : (
               "No solution preloaded"
             )}

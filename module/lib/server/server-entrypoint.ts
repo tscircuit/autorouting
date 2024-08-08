@@ -20,6 +20,7 @@ import { AVAILABLE_DATASETS } from "./available-datasets"
 import getRawBody from "raw-body"
 import { getBuiltinAvailableSolver } from "./get-builtin-available-solver"
 import { AVAILABLE_SOLVERS } from "./available-solvers"
+import { normalizeSolution } from "../solver-utils/normalize-solution.js"
 
 export const serverEntrypoint = async (
   req: IncomingMessage,
@@ -51,7 +52,9 @@ export const serverEntrypoint = async (
     const { problem_soup } = JSON.parse(reqJson)
     res.writeHead(200, { "Content-Type": "application/json" })
 
-    const solution_soup = await solver(problem_soup)
+    const { solution: solution_soup, debugSolutions } = await normalizeSolution(
+      solver(problem_soup),
+    )
 
     res.end(
       JSON.stringify(
@@ -87,13 +90,18 @@ export const serverEntrypoint = async (
   }
 
   let solutionComputeTime: number | undefined
+  let debugSolutions: Record<string, AnySoupElement[]> | undefined
   if (problemSoup) {
     const startTime = performance.now()
-    const solvedResult = await solver(problemSoup as AnySoupElement[])
+    const solverResult = await normalizeSolution(
+      solver(problemSoup as AnySoupElement[]),
+    )
+    debugSolutions = solverResult.debugSolutions
+
     const endTime = performance.now()
     solutionComputeTime = endTime - startTime
 
-    solutionSoup = solvedResult.concat(problemSoup) as any
+    solutionSoup = solverResult.solution.concat(problemSoup) as any
   }
 
   // Add errors to solutionSoup for overlapping traces etc. (run eval)
@@ -130,6 +138,7 @@ export const serverEntrypoint = async (
       getScriptContent({
         problemSoup,
         solutionSoup,
+        debugSolutions,
         solutionComputeTime,
         userMessage,
         solverName: ctx.solverName,
