@@ -1,5 +1,9 @@
 // @ts-ignore
 import frontend from "../../../frontend-dist/index.html" with { type: "text" }
+// @ts-ignore
+import frontendJs from "../../../frontend-dist/assets/index.js" with {
+  type: "text",
+}
 import { getScriptContent } from "./get-script-content"
 import { getDatasetGenerator } from "../generators"
 import type { AnySoupElement } from "@tscircuit/soup"
@@ -110,6 +114,12 @@ export const serverEntrypoint = async (
       })
       res.end(JSON.stringify(problemSoup, null, 2))
     }
+    return
+  }
+
+  if (req.url!.includes("/assets/index.js")) {
+    res.writeHead(200, { "Content-Type": "application/javascript" })
+    res.end(frontendJs)
     return
   }
 
