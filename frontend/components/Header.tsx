@@ -15,7 +15,7 @@ export const Header = () => (
     </a>
     <div style={{ flexGrow: 1 }} />
     <a href="https://github.com/tscircuit/tscircuit">tscircuit github</a>
-    <a href="https://blog.autorouting.com">blog</a>
+    <a href="https://blog.autorouting.com">autorouting blog (get updates)</a>
     <a href="https://x.com/seveibar">twitter</a>
   </div>
 )

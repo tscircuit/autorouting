@@ -1,8 +1,14 @@
 export const DatasetNavigation = () => {
   const problemTypes = window.AVAILABLE_DATASETS ?? ["single-trace"]
-  const [, , selectedProblemType, seedStr] = window.location.pathname.split("/")
+  const [, , selectedProblemType, seedStr, solverName] =
+    window.location.pathname.split("/")
   const seed = seedStr ? Number.parseInt(seedStr) : 0
   const userMessage = window.USER_MESSAGE ?? ""
+
+  const solverDownloadSuffix = solverName
+    ? `/${solverName}/problem.json`
+    : ".problem.json"
+  const solverSuffix = solverName ? `/${solverName}` : ""
 
   return (
     <div>
@@ -28,7 +34,7 @@ export const DatasetNavigation = () => {
             key={problemType}
             style={{ margin: 2 }}
             onClick={() => {
-              window.location.href = `/problem/${problemType}/1`
+              window.location.href = `/problem/${problemType}/1${solverSuffix}`
             }}
           >
             {problemType}
@@ -57,8 +63,14 @@ export const DatasetNavigation = () => {
         <>
           <h2>
             {selectedProblemType} -{" "}
-            <a href={`/problem/${selectedProblemType}/${seed}.json`}>#{seed}</a>{" "}
-            <a href={`/problem/${selectedProblemType}/${seed}.json`}>
+            <a
+              href={`/problem/${selectedProblemType}/${seed}${solverDownloadSuffix}`}
+            >
+              #{seed}
+            </a>{" "}
+            <a
+              href={`/problem/${selectedProblemType}/${seed}${solverDownloadSuffix}`}
+            >
               download (json)
             </a>
           </h2>
@@ -66,14 +78,14 @@ export const DatasetNavigation = () => {
             <button
               disabled={seed === 0}
               onClick={() => {
-                window.location.href = `/problem/${selectedProblemType}/${seed - 1}`
+                window.location.href = `/problem/${selectedProblemType}/${seed - 1}${solverSuffix}`
               }}
             >
               Prev Sample
             </button>
             <button
               onClick={() => {
-                window.location.href = `/problem/${selectedProblemType}/${seed + 1}`
+                window.location.href = `/problem/${selectedProblemType}/${seed + 1}${solverSuffix}`
               }}
             >
               Next Sample
