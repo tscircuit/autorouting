@@ -10,6 +10,7 @@ export const getScriptContent = ({
   userMessage,
   solverName,
   defaultSolverName,
+  debugSolutions,
   solverLink,
   hasCustomSolver,
   solutionComputeTime,
@@ -19,6 +20,7 @@ export const getScriptContent = ({
   problemSoupWithErrors?: AnySoupElement[] | null
   solutionSoup?: AnySoupElement[]
   solutionComputeTime?: number
+  debugSolutions?: Record<string, AnySoupElement[]> | null
   userMessage?: string
   solverName?: string
   defaultSolverName?: string
@@ -46,6 +48,7 @@ export const getScriptContent = ({
     null,
     2,
   )}
+  window.DEBUG_SOLUTIONS = ${JSON.stringify(debugSolutions ?? null, null, 2)}
   </script>
   `
 }

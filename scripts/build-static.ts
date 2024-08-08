@@ -2,6 +2,7 @@
 import { autoroute } from "algos/simple-grid-based"
 import { startDevServer } from "autorouting-dataset"
 import { AVAILABLE_DATASETS } from "../module/lib/server/available-datasets"
+import { AVAILABLE_SOLVERS } from "../module/lib/server/available-solvers"
 import Path from "node:path"
 import fs from "node:fs/promises"
 
@@ -27,21 +28,37 @@ const downloadAndSave = async (path: string) => {
 }
 
 // Download all the relevant urls
-const sampleCount = 40
+const sampleCount = 10
 
 await downloadAndSave(`/available-datasets.json`)
 await downloadAndSave(`/index.html`)
+await fs.mkdir(Path.join(outputDir, "assets"), { recursive: true })
+await downloadAndSave(`/assets/index.js`)
 for (const problemType of AVAILABLE_DATASETS) {
   for (let i = 0; i < sampleCount; i++) {
-    await fs.mkdir(
-      Path.join(outputDir, "problem", problemType, (i + 1).toString()),
-      {
-        recursive: true,
-      },
+    const problemDir = Path.join(
+      outputDir,
+      "problem",
+      problemType,
+      (i + 1).toString(),
     )
+    await fs.mkdir(problemDir, { recursive: true })
     await downloadAndSave(`/problem/${problemType}/${i + 1}/index.html`)
     await downloadAndSave(`/problem/${problemType}/${i + 1}.json`)
     await downloadAndSave(`/problem/${problemType}/${i + 1}.solution.json`)
+
+    for (const solver of AVAILABLE_SOLVERS) {
+      await fs.mkdir(Path.join(problemDir, solver), { recursive: true })
+      await downloadAndSave(
+        `/problem/${problemType}/${i + 1}/${solver}/index.html`,
+      )
+      await downloadAndSave(
+        `/problem/${problemType}/${i + 1}/${solver}/problem.json`,
+      )
+      await downloadAndSave(
+        `/problem/${problemType}/${i + 1}/${solver}/solution.json`,
+      )
+    }
   }
 }
 
