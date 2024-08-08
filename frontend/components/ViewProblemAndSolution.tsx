@@ -5,20 +5,6 @@ import { DatasetNavigation } from "./DatasetNavigation"
 import { ErrorBoundary } from "react-error-boundary"
 import { Header } from "./Header"
 
-declare global {
-  interface Window {
-    PROBLEM_SOUP: AnySoupElement[]
-    SOLUTION_SOUP: AnySoupElement[]
-    HAS_CUSTOM_SOLVER?: string
-    USER_MESSAGE?: string
-    SOLVER_NAME?: string
-    SOLVER_LINK?: string
-    AVAILABLE_DATASETS?: string[]
-    SOLUTION_COMPUTE_TIME?: number
-    IS_SOLUTION_CORRECT?: boolean
-  }
-}
-
 export default () => {
   const hasPreloadedSoup = Boolean(window.PROBLEM_SOUP || window.SOLUTION_SOUP)
   const hasSolver = Boolean(window.HAS_CUSTOM_SOLVER)

@@ -14,16 +14,32 @@ import { tscircuitBuiltinSolver } from "../../../algos/tscircuit-builtin"
 import { isValidSolution } from "../benchmark/is-valid-solution"
 import { AVAILABLE_DATASETS } from "./available-datasets"
 import getRawBody from "raw-body"
+import { getBuiltinAvailableSolver } from "./get-builtin-available-solver"
+import { AVAILABLE_SOLVERS } from "./available-solvers"
 
 export const serverEntrypoint = async (
   req: IncomingMessage,
   res: ServerResponse<IncomingMessage>,
   ctx: AppContext,
 ) => {
-  const { solver = tscircuitBuiltinSolver } = ctx
+  let { solver = tscircuitBuiltinSolver } = ctx
   let problemSoup: AnySoupElement[] | undefined
   let solutionSoup: AnySoupElement[] | undefined
   let userMessage: string | undefined
+
+  // If the url is /problem/single-trace/1/simple-grid-based, then set the solver
+  // to the solver with the name "simple-grid-based"
+  if (req.url!.includes("/problem/")) {
+    const [, , , , overrideSolverName] = req.url!.split("/")
+    if (
+      overrideSolverName &&
+      AVAILABLE_SOLVERS.includes(overrideSolverName) &&
+      ctx.solverName !== overrideSolverName
+    ) {
+      ctx.solverName = overrideSolverName
+      solver = (await getBuiltinAvailableSolver(overrideSolverName))!
+    }
+  }
 
   if (req.url!.endsWith("/solve")) {
     // Read request body
@@ -107,6 +123,7 @@ export const serverEntrypoint = async (
         solutionComputeTime,
         userMessage,
         solverName: ctx.solverName,
+        defaultSolverName: ctx.defaultSolverName,
         hasCustomSolver: Boolean(ctx.solver),
         isSolutionCorrect: isValidSolution(
           problemSoup as any,

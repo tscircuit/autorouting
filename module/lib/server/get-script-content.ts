@@ -1,11 +1,15 @@
 import type { AnySoupElement } from "@tscircuit/soup"
 import { AVAILABLE_DATASETS } from "./available-datasets"
+import { AVAILABLE_SOLVERS } from "./available-solvers"
+
+const dedupe = <T>(arr: T[]): T[] => Array.from(new Set(arr))
 
 export const getScriptContent = ({
   problemSoup,
   solutionSoup,
   userMessage,
   solverName,
+  defaultSolverName,
   solverLink,
   hasCustomSolver,
   solutionComputeTime,
@@ -17,6 +21,7 @@ export const getScriptContent = ({
   solutionComputeTime?: number
   userMessage?: string
   solverName?: string
+  defaultSolverName?: string
   solverLink?: string
   hasCustomSolver?: boolean
   isSolutionCorrect?: boolean
@@ -32,6 +37,15 @@ export const getScriptContent = ({
   window.SOLVER_NAME = "${solverName ?? "unknown"}"
   window.SOLVER_LINK= "${solverLink ?? ""}"
   window.IS_SOLUTION_CORRECT = ${(isSolutionCorrect ?? false).toString()}
+  window.AVAILABLE_SOLVERS = ${JSON.stringify(
+    dedupe(
+      [...AVAILABLE_SOLVERS, solverName, defaultSolverName].filter(
+        (name): name is string => Boolean(name),
+      ),
+    ),
+    null,
+    2,
+  )}
   </script>
   `
 }

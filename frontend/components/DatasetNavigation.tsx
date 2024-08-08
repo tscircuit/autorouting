@@ -20,7 +20,7 @@ export const DatasetNavigation = () => {
           view dataset descriptions
         </a>
       </h2>
-      <div>
+      <div style={{ display: "flex", gap: 2 }}>
         {problemTypes.map((problemType) => (
           <button
             type="button"
@@ -34,6 +34,24 @@ export const DatasetNavigation = () => {
             {problemType}
           </button>
         ))}
+        <div style={{ flex: 1 }} />
+        <select
+          value={window.SOLVER_NAME}
+          disabled={
+            !window.AVAILABLE_SOLVERS || window.AVAILABLE_SOLVERS.length <= 1
+          }
+          onChange={(e) => {
+            window.location.href = `/problem/${selectedProblemType}/${seedStr}/${e.target.value}`
+          }}
+        >
+          {(window.AVAILABLE_SOLVERS || [window.SOLVER_NAME]).map(
+            (solverName) => (
+              <option value={solverName} key={solverName}>
+                {solverName}
+              </option>
+            ),
+          )}
+        </select>
       </div>
       {selectedProblemType && (
         <>

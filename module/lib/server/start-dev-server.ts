@@ -21,7 +21,12 @@ export const startDevServer = ({
   }
 
   const server = http.createServer(async (req, res) => {
-    return serverEntrypoint(req, res, { solver, solverName, solverLink })
+    return serverEntrypoint(req, res, {
+      solver,
+      solverName,
+      defaultSolverName: solverName,
+      solverLink,
+    })
   })
 
   server.listen(port, () => {
