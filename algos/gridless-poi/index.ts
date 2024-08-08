@@ -30,6 +30,7 @@ export function autoroute(soup: AnySoupElement[]): SolutionWithDebugInfo {
   const solution: (SimplifiedPcbTrace | PcbFabricationNotePath)[] = []
   const debugSolutions: Record<string, AnySoupElement[]> = {
     mesh: [],
+    pois: [],
   }
 
   // Get optimal points
@@ -41,23 +42,23 @@ export function autoroute(soup: AnySoupElement[]): SolutionWithDebugInfo {
   timer.end()
 
   if (debug.enabled) {
-    solution.push(
+    debugSolutions.pois.push(
       ...optimalPoints.map((point) => ({
         type: "pcb_fabrication_note_path" as const,
         pcb_component_id: "",
         fabrication_note_path_id: `note_path_${point.x}_${point.y}`,
         layer: "top" as const,
         route: [
-          [-0.1, 0],
-          [0, 0.1],
-          [0.1, 0],
-          [0, -0.1],
-          [-0.1, 0],
+          [-0.04, 0],
+          [0, 0.04],
+          [0.04, 0],
+          [0, -0.04],
+          [-0.04, 0],
         ].map(([dx, dy]) => ({
           x: point.x + dx,
           y: point.y + dy,
         })),
-        stroke_width: 0.001,
+        stroke_width: 0.03,
       })),
     )
   }

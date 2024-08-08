@@ -46,7 +46,7 @@ export const getUnclusteredOptimalPointsFromObstacles = (
     for (let j = 0; j < unclusteredOptimalPoints.length; j++) {
       const p2 = unclusteredOptimalPoints[j]
       const dsq = (p1.x - p2.x) ** 2 + (p1.y - p2.y) ** 2
-      if (dsq < 0.02 ** 2) {
+      if (dsq < 0.05 ** 2) {
         closePoint = p2
         break
       }
