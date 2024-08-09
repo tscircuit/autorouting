@@ -154,7 +154,11 @@ export default () => {
               >
                 <option value="main solution">main solution</option>
                 {Object.keys(window.DEBUG_SOLUTIONS).map((key) => (
-                  <option value={key} key={key}>
+                  <option
+                    value={key}
+                    key={key}
+                    disabled={window.DEBUG_SOLUTIONS?.[key].length === 0}
+                  >
                     {key}
                   </option>
                 ))}
