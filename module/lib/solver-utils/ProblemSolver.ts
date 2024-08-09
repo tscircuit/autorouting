@@ -3,8 +3,12 @@ import type { SimplifiedPcbTrace } from "../types"
 
 export type ValidSolutionElement = AnySoupElement | SimplifiedPcbTrace
 
-export type SolutionWithDebugInfo = {
-  solution: ValidSolutionElement[]
+export type SolutionWithDebugInfo<
+  SolElm extends AnySoupElement | SimplifiedPcbTrace =
+    | AnySoupElement
+    | SimplifiedPcbTrace,
+> = {
+  solution: SolElm[]
 
   /**
    * Solvers can return a debugSolutions object that contains various stages or
@@ -25,3 +29,4 @@ export type ProblemSolver = (
   | ValidSolutionElement[]
   | Promise<ValidSolutionElement[]>
   | Promise<SolutionWithDebugInfo>
+  | SolutionWithDebugInfo

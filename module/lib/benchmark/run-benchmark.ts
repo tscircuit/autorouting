@@ -5,6 +5,7 @@ import type { ProblemType } from "../generators/types"
 import { isValidSolution } from "./is-valid-solution"
 import kleur from "kleur"
 import { last } from "lodash"
+import { normalizeSolution } from "../solver-utils/normalize-solution"
 
 interface BenchmarkOptions {
   solver: ProblemSolver
@@ -30,7 +31,7 @@ export async function runBenchmark(
   const {
     solver,
     verbose = false,
-    sampleCount = 50,
+    sampleCount = 100,
     problemType,
     sampleSeed = 0,
     noSkipping = false,
@@ -64,7 +65,7 @@ export async function runBenchmark(
 
       try {
         const startTime = performance.now()
-        const solution = await solver(soup)
+        const { solution } = await normalizeSolution(solver(soup))
         const endTime = performance.now()
         const sampleCorrect = isValidSolution(soup, solution)
 

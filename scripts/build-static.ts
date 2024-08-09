@@ -28,7 +28,7 @@ const downloadAndSave = async (path: string) => {
 }
 
 // Download all the relevant urls
-const sampleCount = 10
+const sampleCount = 25
 
 await downloadAndSave(`/available-datasets.json`)
 await downloadAndSave(`/index.html`)

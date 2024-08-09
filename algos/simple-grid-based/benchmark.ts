@@ -4,6 +4,5 @@ import { autoroute } from "./index"
 await runBenchmark({
   solver: autoroute,
   solverName: "simple-grid-based",
-  sampleCount: 30,
   verbose: true,
 })
