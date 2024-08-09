@@ -13,7 +13,7 @@
   "devDependencies": {
     "@biomejs/biome": "^1.8.3",
     "@timohausmann/quadtree-ts": "^2.2.2",
-    "@tscircuit/builder": "1.9.3",
+    "@tscircuit/builder": "1.9.5",
     "@tscircuit/pcb-viewer": "1.4.5",
     "@tscircuit/props": "^0.0.26",
     "@tscircuit/soup": "^0.0.39",
@@ -49,6 +49,6 @@
     "kleur": "^4.1.5",
     "mersenne-twister": "^1.1.0",
     "raw-body": "^3.0.0",
-    "tscircuit": "^0.0.254"
+    "tscircuit": "^0.0.258"
   }
 }
