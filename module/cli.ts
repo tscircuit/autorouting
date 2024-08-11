@@ -121,7 +121,7 @@ program
         "Failed Samples": result.failedSamples,
         "Average Time (ms)": result.averageTime.toFixed(2),
         "Completion Rate": `${((result.successfulSamples / result.samplesRun) * 100).toFixed(2)}%`,
-      }))
+      })),
     )
   })
 
