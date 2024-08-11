@@ -3,6 +3,6 @@ import { autoroute } from "./index"
 
 await runBenchmark({
   solver: autoroute,
-  solverName: "simple-grid-based",
+  solverName: "jump-point-grid",
   verbose: true,
 })
