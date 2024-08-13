@@ -49,10 +49,10 @@ function directionDistancesToNearestObstacle(
 
   for (const obstacle of input.obstacles) {
     if (obstacle.type === "rect") {
-      const left = obstacle.center.x - obstacle.width / 2
-      const right = obstacle.center.x + obstacle.width / 2
-      const top = obstacle.center.y + obstacle.height / 2
-      const bottom = obstacle.center.y - obstacle.height / 2
+      const left = obstacle.center.x - obstacle.width / 2 - OBSTACLE_MARGIN
+      const right = obstacle.center.x + obstacle.width / 2 + OBSTACLE_MARGIN
+      const top = obstacle.center.y + obstacle.height / 2 + OBSTACLE_MARGIN
+      const bottom = obstacle.center.y - obstacle.height / 2 - OBSTACLE_MARGIN
 
       // Check left
       if (y >= bottom && y <= top && x > left) {
@@ -99,18 +99,28 @@ function isGridWalkable(x: number, y: number, obstacles: Obstacle[]): boolean {
 }
 
 const GRID_STEP = 0.1
-function getNeighbors(node: Node, input: SimpleRouteJson): Node[] {
+function getNeighbors(
+  node: Node,
+  input: SimpleRouteJson,
+  goalDist: number,
+): Node[] {
   const neighbors: Node[] = []
+  const distances = directionDistancesToNearestObstacle(node.x, node.y, input)
+
   const directions = [
-    { x: 0, y: GRID_STEP },
-    { x: GRID_STEP, y: 0 },
-    { x: 0, y: -GRID_STEP },
-    { x: -GRID_STEP, y: 0 },
+    { x: 0, y: 1, distance: distances.top }, // Up
+    { x: 1, y: 0, distance: distances.right }, // Right
+    { x: 0, y: -1, distance: distances.bottom }, // Down
+    { x: -1, y: 0, distance: distances.left }, // Left
   ]
 
   for (const dir of directions) {
-    const newX = node.x + dir.x
-    const newY = node.y + dir.y
+    const step = Math.max(
+      GRID_STEP,
+      Math.min(GRID_STEP * 20, dir.distance / 2, goalDist / 2),
+    )
+    const newX = node.x + dir.x * step
+    const newY = node.y + dir.y * step
 
     if (
       newX >= input.bounds.minX &&
@@ -144,7 +154,10 @@ function aStar(
   const startNode: Node = { ...start, f: 0, g: 0, h: 0, parent: null }
   openSet.push(startNode)
 
+  let iters = 0
   while (openSet.length > 0) {
+    iters++
+    if (iters > 5000) return null
     openSet.sort((a, b) => a.f - b.f)
     const current = openSet.shift()!
 
@@ -159,10 +172,11 @@ function aStar(
       return path
     }
 
-    closedSet.add(`${current.x},${current.y}`)
+    closedSet.add(`${current.x.toFixed(2)},${current.y.toFixed(2)}`)
 
-    for (const neighbor of getNeighbors(current, input)) {
-      if (closedSet.has(`${neighbor.x},${neighbor.y}`)) continue
+    for (const neighbor of getNeighbors(current, input, goalDist)) {
+      if (closedSet.has(`${neighbor.x.toFixed(2)},${neighbor.y.toFixed(2)}`))
+        continue
 
       const tentativeG = current.g + GRID_STEP // or +1? not sure
 
