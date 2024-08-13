@@ -4,6 +4,12 @@ import {
   type Obstacle,
   type SimpleRouteJson,
 } from "autorouting-dataset"
+import { getLineRectangleIntersection } from "autorouting-dataset/lib/solver-utils/getLineRectangleIntersection"
+// function getLineRectangleIntersection(
+//   line: { x1: number; y1: number; x2: number; y2: number },
+//   rect: { minX: number; minY: number; width: number; height: number },
+// ): { x: number; y: number } | null
+
 import type { AnySoupElement } from "@tscircuit/soup"
 
 interface Point {
@@ -22,6 +28,57 @@ function manhattanDistance(a: Point, b: Point): number {
   return Math.abs(a.x - b.x) + Math.abs(a.y - b.y)
 }
 
+interface DirectionDistances {
+  left: number
+  top: number
+  bottom: number
+  right: number
+}
+
+function directionDistancesToNearestObstacle(
+  x: number,
+  y: number,
+  input: SimpleRouteJson,
+): DirectionDistances {
+  const result: DirectionDistances = {
+    left: Infinity,
+    top: Infinity,
+    bottom: Infinity,
+    right: Infinity,
+  }
+
+  for (const obstacle of input.obstacles) {
+    if (obstacle.type === "rect") {
+      const left = obstacle.center.x - obstacle.width / 2
+      const right = obstacle.center.x + obstacle.width / 2
+      const top = obstacle.center.y + obstacle.height / 2
+      const bottom = obstacle.center.y - obstacle.height / 2
+
+      // Check left
+      if (y >= bottom && y <= top && x > left) {
+        result.left = Math.min(result.left, x - right)
+      }
+
+      // Check right
+      if (y >= bottom && y <= top && x < right) {
+        result.right = Math.min(result.right, left - x)
+      }
+
+      // Check top
+      if (x >= left && x <= right && y < top) {
+        result.top = Math.min(result.top, bottom - y)
+      }
+
+      // Check bottom
+      if (x >= left && x <= right && y > bottom) {
+        result.bottom = Math.min(result.bottom, y - top)
+      }
+    }
+  }
+
+  return result
+}
+
 const OBSTACLE_MARGIN = 0.15
 function isGridWalkable(x: number, y: number, obstacles: Obstacle[]): boolean {
   for (const obstacle of obstacles) {
@@ -34,15 +91,6 @@ function isGridWalkable(x: number, y: number, obstacles: Obstacle[]): boolean {
         y >= obstacle.center.y - halfHeight &&
         y <= obstacle.center.y + halfHeight
       ) {
-        return false
-      }
-    } else if (obstacle.type === "oval") {
-      // Simplified oval check (treating it as a circle)
-      const dx = x - obstacle.center.x
-      const dy = y - obstacle.center.y
-      const radius =
-        Math.max(obstacle.width, obstacle.height) / 2 + OBSTACLE_MARGIN
-      if (dx * dx + dy * dy <= radius * radius) {
         return false
       }
     }
