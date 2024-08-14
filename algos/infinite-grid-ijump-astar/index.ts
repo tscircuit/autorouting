@@ -4,8 +4,6 @@ import {
   type Obstacle,
   type SimpleRouteJson,
 } from "autorouting-dataset"
-import { getLineRectangleIntersection } from "autorouting-dataset/lib/solver-utils/getLineRectangleIntersection"
-
 import type { AnySoupElement } from "@tscircuit/soup"
 
 interface Point {
@@ -24,11 +22,25 @@ function manhattanDistance(a: Point, b: Point): number {
   return Math.abs(a.x - b.x) + Math.abs(a.y - b.y)
 }
 
+function dist(a: Point, b: Point): number {
+  return Math.hypot(a.x - b.x, a.y - b.y)
+}
+
+function diagonalDistance(a: Point, b: Point): number {
+  const dx = Math.abs(a.x - b.x)
+  const dy = Math.abs(a.y - b.y)
+  return Math.max(dx, dy)
+}
+
 interface DirectionDistances {
   left: number
   top: number
   bottom: number
   right: number
+  topLeft: number
+  topRight: number
+  bottomLeft: number
+  bottomRight: number
 }
 
 function directionDistancesToNearestObstacle(
@@ -41,6 +53,10 @@ function directionDistancesToNearestObstacle(
     top: Infinity,
     bottom: Infinity,
     right: Infinity,
+    topLeft: Infinity,
+    topRight: Infinity,
+    bottomLeft: Infinity,
+    bottomRight: Infinity,
   }
 
   for (const obstacle of input.obstacles) {
@@ -68,6 +84,31 @@ function directionDistancesToNearestObstacle(
       // Check bottom
       if (x >= left && x <= right && y > bottom) {
         result.bottom = Math.min(result.bottom, y - top)
+      }
+
+      if (x < left && y < bottom) {
+        result.topLeft = Math.min(
+          result.topLeft,
+          diagonalDistance({ x, y }, { x: left, y: bottom }),
+        )
+      }
+      if (x > right && y < bottom) {
+        result.topRight = Math.min(
+          result.topRight,
+          diagonalDistance({ x, y }, { x: right, y: bottom }),
+        )
+      }
+      if (x < left && y > top) {
+        result.bottomLeft = Math.min(
+          result.bottomLeft,
+          diagonalDistance({ x, y }, { x: left, y: top }),
+        )
+      }
+      if (x > right && y > top) {
+        result.bottomRight = Math.min(
+          result.bottomRight,
+          diagonalDistance({ x, y }, { x: right, y: top }),
+        )
       }
     }
   }
@@ -108,6 +149,10 @@ function getNeighbors(
     { x: 1, y: 0, distance: distances.right }, // Right
     { x: 0, y: -1, distance: distances.bottom }, // Down
     { x: -1, y: 0, distance: distances.left }, // Left
+    { x: 1, y: 1, distance: distances.topRight }, // Top-Right
+    { x: -1, y: 1, distance: distances.topLeft }, // Top-Left
+    { x: 1, y: -1, distance: distances.bottomRight }, // Bottom-Right
+    { x: -1, y: -1, distance: distances.bottomLeft }, // Bottom-Left
   ]
 
   for (const dir of directions) {
@@ -174,7 +219,7 @@ function aStar(
       if (closedSet.has(`${neighbor.x.toFixed(2)},${neighbor.y.toFixed(2)}`))
         continue
 
-      const tentativeG = current.g + GRID_STEP // or +1? not sure
+      const tentativeG = current.g + dist(current, neighbor)
 
       const existingNeighbor = openSet.find(
         (n) => n.x === neighbor.x && n.y === neighbor.y,
@@ -183,7 +228,7 @@ function aStar(
       if (!existingNeighbor || tentativeG < existingNeighbor.g) {
         neighbor.parent = current
         neighbor.g = tentativeG
-        neighbor.h = manhattanDistance(neighbor, goal)
+        neighbor.h = dist(neighbor, goal)
         neighbor.f = neighbor.g + neighbor.h
 
         if (!existingNeighbor) {
