@@ -4,7 +4,14 @@ import {
   type Obstacle,
   type SimpleRouteJson,
 } from "autorouting-dataset"
-import type { AnySoupElement } from "@tscircuit/soup"
+import type {
+  AnySoupElement,
+  PcbFabricationNotePath,
+  PcbFabricationNoteText,
+} from "@tscircuit/soup"
+import type { SolutionWithDebugInfo } from "autorouting-dataset/lib/solver-utils/ProblemSolver"
+
+const debugSolutions: any = {}
 
 interface Point {
   x: number
@@ -149,16 +156,16 @@ function getNeighbors(
     { x: 1, y: 0, distance: distances.right }, // Right
     { x: 0, y: -1, distance: distances.bottom }, // Down
     { x: -1, y: 0, distance: distances.left }, // Left
-    { x: 1, y: 1, distance: distances.topRight }, // Top-Right
-    { x: -1, y: 1, distance: distances.topLeft }, // Top-Left
-    { x: 1, y: -1, distance: distances.bottomRight }, // Bottom-Right
-    { x: -1, y: -1, distance: distances.bottomLeft }, // Bottom-Left
+    // { x: 1, y: 1, distance: distances.topRight }, // Top-Right
+    // { x: -1, y: 1, distance: distances.topLeft }, // Top-Left
+    // { x: 1, y: -1, distance: distances.bottomRight }, // Bottom-Right
+    // { x: -1, y: -1, distance: distances.bottomLeft }, // Bottom-Left
   ]
 
   for (const dir of directions) {
     const step = Math.max(
       GRID_STEP,
-      Math.min(GRID_STEP * 20, dir.distance / 2, goalDist / 2),
+      Math.min(GRID_STEP * 20, (dir.distance - GRID_STEP) / 2, goalDist / 2),
     )
     const newX = node.x + dir.x * step
     const newY = node.y + dir.y * step
@@ -199,10 +206,42 @@ function aStar(
   while (openSet.length > 0) {
     iters++
     if (iters > 5000) return null
+    const debugGroup = Math.floor(iters / 10)
+    debugSolutions[`iter${debugGroup * 10}`] ??= []
+    const debugSolution: Array<PcbFabricationNoteText> =
+      debugSolutions[`iter${debugGroup * 10}`]
     openSet.sort((a, b) => a.f - b.f)
     const current = openSet.shift()!
 
-    const goalDist = manhattanDistance(current, goal)
+    debugSolution.push({
+      type: "pcb_fabrication_note_text",
+      font: "tscircuit2024",
+      font_size: 0.1,
+      text: iters.toString(),
+      pcb_component_id: "",
+      layer: "top",
+      anchor_position: {
+        x: current.x,
+        y: current.y,
+      },
+      anchor_alignment: "center",
+    })
+    // debugSolution.push({
+    //   type: "pcb_fabrication_note_path",
+    //   layer: "top",
+    //   route: [
+    //     [-0.05, 0.05],
+    //     [0.05, -0.05],
+    //   ].map(([dx, dy]) => ({
+    //     x: current.x + dx,
+    //     y: current.y + dy,
+    //   })),
+    //   stroke_width: 0.02,
+    //   pcb_component_id: "",
+    //   fabrication_note_path_id: "",
+    // })
+
+    const goalDist = dist(current, goal)
     if (goalDist <= GRID_STEP * 2) {
       const path: Point[] = []
       let node: Node | null = current
@@ -282,7 +321,7 @@ function routeConnection(
   }
 }
 
-export function autoroute(soup: AnySoupElement[]): SimplifiedPcbTrace[] {
+export function autoroute(soup: AnySoupElement[]): SolutionWithDebugInfo {
   const input = getSimpleRouteJson(soup)
   const traces: SimplifiedPcbTrace[] = []
 
@@ -291,5 +330,8 @@ export function autoroute(soup: AnySoupElement[]): SimplifiedPcbTrace[] {
     traces.push(trace)
   }
 
-  return traces
+  return {
+    solution: traces,
+    debugSolutions,
+  }
 }
