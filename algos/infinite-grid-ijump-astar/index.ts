@@ -154,9 +154,16 @@ function isGridWalkable(x: number, y: number, obstacles: Obstacle[]): boolean {
 
 const GRID_STEP = 0.1
 const FAST_STEP = 2
-const EXTRA_STEP_PENALTY = 0.3
+const EXTRA_STEP_PENALTY = 1
 const AXIS_LOCK_ESCAPE_STEP = 0.5
 const MAX_STEP = 100
+/**
+ * The higher the heuristic distance penalty, the more likely we are to explore
+ * paths that are closer to the goal. Making this number 1 will give us shorter
+ * paths, but often sacrificing speed. Making it higher than 1 will make it go
+ * down more rabbitholes, but in most cases find a path faster.
+ */
+const HEURISTIC_PENALTY_MULTIPLIER = 1.5
 function getNeighbors(node: Node, goal: Point, input: SimpleRouteJson): Node[] {
   const neighbors: Node[] = []
   const distances = directionDistancesToNearestObstacle(node.x, node.y, input)
@@ -373,7 +380,8 @@ function aStar(
         neighbor.parent = current
         neighbor.g = tentativeG
         // neighbor.h = dist(neighbor, goal)
-        neighbor.h = manhattanDistance(neighbor, goal)
+        neighbor.h =
+          manhattanDistance(neighbor, goal) * HEURISTIC_PENALTY_MULTIPLIER
         neighbor.f = neighbor.g + neighbor.h
         neighbor.numParents = current.numParents + 1
 
