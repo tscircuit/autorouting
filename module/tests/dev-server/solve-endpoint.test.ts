@@ -3,7 +3,7 @@ import { startDevServer } from "../../lib/server/start-dev-server"
 import { getDatasetGenerator } from "../../lib/generators"
 import type { AnySoupElement } from "@tscircuit/soup"
 import { runChecks } from "../../lib/benchmark/run-checks"
-import { autoroute } from "algos/simple-grid-based"
+import { autoroute } from "algos/simple-grid"
 import { getSimpleRouteJson } from "../../lib/solver-utils/getSimpleRouteJson"
 
 test("solve endpoint", async () => {

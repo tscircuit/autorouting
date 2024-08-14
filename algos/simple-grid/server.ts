@@ -3,6 +3,6 @@ import { autoroute } from "./index"
 
 await startDevServer({
   solver: autoroute,
-  solverName: "simple-grid-based",
+  solverName: "simple-grid",
   port: 3080,
 })

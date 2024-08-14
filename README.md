@@ -176,7 +176,7 @@ You can then run this file with `bun --hot ./solver-server.ts`
 ### Non-Typescript Solvers
 
 > [!TIP]
-> Check out a [simple python autorouter](./algos/python-simple-grid-based)
+> Check out a [simple python autorouter](./algos/python-simple-grid)
 
 - Host a server with your algorithm (see the simple flask server below)
 - Run `npx autorouting-dataset server start --solver-url http://localhost:1234` (replace `localhost:1234` with your solver server url
@@ -295,7 +295,7 @@ await startDevServer({
 ```
 
 > [!TIP]
-> Check out [this directory](./algos/simple-grid-based/) for a typical Typescript autorouter configuration
+> Check out [this directory](./algos/simple-grid/) for a typical Typescript autorouter configuration
 
 ## Running a Benchmark
 

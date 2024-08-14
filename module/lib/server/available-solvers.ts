@@ -1,1 +1,3 @@
-export const AVAILABLE_SOLVERS = ["simple-grid-based", "gridless-poi"]
+import { builtinSolvers } from "./get-builtin-available-solver"
+
+export const AVAILABLE_SOLVERS = Object.keys(builtinSolvers)

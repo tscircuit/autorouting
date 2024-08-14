@@ -5,10 +5,6 @@ import {
   type SimpleRouteJson,
 } from "autorouting-dataset"
 import { getLineRectangleIntersection } from "autorouting-dataset/lib/solver-utils/getLineRectangleIntersection"
-// function getLineRectangleIntersection(
-//   line: { x1: number; y1: number; x2: number; y2: number },
-//   rect: { minX: number; minY: number; width: number; height: number },
-// ): { x: number; y: number } | null
 
 import type { AnySoupElement } from "@tscircuit/soup"
 

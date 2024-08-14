@@ -3,6 +3,6 @@ import { autoroute } from "./index"
 
 await runBenchmark({
   solver: autoroute,
-  solverName: "jumpy-grid",
+  solverName: "infgrid-astar",
   verbose: true,
 })

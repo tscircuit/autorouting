@@ -3,6 +3,6 @@ import { autoroute } from "./index"
 
 await startDevServer({
   solver: autoroute,
-  solverName: "jumpy-grid",
+  solverName: "infgrid-ijump-astar",
   port: 3080,
 })

@@ -1,5 +1,5 @@
 #!/usr/bin/env bun
-import { autoroute } from "algos/simple-grid-based"
+import { autoroute } from "algos/simple-grid"
 import { startDevServer } from "autorouting-dataset"
 import { AVAILABLE_DATASETS } from "../module/lib/server/available-datasets"
 import { AVAILABLE_SOLVERS } from "../module/lib/server/available-solvers"
@@ -9,9 +9,9 @@ import fs from "node:fs/promises"
 // 1. Run the server
 const devServer = await startDevServer({
   solver: autoroute,
-  solverName: "simple-grid-based",
+  solverName: "simple-grid",
   solverLink:
-    "https://github.com/tscircuit/autorouting-dataset/blob/main/algos/simple-grid-based/index.ts",
+    "https://github.com/tscircuit/autorouting-dataset/blob/main/algos/simple-grid/index.ts",
   port: 3081,
 })
 

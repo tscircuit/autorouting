@@ -4,7 +4,7 @@ import { getSimpleRouteJson } from "./lib/solver-utils/getSimpleRouteJson"
 import fs from "node:fs/promises"
 import path from "node:path"
 import { startDevServer } from "./lib/server/start-dev-server"
-import { autoroute } from "../algos/simple-grid-based"
+import { autoroute } from "../algos/simple-grid"
 import { runBenchmark } from "./lib/benchmark/run-benchmark"
 import { createSolverFromUrl } from "./lib/solver-utils/createSolverFromUrl"
 
@@ -26,8 +26,7 @@ program
     startDevServer({
       solver: options.solverUrl ? undefined : autoroute,
       solverName:
-        options.solveName ??
-        (options.solverUrl ? undefined : "simple-grid-based"),
+        options.solveName ?? (options.solverUrl ? undefined : "simple-grid"),
       solverUrl: options.solverUrl,
       port: options.port || 3080,
     })

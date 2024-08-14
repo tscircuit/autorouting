@@ -32,8 +32,8 @@ export const serverEntrypoint = async (
   let solutionSoup: AnySoupElement[] | undefined
   let userMessage: string | undefined
 
-  // If the url is /problem/single-trace/1/simple-grid-based, then set the solver
-  // to the solver with the name "simple-grid-based"
+  // If the url is /problem/single-trace/1/simple-grid, then set the solver
+  // to the solver with the name "simple-grid"
   if (req.url!.includes("/problem/")) {
     const [, , , , overrideSolverName] = req.url!.split("/")
     if (
