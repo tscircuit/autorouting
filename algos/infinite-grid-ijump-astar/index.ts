@@ -29,14 +29,6 @@ interface Node extends Point {
   f: number
   g: number
   h: number
-  /**
-   * How quickly the node moved to get to this path, if the momentum is high,
-   * this node is making rapid progress towards the goal. If the momentum is
-   * low, the node is having trouble finding a way out.
-   *
-   * Momentum is calculated by averaging the distFromParent of it's parents.
-   */
-  momentum: number
   /** Distance from the parent node */
   distFromParent: number
   numParents: number
@@ -161,7 +153,9 @@ function isGridWalkable(x: number, y: number, obstacles: Obstacle[]): boolean {
 }
 
 const GRID_STEP = 0.1
-const FAST_STEP = 1
+const FAST_STEP = 2
+const EXTRA_STEP_PENALTY = 0.3
+const AXIS_LOCK_ESCAPE_STEP = 0.5
 const MAX_STEP = 100
 function getNeighbors(node: Node, goal: Point, input: SimpleRouteJson): Node[] {
   const neighbors: Node[] = []
@@ -183,38 +177,79 @@ function getNeighbors(node: Node, goal: Point, input: SimpleRouteJson): Node[] {
     y: goal.y - node.y,
   }
 
-  // const minStepDist = GRID_STEP // simpler variant (uncomment to remove momentum)
+  const minStepX = Math.min(remainingGoalDist.x, -GRID_STEP)
+  const maxStepX = Math.max(remainingGoalDist.x, GRID_STEP)
+  const minStepY = Math.min(remainingGoalDist.y, -GRID_STEP)
+  const maxStepY = Math.max(remainingGoalDist.y, GRID_STEP)
 
-  const minStepDist = GRID_STEP // + FAST_STEP * Math.random()
-  console.log("node.momentum:", node.momentum.toFixed(2))
-  // const minStepDist = Math.min(
-  //   (remainingGoalDist.x ** 2 + remainingGoalDist.y ** 2) ** 0.5,
-  //   Math.max(GRID_STEP, Math.max(FAST_STEP, node.momentum / 2)),
-  // )
-
-  const minStepX = Math.min(remainingGoalDist.x, -minStepDist)
-  const maxStepX = Math.max(remainingGoalDist.x, minStepDist)
-  const minStepY = Math.min(remainingGoalDist.y, -minStepDist)
-  const maxStepY = Math.max(remainingGoalDist.y, minStepDist)
-
-  console.log("minStepX:", minStepX.toFixed(2))
-  console.log("maxStepX:", maxStepX.toFixed(2))
-  console.log("minStepY:", minStepY.toFixed(2))
-  console.log("maxStepY:", maxStepY.toFixed(2))
-
+  const subDirections: Array<{
+    x: number
+    y: number
+    distance: number
+    step: number
+    stepX: number
+    stepY: number
+  }> = []
   for (const dir of directions) {
-    console.log("\ndir:", dir)
-    const step = clamp(GRID_STEP, MAX_STEP, dir.distance - GRID_STEP)
-    console.log("step:", step.toFixed(2))
-    console.log("dir.distance:", dir.distance.toFixed(2))
-    const stepX = clamp(minStepX, maxStepX, step * dir.x)
-    const stepY = clamp(minStepY, maxStepY, step * dir.y)
-    console.log("stepX:", stepX.toFixed(2), "stepY:", stepY.toFixed(2))
+    const baseStep = clamp(GRID_STEP, MAX_STEP, dir.distance - GRID_STEP)
+    const stepX = clamp(minStepX, maxStepX, baseStep * dir.x)
+    const stepY = clamp(minStepY, maxStepY, baseStep * dir.y)
+
+    const stepDist = (stepX ** 2 + stepY ** 2) ** 0.5
+
+    subDirections.push({
+      x: dir.x,
+      y: dir.y,
+      distance: dir.distance,
+      step: baseStep,
+      stepX,
+      stepY,
+    })
+
+    // If we're stepping greater than FAST_STEP, add a neighbor inbetween, this
+    // breaks up large steps (TODO, we should really break into d/FAST_STEP
+    // segments)
+    if (stepDist > FAST_STEP) {
+      const halfStepX = clamp(minStepX, maxStepX, stepX * 0.5)
+      const halfStepY = clamp(minStepY, maxStepY, stepY * 0.5)
+
+      subDirections.push({
+        x: dir.x,
+        y: dir.y,
+        distance: dir.distance,
+        step: baseStep / 2,
+        stepX: halfStepX,
+        stepY: halfStepY,
+      })
+    }
+
+    // "axis lock" happens when we're close to the goal on one axis but not the
+    // other, we want to add a neighbor that's a more distant step to
+    // avoid slowly exploring
+    if (dir.distance > FAST_STEP && stepDist <= GRID_STEP * 1.5) {
+      console.log("axis lock")
+      const fastStepX = stepX * (AXIS_LOCK_ESCAPE_STEP / GRID_STEP)
+      const fastStepY = stepY * (AXIS_LOCK_ESCAPE_STEP / GRID_STEP)
+      console.log("oldStepX", stepX.toFixed(2), "oldStepY", stepY.toFixed(2))
+      console.log("fastStepX:", fastStepX.toFixed(2))
+      console.log("fastStepY:", fastStepY.toFixed(2))
+
+      subDirections.push({
+        x: dir.x,
+        y: dir.y,
+        distance: dir.distance,
+        step: baseStep,
+        stepX: fastStepX,
+        stepY: fastStepY,
+      })
+    }
+  }
+
+  for (const dir of subDirections) {
+    const { stepX, stepY } = dir
 
     const newX = node.x + stepX
     const newY = node.y + stepY
-    console.log("newX:", newX.toFixed(2))
-    console.log("newY:", newY.toFixed(2))
 
     if (
       newX >= input.bounds.minX &&
@@ -228,7 +263,6 @@ function getNeighbors(node: Node, goal: Point, input: SimpleRouteJson): Node[] {
         x: newX,
         y: newY,
         distFromParent,
-        momentum: 0,
         numParents: 0,
         f: 0,
         g: 0,
@@ -256,7 +290,6 @@ function aStar(
     g: 0,
     h: 0,
     numParents: 0,
-    momentum: 0,
     parent: null,
   }
   openSet.push(startNode)
@@ -327,14 +360,14 @@ function aStar(
       return path
     }
 
-    closedSet.add(`${current.x.toFixed(2)},${current.y.toFixed(2)}`)
+    closedSet.add(`${current.x.toFixed(1)},${current.y.toFixed(1)}`)
 
     for (const neighbor of getNeighbors(current, goal, input)) {
-      if (closedSet.has(`${neighbor.x.toFixed(2)},${neighbor.y.toFixed(2)}`))
+      if (closedSet.has(`${neighbor.x.toFixed(1)},${neighbor.y.toFixed(1)}`))
         continue
 
       // TODO check distance when adding g
-      const tentativeG = current.g + neighbor.distFromParent // GRID_STEP
+      const tentativeG = current.g + GRID_STEP + EXTRA_STEP_PENALTY // manhattanDistance(current, neighbor) // neighbor.distFromParent // GRID_STEP
 
       const existingNeighbor = openSet.find(
         (n) => n.x === neighbor.x && n.y === neighbor.y,
@@ -347,9 +380,6 @@ function aStar(
         neighbor.h = manhattanDistance(neighbor, goal)
         neighbor.f = neighbor.g + neighbor.h
         neighbor.numParents = current.numParents + 1
-        neighbor.momentum =
-          (current.momentum * current.numParents + neighbor.distFromParent) /
-          neighbor.numParents
 
         if (!existingNeighbor) {
           openSet.push(neighbor)
