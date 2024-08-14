@@ -10,6 +10,9 @@ import type {
   PcbFabricationNoteText,
 } from "@tscircuit/soup"
 import type { SolutionWithDebugInfo } from "autorouting-dataset/lib/solver-utils/ProblemSolver"
+import Debug from "debug"
+
+const debug = Debug("autorouting-dataset:infinite-grid-ijump-astar")
 
 const debugSolutions: any = {}
 
@@ -26,6 +29,7 @@ interface Node extends Point {
   f: number
   g: number
   h: number
+  distFromParent: number
   parent: Node | null
 }
 
@@ -147,6 +151,7 @@ function isGridWalkable(x: number, y: number, obstacles: Obstacle[]): boolean {
 }
 
 const GRID_STEP = 0.1
+const FAST_STEP = 1
 const MAX_STEP = 100
 function getNeighbors(node: Node, goal: Point, input: SimpleRouteJson): Node[] {
   const neighbors: Node[] = []
@@ -180,14 +185,6 @@ function getNeighbors(node: Node, goal: Point, input: SimpleRouteJson): Node[] {
 
   for (const dir of directions) {
     console.log("\ndir:", dir)
-    // const step = Math.min(
-    //   GRID_STEP * 20,
-    //   Math.max(
-    //     GRID_STEP,
-    //     dir.distance - GRID_STEP,
-    //     // Math.min(GRID_STEP * 20, (dir.distance - GRID_STEP)/2, goalDist / 2),
-    //   ),
-    // )
     const step = clamp(GRID_STEP, MAX_STEP, dir.distance - GRID_STEP)
     console.log("step:", step.toFixed(2))
     console.log("dir.distance:", dir.distance.toFixed(2))
@@ -210,6 +207,7 @@ function getNeighbors(node: Node, goal: Point, input: SimpleRouteJson): Node[] {
       neighbors.push({
         x: newX,
         y: newY,
+        distFromParent: (stepX ** 2 + stepY ** 2) ** 0.5,
         f: 0,
         g: 0,
         h: 0,
@@ -229,37 +227,50 @@ function aStar(
   const openSet: Node[] = []
   const closedSet: Set<string> = new Set()
 
-  const startNode: Node = { ...start, f: 0, g: 0, h: 0, parent: null }
+  const startNode: Node = {
+    ...start,
+    distFromParent: 0,
+    f: 0,
+    g: 0,
+    h: 0,
+    parent: null,
+  }
   openSet.push(startNode)
 
   let iters = 0
   while (openSet.length > 0) {
     iters++
     console.log("\nITERATIONS:", iters)
-    if (iters > 10) {
+    if (iters > 200) {
       console.log("ITERATIONS MAXED OUT")
       return null
     }
-    const debugGroup = Math.floor(iters / 10)
-    debugSolutions[`iter${debugGroup * 10}`] ??= []
-    const debugSolution: Array<PcbFabricationNoteText> =
-      debugSolutions[`iter${debugGroup * 10}`]
+    let debugSolution: Array<PcbFabricationNoteText>
+    if (debug.enabled) {
+      const debugGroup = Math.floor(iters / 10)
+      debugSolutions[`iter${debugGroup * 10}`] ??= []
+      debugSolution = debugSolutions[`iter${debugGroup * 10}`]
+    }
+
+    // TODO priority queue instead of constant resort
     openSet.sort((a, b) => a.f - b.f)
     const current = openSet.shift()!
 
-    debugSolution.push({
-      type: "pcb_fabrication_note_text",
-      font: "tscircuit2024",
-      font_size: 0.1,
-      text: iters.toString(),
-      pcb_component_id: "",
-      layer: "top",
-      anchor_position: {
-        x: current.x,
-        y: current.y,
-      },
-      anchor_alignment: "center",
-    })
+    if (debug.enabled) {
+      debugSolution!.push({
+        type: "pcb_fabrication_note_text",
+        font: "tscircuit2024",
+        font_size: 0.1,
+        text: iters.toString(),
+        pcb_component_id: "",
+        layer: "top",
+        anchor_position: {
+          x: current.x,
+          y: current.y,
+        },
+        anchor_alignment: "center",
+      })
+    }
 
     const goalDist = manhattanDistance(current, goal)
     if (goalDist <= GRID_STEP * 2) {
@@ -279,7 +290,7 @@ function aStar(
         continue
 
       // TODO check distance when adding g
-      const tentativeG = current.g + GRID_STEP
+      const tentativeG = current.g + neighbor.distFromParent // GRID_STEP
 
       const existingNeighbor = openSet.find(
         (n) => n.x === neighbor.x && n.y === neighbor.y,
