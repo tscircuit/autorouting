@@ -452,24 +452,30 @@ function aStar(
       console.log("ITERATIONS MAXED OUT")
       return null
     }
-    let debugSolution: Array<PcbFabricationNoteText | PcbFabricationNotePath>
+    let debugSolution: Array<
+      PcbFabricationNoteText | PcbFabricationNotePath
+    > | null = null
     if (debug.enabled) {
-      const debugGroupNum = Math.floor(iters / 10)
-      const debugGroup = `iter${debugGroupNum * 10}_${(debugGroupNum + 1) * 10}`
-      debugSolutions[debugGroup] ??= []
-      debugSolution = debugSolutions[debugGroup]
+      const groupSize = 1
+      const debugGroupNum = Math.floor(iters / groupSize)
+      // No more than 10 groups to avoid massive output
+      if (debugGroupNum < 10) {
+        const debugGroup = `iter${debugGroupNum * groupSize}_${(debugGroupNum + 1) * groupSize}`
+        debugSolutions[debugGroup] ??= []
+        debugSolution = debugSolutions[debugGroup]
+      }
     }
 
     // TODO priority queue instead of constant resort
     openSet.sort((a, b) => a.f - b.f)
     const current = openSet.shift()!
 
-    if (debug.enabled) {
-      debugSolution!.push({
+    if (debug.enabled && debugSolution) {
+      debugSolution.push({
         type: "pcb_fabrication_note_text",
         font: "tscircuit2024",
-        font_size: 0.1,
-        text: iters.toString(),
+        font_size: 0.25,
+        text: "X",
         pcb_component_id: "",
         layer: "top",
         anchor_position: {
@@ -478,6 +484,42 @@ function aStar(
         },
         anchor_alignment: "center",
       })
+      // Add all the openSet as small diamonds
+      for (let i = 0; i < openSet.length; i++) {
+        const node = openSet[i]
+        debugSolution.push({
+          type: "pcb_fabrication_note_path",
+          pcb_component_id: "",
+          fabrication_note_path_id: `note_path_${node.x}_${node.y}`,
+          layer: "top",
+          route: [
+            [0, 0.1],
+            [0.1, 0],
+            [0, -0.1],
+            [-0.1, 0],
+            [0, 0.1],
+          ].map(([dx, dy]) => ({
+            x: node.x + dx,
+            y: node.y + dy,
+          })),
+          stroke_width: 0.02,
+        })
+        // Add text that indicates the order of this point
+        debugSolution.push({
+          type: "pcb_fabrication_note_text",
+          font: "tscircuit2024",
+          font_size: 0.1,
+          text: i.toString(),
+          pcb_component_id: "",
+          layer: "top",
+          anchor_position: {
+            x: node.x,
+            y: node.y,
+          },
+          anchor_alignment: "center",
+        })
+      }
+
       if (current.parent) {
         debugSolution!.push({
           type: "pcb_fabrication_note_path",
