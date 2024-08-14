@@ -13,6 +13,10 @@ import type { SolutionWithDebugInfo } from "autorouting-dataset/lib/solver-utils
 
 const debugSolutions: any = {}
 
+const clamp = (min: number, max: number, value: number) => {
+  return Math.min(Math.max(min, value), max)
+}
+
 interface Point {
   x: number
   y: number
@@ -30,7 +34,7 @@ function manhattanDistance(a: Point, b: Point): number {
 }
 
 function dist(a: Point, b: Point): number {
-  return Math.hypot(a.x - b.x, a.y - b.y)
+  return (a.x - b.x ** 2 + (a.y - b.y) ** 2) ** 0.5
 }
 
 function diagonalDistance(a: Point, b: Point): number {
@@ -143,11 +147,8 @@ function isGridWalkable(x: number, y: number, obstacles: Obstacle[]): boolean {
 }
 
 const GRID_STEP = 0.1
-function getNeighbors(
-  node: Node,
-  input: SimpleRouteJson,
-  goalDist: number,
-): Node[] {
+const MAX_STEP = 100
+function getNeighbors(node: Node, goal: Point, input: SimpleRouteJson): Node[] {
   const neighbors: Node[] = []
   const distances = directionDistancesToNearestObstacle(node.x, node.y, input)
 
@@ -162,13 +163,42 @@ function getNeighbors(
     // { x: -1, y: -1, distance: distances.bottomLeft }, // Bottom-Left
   ]
 
+  const remainingGoalDist = {
+    x: goal.x - node.x,
+    y: goal.y - node.y,
+  }
+
+  const minStepX = Math.min(remainingGoalDist.x, -GRID_STEP)
+  const maxStepX = Math.max(remainingGoalDist.x, GRID_STEP)
+  const minStepY = Math.min(remainingGoalDist.y, -GRID_STEP)
+  const maxStepY = Math.max(remainingGoalDist.y, GRID_STEP)
+
+  console.log("minStepX:", minStepX.toFixed(2))
+  console.log("maxStepX:", maxStepX.toFixed(2))
+  console.log("minStepY:", minStepY.toFixed(2))
+  console.log("maxStepY:", maxStepY.toFixed(2))
+
   for (const dir of directions) {
-    const step = Math.max(
-      GRID_STEP,
-      Math.min(GRID_STEP * 20, (dir.distance - GRID_STEP) / 2, goalDist / 2),
-    )
-    const newX = node.x + dir.x * step
-    const newY = node.y + dir.y * step
+    console.log("\ndir:", dir)
+    // const step = Math.min(
+    //   GRID_STEP * 20,
+    //   Math.max(
+    //     GRID_STEP,
+    //     dir.distance - GRID_STEP,
+    //     // Math.min(GRID_STEP * 20, (dir.distance - GRID_STEP)/2, goalDist / 2),
+    //   ),
+    // )
+    const step = clamp(GRID_STEP, MAX_STEP, dir.distance - GRID_STEP)
+    console.log("step:", step.toFixed(2))
+    console.log("dir.distance:", dir.distance.toFixed(2))
+    const stepX = clamp(minStepX, maxStepX, step * dir.x)
+    const stepY = clamp(minStepY, maxStepY, step * dir.y)
+    console.log("stepX:", stepX.toFixed(2), "stepY:", stepY.toFixed(2))
+
+    const newX = node.x + stepX
+    const newY = node.y + stepY
+    console.log("newX:", newX.toFixed(2))
+    console.log("newY:", newY.toFixed(2))
 
     if (
       newX >= input.bounds.minX &&
@@ -205,7 +235,11 @@ function aStar(
   let iters = 0
   while (openSet.length > 0) {
     iters++
-    if (iters > 5000) return null
+    console.log("\nITERATIONS:", iters)
+    if (iters > 10) {
+      console.log("ITERATIONS MAXED OUT")
+      return null
+    }
     const debugGroup = Math.floor(iters / 10)
     debugSolutions[`iter${debugGroup * 10}`] ??= []
     const debugSolution: Array<PcbFabricationNoteText> =
@@ -226,22 +260,8 @@ function aStar(
       },
       anchor_alignment: "center",
     })
-    // debugSolution.push({
-    //   type: "pcb_fabrication_note_path",
-    //   layer: "top",
-    //   route: [
-    //     [-0.05, 0.05],
-    //     [0.05, -0.05],
-    //   ].map(([dx, dy]) => ({
-    //     x: current.x + dx,
-    //     y: current.y + dy,
-    //   })),
-    //   stroke_width: 0.02,
-    //   pcb_component_id: "",
-    //   fabrication_note_path_id: "",
-    // })
 
-    const goalDist = dist(current, goal)
+    const goalDist = manhattanDistance(current, goal)
     if (goalDist <= GRID_STEP * 2) {
       const path: Point[] = []
       let node: Node | null = current
@@ -254,11 +274,12 @@ function aStar(
 
     closedSet.add(`${current.x.toFixed(2)},${current.y.toFixed(2)}`)
 
-    for (const neighbor of getNeighbors(current, input, goalDist)) {
+    for (const neighbor of getNeighbors(current, goal, input)) {
       if (closedSet.has(`${neighbor.x.toFixed(2)},${neighbor.y.toFixed(2)}`))
         continue
 
-      const tentativeG = current.g + dist(current, neighbor)
+      // TODO check distance when adding g
+      const tentativeG = current.g + GRID_STEP
 
       const existingNeighbor = openSet.find(
         (n) => n.x === neighbor.x && n.y === neighbor.y,
@@ -267,7 +288,8 @@ function aStar(
       if (!existingNeighbor || tentativeG < existingNeighbor.g) {
         neighbor.parent = current
         neighbor.g = tentativeG
-        neighbor.h = dist(neighbor, goal)
+        // neighbor.h = dist(neighbor, goal)
+        neighbor.h = manhattanDistance(neighbor, goal)
         neighbor.f = neighbor.g + neighbor.h
 
         if (!existingNeighbor) {
