@@ -187,7 +187,7 @@ const MAX_STEP = 100
  * paths, but often sacrificing speed. Making it higher than 1 will make it go
  * down more rabbitholes, but in most cases find a path faster.
  */
-const HEURISTIC_PENALTY_MULTIPLIER = 2
+const HEURISTIC_PENALTY_MULTIPLIER = 1.5
 function getNeighbors(node: Node, goal: Point, input: SimpleRouteJson): Node[] {
   const neighbors: Node[] = []
   const distances = directionDistancesToNearestObstacle(node.x, node.y, input)
@@ -311,32 +311,26 @@ function getNeighbors(node: Node, goal: Point, input: SimpleRouteJson): Node[] {
         if (dir.x === 0) {
           if (dir.y > 0) {
             distToOvercomeObstacle =
-              obstacle.center.y + obstacle.height - node.y
+              obstacle.center.y + obstacle.height / 2 - node.y
           } else {
             distToOvercomeObstacle =
-              node.y - (obstacle.center.y - obstacle.height)
+              node.y - (obstacle.center.y - obstacle.height / 2)
           }
         } else {
           if (dir.x > 0) {
-            distToOvercomeObstacle = obstacle.center.x + obstacle.width - node.x
+            distToOvercomeObstacle =
+              obstacle.center.x + obstacle.width / 2 - node.x
           } else {
             distToOvercomeObstacle =
-              node.x - (obstacle.center.x - obstacle.width)
+              node.x - (obstacle.center.x - obstacle.width / 2)
           }
         }
+        distToOvercomeObstacle += OBSTACLE_MARGIN + GRID_STEP
 
         const oStepX = dir.x * distToOvercomeObstacle
         const oStepY = dir.y * distToOvercomeObstacle
         const oStepManDist = Math.abs(oStepX) + Math.abs(oStepY)
         if (oStepManDist > bStepManDist) {
-          console.log({
-            bStepX,
-            bStepY,
-            oStepX,
-            oStepY,
-            oStepManDist,
-            bStepManDist,
-          })
           subDirections.push({
             x: dir.x,
             y: dir.y,
