@@ -29,7 +29,17 @@ interface Node extends Point {
   f: number
   g: number
   h: number
+  /**
+   * How quickly the node moved to get to this path, if the momentum is high,
+   * this node is making rapid progress towards the goal. If the momentum is
+   * low, the node is having trouble finding a way out.
+   *
+   * Momentum is calculated by averaging the distFromParent of it's parents.
+   */
+  momentum: number
+  /** Distance from the parent node */
   distFromParent: number
+  numParents: number
   parent: Node | null
 }
 
@@ -173,10 +183,14 @@ function getNeighbors(node: Node, goal: Point, input: SimpleRouteJson): Node[] {
     y: goal.y - node.y,
   }
 
-  const minStepX = Math.min(remainingGoalDist.x, -GRID_STEP)
-  const maxStepX = Math.max(remainingGoalDist.x, GRID_STEP)
-  const minStepY = Math.min(remainingGoalDist.y, -GRID_STEP)
-  const maxStepY = Math.max(remainingGoalDist.y, GRID_STEP)
+  const minStepDist = GRID_STEP // simpler variant (uncomment to remove momentum)
+  console.log("node.momentum:", node.momentum.toFixed(2))
+  // const minStepDist = Math.max(GRID_STEP, node.momentum / 2)
+
+  const minStepX = Math.min(remainingGoalDist.x, -minStepDist)
+  const maxStepX = Math.max(remainingGoalDist.x, minStepDist)
+  const minStepY = Math.min(remainingGoalDist.y, -minStepDist)
+  const maxStepY = Math.max(remainingGoalDist.y, minStepDist)
 
   console.log("minStepX:", minStepX.toFixed(2))
   console.log("maxStepX:", maxStepX.toFixed(2))
@@ -204,10 +218,13 @@ function getNeighbors(node: Node, goal: Point, input: SimpleRouteJson): Node[] {
       newY <= input.bounds.maxY &&
       isGridWalkable(newX, newY, input.obstacles)
     ) {
+      const distFromParent = (stepX ** 2 + stepY ** 2) ** 0.5
       neighbors.push({
         x: newX,
         y: newY,
-        distFromParent: (stepX ** 2 + stepY ** 2) ** 0.5,
+        distFromParent,
+        momentum: 0,
+        numParents: 0,
         f: 0,
         g: 0,
         h: 0,
@@ -233,6 +250,8 @@ function aStar(
     f: 0,
     g: 0,
     h: 0,
+    numParents: 0,
+    momentum: 0,
     parent: null,
   }
   openSet.push(startNode)
@@ -245,11 +264,12 @@ function aStar(
       console.log("ITERATIONS MAXED OUT")
       return null
     }
-    let debugSolution: Array<PcbFabricationNoteText>
+    let debugSolution: Array<PcbFabricationNoteText | PcbFabricationNotePath>
     if (debug.enabled) {
-      const debugGroup = Math.floor(iters / 10)
-      debugSolutions[`iter${debugGroup * 10}`] ??= []
-      debugSolution = debugSolutions[`iter${debugGroup * 10}`]
+      const debugGroupNum = Math.floor(iters / 10)
+      const debugGroup = `iter${debugGroupNum * 10}_${(debugGroupNum + 1) * 10}`
+      debugSolutions[debugGroup] ??= []
+      debugSolution = debugSolutions[debugGroup]
     }
 
     // TODO priority queue instead of constant resort
@@ -270,6 +290,25 @@ function aStar(
         },
         anchor_alignment: "center",
       })
+      if (current.parent) {
+        debugSolution!.push({
+          type: "pcb_fabrication_note_path",
+          pcb_component_id: "",
+          fabrication_note_path_id: `note_path_${current.x}_${current.y}`,
+          layer: "top",
+          route: [
+            {
+              x: current.x,
+              y: current.y,
+            },
+            {
+              x: current.parent.x,
+              y: current.parent.y,
+            },
+          ],
+          stroke_width: 0.01,
+        })
+      }
     }
 
     const goalDist = manhattanDistance(current, goal)
@@ -302,6 +341,10 @@ function aStar(
         // neighbor.h = dist(neighbor, goal)
         neighbor.h = manhattanDistance(neighbor, goal)
         neighbor.f = neighbor.g + neighbor.h
+        neighbor.numParents = current.numParents + 1
+        neighbor.momentum =
+          (current.momentum * current.numParents + neighbor.distFromParent) /
+          neighbor.numParents
 
         if (!existingNeighbor) {
           openSet.push(neighbor)
@@ -355,6 +398,11 @@ function routeConnection(
 }
 
 export function autoroute(soup: AnySoupElement[]): SolutionWithDebugInfo {
+  if (debug.enabled) {
+    for (const key in debugSolutions) {
+      delete debugSolutions[key]
+    }
+  }
   const input = getSimpleRouteJson(soup)
   const traces: SimplifiedPcbTrace[] = []
 
