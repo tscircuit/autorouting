@@ -227,12 +227,8 @@ function getNeighbors(node: Node, goal: Point, input: SimpleRouteJson): Node[] {
     // other, we want to add a neighbor that's a more distant step to
     // avoid slowly exploring
     if (dir.distance > FAST_STEP && stepDist <= GRID_STEP * 1.5) {
-      console.log("axis lock")
       const fastStepX = stepX * (AXIS_LOCK_ESCAPE_STEP / GRID_STEP)
       const fastStepY = stepY * (AXIS_LOCK_ESCAPE_STEP / GRID_STEP)
-      console.log("oldStepX", stepX.toFixed(2), "oldStepY", stepY.toFixed(2))
-      console.log("fastStepX:", fastStepX.toFixed(2))
-      console.log("fastStepY:", fastStepY.toFixed(2))
 
       subDirections.push({
         x: dir.x,
@@ -297,8 +293,7 @@ function aStar(
   let iters = 0
   while (openSet.length > 0) {
     iters++
-    console.log("\nITERATIONS:", iters)
-    if (iters > 200) {
+    if (iters > 2000) {
       console.log("ITERATIONS MAXED OUT")
       return null
     }
@@ -367,7 +362,8 @@ function aStar(
         continue
 
       // TODO check distance when adding g
-      const tentativeG = current.g + GRID_STEP + EXTRA_STEP_PENALTY // manhattanDistance(current, neighbor) // neighbor.distFromParent // GRID_STEP
+      const tentativeG =
+        current.g + EXTRA_STEP_PENALTY + neighbor.distFromParent // manhattanDistance(current, neighbor) // neighbor.distFromParent // GRID_STEP
 
       const existingNeighbor = openSet.find(
         (n) => n.x === neighbor.x && n.y === neighbor.y,
