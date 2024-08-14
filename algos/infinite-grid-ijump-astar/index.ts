@@ -187,7 +187,7 @@ const MAX_STEP = 100
  * paths, but often sacrificing speed. Making it higher than 1 will make it go
  * down more rabbitholes, but in most cases find a path faster.
  */
-const HEURISTIC_PENALTY_MULTIPLIER = 1.5
+const HEURISTIC_PENALTY_MULTIPLIER = 2
 function getNeighbors(node: Node, goal: Point, input: SimpleRouteJson): Node[] {
   const neighbors: Node[] = []
   const distances = directionDistancesToNearestObstacle(node.x, node.y, input)
@@ -457,7 +457,7 @@ function aStar(
     > | null = null
     if (debug.enabled) {
       const groupSize = 1
-      const debugGroupNum = Math.floor(iters / groupSize)
+      const debugGroupNum = Math.floor((iters - 1) / groupSize)
       // No more than 10 groups to avoid massive output
       if (debugGroupNum < 10) {
         const debugGroup = `iter${debugGroupNum * groupSize}_${(debugGroupNum + 1) * groupSize}`
@@ -470,7 +470,49 @@ function aStar(
     openSet.sort((a, b) => a.f - b.f)
     const current = openSet.shift()!
 
+    const goalDist = manhattanDistance(current, goal)
+    if (goalDist <= GRID_STEP * 2) {
+      const path: Point[] = []
+      let node: Node | null = current
+      while (node) {
+        path.unshift({ x: node.x, y: node.y })
+        node = node.parent
+      }
+      return path
+    }
+
+    closedSet.add(`${current.x.toFixed(1)},${current.y.toFixed(1)}`)
+
+    for (const neighbor of getNeighbors(current, goal, input)) {
+      if (closedSet.has(`${neighbor.x.toFixed(1)},${neighbor.y.toFixed(1)}`))
+        continue
+
+      // TODO check distance when adding g
+      const tentativeG =
+        current.g + EXTRA_STEP_PENALTY + neighbor.distFromParent // manhattanDistance(current, neighbor) // neighbor.distFromParent // GRID_STEP
+
+      const existingNeighbor = openSet.find(
+        (n) => n.x === neighbor.x && n.y === neighbor.y,
+      )
+
+      if (!existingNeighbor || tentativeG < existingNeighbor.g) {
+        neighbor.parent = current
+        neighbor.g = tentativeG
+        // neighbor.h = dist(neighbor, goal)
+        neighbor.h =
+          manhattanDistance(neighbor, goal) * HEURISTIC_PENALTY_MULTIPLIER
+        neighbor.f = neighbor.g + neighbor.h
+        neighbor.numParents = current.numParents + 1
+
+        if (!existingNeighbor) {
+          openSet.push(neighbor)
+        }
+      }
+    }
+
     if (debug.enabled && debugSolution) {
+      // Redundant sort, but much better for debugging
+      openSet.sort((a, b) => a.f - b.f)
       debugSolution.push({
         type: "pcb_fabrication_note_text",
         font: "tscircuit2024",
@@ -538,46 +580,6 @@ function aStar(
           ],
           stroke_width: 0.01,
         })
-      }
-    }
-
-    const goalDist = manhattanDistance(current, goal)
-    if (goalDist <= GRID_STEP * 2) {
-      const path: Point[] = []
-      let node: Node | null = current
-      while (node) {
-        path.unshift({ x: node.x, y: node.y })
-        node = node.parent
-      }
-      return path
-    }
-
-    closedSet.add(`${current.x.toFixed(1)},${current.y.toFixed(1)}`)
-
-    for (const neighbor of getNeighbors(current, goal, input)) {
-      if (closedSet.has(`${neighbor.x.toFixed(1)},${neighbor.y.toFixed(1)}`))
-        continue
-
-      // TODO check distance when adding g
-      const tentativeG =
-        current.g + EXTRA_STEP_PENALTY + neighbor.distFromParent // manhattanDistance(current, neighbor) // neighbor.distFromParent // GRID_STEP
-
-      const existingNeighbor = openSet.find(
-        (n) => n.x === neighbor.x && n.y === neighbor.y,
-      )
-
-      if (!existingNeighbor || tentativeG < existingNeighbor.g) {
-        neighbor.parent = current
-        neighbor.g = tentativeG
-        // neighbor.h = dist(neighbor, goal)
-        neighbor.h =
-          manhattanDistance(neighbor, goal) * HEURISTIC_PENALTY_MULTIPLIER
-        neighbor.f = neighbor.g + neighbor.h
-        neighbor.numParents = current.numParents + 1
-
-        if (!existingNeighbor) {
-          openSet.push(neighbor)
-        }
       }
     }
   }
