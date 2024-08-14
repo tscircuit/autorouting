@@ -183,9 +183,14 @@ function getNeighbors(node: Node, goal: Point, input: SimpleRouteJson): Node[] {
     y: goal.y - node.y,
   }
 
-  const minStepDist = GRID_STEP // simpler variant (uncomment to remove momentum)
+  // const minStepDist = GRID_STEP // simpler variant (uncomment to remove momentum)
+
+  const minStepDist = GRID_STEP // + FAST_STEP * Math.random()
   console.log("node.momentum:", node.momentum.toFixed(2))
-  // const minStepDist = Math.max(GRID_STEP, node.momentum / 2)
+  // const minStepDist = Math.min(
+  //   (remainingGoalDist.x ** 2 + remainingGoalDist.y ** 2) ** 0.5,
+  //   Math.max(GRID_STEP, Math.max(FAST_STEP, node.momentum / 2)),
+  // )
 
   const minStepX = Math.min(remainingGoalDist.x, -minStepDist)
   const maxStepX = Math.max(remainingGoalDist.x, minStepDist)
