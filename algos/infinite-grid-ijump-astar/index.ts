@@ -192,6 +192,13 @@ const HEURISTIC_PENALTY_MULTIPLIER = 3
 // Still validating this, see https://github.com/tscircuit/autorouting-dataset/issues/28
 const SHOULD_IGNORE_SMALL_UNNECESSARY_BACKSTEPS = true
 
+/**
+ * If we're stepping greater than FAST_STEP, add a neighbor inbetween, this
+ * breaks up large steps (TODO, we should really break into d/FAST_STEP
+ * segments)
+ */
+const SHOULD_SEGMENT_LARGE_STEPS = true
+
 function getNeighbors(node: Node, goal: Point, input: SimpleRouteJson): Node[] {
   const neighbors: Node[] = []
   const distances = directionDistancesToNearestObstacle(node.x, node.y, input)
@@ -379,10 +386,8 @@ function getNeighbors(node: Node, goal: Point, input: SimpleRouteJson): Node[] {
       })
     }
 
-    // If we're stepping greater than FAST_STEP, add a neighbor inbetween, this
-    // breaks up large steps (TODO, we should really break into d/FAST_STEP
-    // segments)
-    if (stepDist > FAST_STEP) {
+    // If we're stepping greater than FAST_STEP, add a neighbor inbetween
+    if (SHOULD_SEGMENT_LARGE_STEPS && stepDist > FAST_STEP) {
       const halfStepX = clamp(minBStepX, maxBStepX, bStepX * 0.5)
       const halfStepY = clamp(minBStepY, maxBStepY, bStepY * 0.5)
 
