@@ -16,6 +16,7 @@ export class FastObstacleList {
     this.obstacles = obstacles.map((obstacle) => ({
       obstacle,
     }))
+    // TODO sort into quadtree
   }
 
   getObstacleAt(x: number, y: number): Obstacle | null {

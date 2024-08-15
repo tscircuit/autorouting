@@ -8,15 +8,5 @@ export const dist = (a: Point, b: Point): number => {
   return ((a.x - b.x) ** 2 + (a.y - b.y) ** 2) ** 0.5
 }
 
-export interface Node extends Point {
-  /** Distance from the parent node (along path) */
-  g: number
-  /** Heuristic distance from the goal */
-  h: number
-  /** Distance score for this node (g + h) */
-  f: number
-  /** Manhattan Distance from the parent node */
-  manDistFromParent: number
-  nodesInPath: number
-  parent: Node | null
-}
+export const nodeName = (node: Point, GRID_STEP: number = 0.1): string =>
+  `${Math.round(node.x / GRID_STEP)},${Math.round(node.y / GRID_STEP)}`
