@@ -16,6 +16,7 @@ import { getObstaclesFromTrace } from "./lib/getObstaclesFromTrace"
 const debug = Debug("autorouting-dataset:infinite-grid-ijump-astar")
 
 let debugGroup: string | null = null
+let debugTraceCount = 0
 const debugSolutions: any = {}
 
 const clamp = (min: number, max: number, value: number) => {
@@ -145,6 +146,7 @@ function getObstacleAt(
   return null
 }
 
+const MAX_ITERATIONS = 2
 const GRID_STEP = 0.1
 const FAST_STEP = 2
 const EXTRA_STEP_PENALTY = 1
@@ -157,15 +159,84 @@ const MAX_STEP = 100
  */
 const HEURISTIC_PENALTY_MULTIPLIER = 3
 
-// Still validating this, see https://github.com/tscircuit/autorouting-dataset/issues/28
+/**
+ * EXPERIMENTAL
+ * If there are no obstacles to our left or right, don't move backwards
+ *
+ * Still validating this, see https://github.com/tscircuit/autorouting-dataset/issues/28
+ **/
 const SHOULD_IGNORE_SMALL_UNNECESSARY_BACKSTEPS = true
 
 /**
+ * EXPERIMENTAL
  * If we're stepping greater than FAST_STEP, add a neighbor inbetween, this
  * breaks up large steps (TODO, we should really break into d/FAST_STEP
  * segments)
  */
 const SHOULD_SEGMENT_LARGE_STEPS = true
+
+/**
+ * EXPERIMENTAL, EXPENSIVE
+ * Conjoined obstacle detection means that when we're trying to find the
+ * distance to overcome an obstacle, we check to see if there's another obstacle
+ * at the end of our run. If there is, we continue adding to the distance to
+ * overcome.
+ * 
+ * This increases the number of obstacle checks dramatically, but decreases
+ * the number of iterations. Pre-merging obstacles (based on trace width) may be
+ * much more efficient.
+ *
+ */
+const SHOULD_DETECT_CONJOINED_OBSTACLES = true
+
+function getDistanceToOvercomeObstacle(
+  node: { x: number; y: number },
+  dir: { x: number; y: number; distance: number },
+  obstacle: Obstacle,
+  obstacles: Obstacle[],
+  obstaclesInRow?: number=  0
+): number {
+  let distToOvercomeObstacle: number
+  if (dir.x === 0) {
+    if (dir.y > 0) {
+      distToOvercomeObstacle = obstacle.center.y + obstacle.height / 2 - node.y
+    } else {
+      distToOvercomeObstacle =
+        node.y - (obstacle.center.y - obstacle.height / 2)
+    }
+  } else {
+    if (dir.x > 0) {
+      distToOvercomeObstacle = obstacle.center.x + obstacle.width / 2 - node.x
+    } else {
+      distToOvercomeObstacle = node.x - (obstacle.center.x - obstacle.width / 2)
+    }
+  }
+  distToOvercomeObstacle += OBSTACLE_MARGIN // + GRID_STEP
+
+  if (SHOULD_DETECT_CONJOINED_OBSTACLES) {
+    const obstacleAtEnd = getObstacleAt(
+      node.x + dir.x * distToOvercomeObstacle,
+      node.y + dir.y * distToOvercomeObstacle,
+      obstacles,
+    )
+    console.log("detected conjoined obstacle", obstaclesInRow)
+
+    if (obstacleAtEnd && obstacleAtEnd.type === "rect") {
+      distToOvercomeObstacle += getDistanceToOvercomeObstacle(
+        {
+          x: node.x + dir.x * distToOvercomeObstacle,
+          y: node.y + dir.y * distToOvercomeObstacle,
+        },
+        dir,
+        obstacleAtEnd,
+        obstacles,
+        obstaclesInRow + 1,
+      )
+    }
+  }
+
+  return distToOvercomeObstacle
+}
 
 function getNeighbors(node: Node, goal: Point, input: SimpleRouteJson): Node[] {
   const neighbors: Node[] = []
@@ -293,25 +364,12 @@ function getNeighbors(node: Node, goal: Point, input: SimpleRouteJson): Node[] {
       )
 
       if (obstacle && obstacle.type === "rect") {
-        let distToOvercomeObstacle: number
-        if (dir.x === 0) {
-          if (dir.y > 0) {
-            distToOvercomeObstacle =
-              obstacle.center.y + obstacle.height / 2 - node.y
-          } else {
-            distToOvercomeObstacle =
-              node.y - (obstacle.center.y - obstacle.height / 2)
-          }
-        } else {
-          if (dir.x > 0) {
-            distToOvercomeObstacle =
-              obstacle.center.x + obstacle.width / 2 - node.x
-          } else {
-            distToOvercomeObstacle =
-              node.x - (obstacle.center.x - obstacle.width / 2)
-          }
-        }
-        distToOvercomeObstacle += OBSTACLE_MARGIN + GRID_STEP
+        const distToOvercomeObstacle = getDistanceToOvercomeObstacle(
+          node,
+          dir,
+          obstacle,
+          input.obstacles,
+        )
 
         const oStepX = dir.x * distToOvercomeObstacle
         const oStepY = dir.y * distToOvercomeObstacle
@@ -432,22 +490,21 @@ function aStar(
   }
   openSet.push(startNode)
 
-  let iters = 0
+  let iters = -1
   while (openSet.length > 0) {
     iters++
-    if (iters > 2000) {
-      console.log("ITERATIONS MAXED OUT")
+    if (iters > MAX_ITERATIONS) {
+      debug("ITERATIONS MAXED OUT")
       return null
     }
     let debugSolution: Array<
       PcbFabricationNoteText | PcbFabricationNotePath
     > | null = null
     if (debug.enabled) {
-      const groupSize = 1
-      const debugGroupNum = Math.floor((iters - 1) / groupSize)
-      // No more than 10 groups to avoid massive output
-      if (debugGroupNum < 10) {
-        debugGroup = `iter${debugGroupNum * groupSize}_${(debugGroupNum + 1) * groupSize}`
+      const debugGroupNum = iters
+      // No more than 20 groups to avoid massive output
+      if (debugGroupNum < 20) {
+        debugGroup = `t${debugTraceCount}_iter[${debugGroupNum}]`
         debugSolutions[debugGroup] ??= []
         debugSolution = debugSolutions[debugGroup]
       } else {
@@ -467,9 +524,7 @@ function aStar(
         path.unshift({ x: node.x, y: node.y })
         node = node.parent
       }
-      if (debug.enabled) {
-        console.log(`Path found after ${iters} iterations`)
-      }
+      debug(`Path found after ${iters} iterations`)
       return path
     }
 
@@ -599,11 +654,13 @@ function routeConnection(
     if (path) {
       routes.push(...path)
     } else {
-      console.warn(
-        `No path found for connection ${connection.name} between points`,
-        start,
-        end,
-      )
+      if (debug.enabled) {
+        console.warn(
+          `No path found for connection ${connection.name} between points`,
+          start,
+          end,
+        )
+      }
     }
   }
 
@@ -623,6 +680,7 @@ function routeConnection(
 export function autoroute(soup: AnySoupElement[]): SolutionWithDebugInfo {
   if (debug.enabled) {
     debugGroup = null
+    debugTraceCount = 0
     for (const key in debugSolutions) {
       delete debugSolutions[key]
     }
@@ -642,6 +700,7 @@ export function autoroute(soup: AnySoupElement[]): SolutionWithDebugInfo {
     traceObstacles.push(...getObstaclesFromTrace(trace, connection.name))
 
     traces.push(trace)
+    debugTraceCount++
   }
 
   return {
