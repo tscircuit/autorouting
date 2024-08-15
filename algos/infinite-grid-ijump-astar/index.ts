@@ -55,10 +55,6 @@ interface DirectionDistances {
   top: number
   bottom: number
   right: number
-  topLeft: number
-  topRight: number
-  bottomLeft: number
-  bottomRight: number
 }
 
 function directionDistancesToNearestObstacle(
@@ -71,10 +67,6 @@ function directionDistancesToNearestObstacle(
     top: Infinity,
     bottom: Infinity,
     right: Infinity,
-    topLeft: Infinity,
-    topRight: Infinity,
-    bottomLeft: Infinity,
-    bottomRight: Infinity,
   }
 
   for (const obstacle of input.obstacles) {
@@ -102,31 +94,6 @@ function directionDistancesToNearestObstacle(
       // Check bottom
       if (x >= left && x <= right && y > bottom) {
         result.bottom = Math.min(result.bottom, y - top)
-      }
-
-      if (x < left && y < bottom) {
-        result.topLeft = Math.min(
-          result.topLeft,
-          diagonalDistance({ x, y }, { x: left, y: bottom }),
-        )
-      }
-      if (x > right && y < bottom) {
-        result.topRight = Math.min(
-          result.topRight,
-          diagonalDistance({ x, y }, { x: right, y: bottom }),
-        )
-      }
-      if (x < left && y > top) {
-        result.bottomLeft = Math.min(
-          result.bottomLeft,
-          diagonalDistance({ x, y }, { x: left, y: top }),
-        )
-      }
-      if (x > right && y > top) {
-        result.bottomRight = Math.min(
-          result.bottomRight,
-          diagonalDistance({ x, y }, { x: right, y: top }),
-        )
       }
     }
   }
@@ -265,10 +232,6 @@ function getNeighbors(node: Node, goal: Point, input: SimpleRouteJson): Node[] {
       maxOrthoDist: Math.max(distances.top, distances.bottom),
       orthoDir: { x: 0, y: goalUnitD.y, distance: distances[goalUnitD.dirY] },
     },
-    // { x: 1, y: 1, distance: distances.topRight }, // Top-Right
-    // { x: -1, y: 1, distance: distances.topLeft }, // Top-Left
-    // { x: 1, y: -1, distance: distances.bottomRight }, // Bottom-Right
-    // { x: -1, y: -1, distance: distances.bottomLeft }, // Bottom-Left
   ]
 
   const minBStepX = Math.min(remainingGoalDist.x, -GRID_STEP)
