@@ -98,7 +98,7 @@ utility function from `autorouting-dataset` to convert it into a simple object w
 interface SimpleRouteJson {
   layerCount: number
   obstacles: Array<{
-    type: "rect" | "oval" // NOTE: most datasets do not contain ovals
+    type: "rect"
     center: { x: number; y: number }
     width: number
     height: number

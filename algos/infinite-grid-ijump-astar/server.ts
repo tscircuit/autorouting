@@ -1,5 +1,5 @@
 import { startDevServer } from "autorouting-dataset"
-import { autoroute } from "./index"
+import { autoroute } from "./v1"
 
 await startDevServer({
   solver: autoroute,
