@@ -159,7 +159,7 @@ const MAX_STEP = 100
  * paths, but often sacrificing speed. Making it higher than 1 will make it go
  * down more rabbitholes, but in most cases find a path faster.
  */
-const HEURISTIC_PENALTY_MULTIPLIER = 1.5
+const HEURISTIC_PENALTY_MULTIPLIER = 2
 
 /**
  * EXPERIMENTAL
@@ -580,7 +580,8 @@ function aStar(
         current.g + EXTRA_STEP_PENALTY + neighbor.distFromParent // manhattanDistance(current, neighbor) // neighbor.distFromParent // GRID_STEP
 
       const existingNeighbor = openSet.find(
-        (n) => n.x === neighbor.x && n.y === neighbor.y,
+        // (n) => n.x === neighbor.x && n.y === neighbor.y,
+        (n) => manhattanDistance(n, neighbor) < GRID_STEP,
       )
 
       if (!existingNeighbor || tentativeG < existingNeighbor.g) {
