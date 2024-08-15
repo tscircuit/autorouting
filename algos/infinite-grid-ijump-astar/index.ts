@@ -11,6 +11,7 @@ import type {
 } from "@tscircuit/soup"
 import type { SolutionWithDebugInfo } from "autorouting-dataset/lib/solver-utils/ProblemSolver"
 import Debug from "debug"
+import { getObstaclesFromTrace } from "./lib/getObstaclesFromTrace"
 
 const debug = Debug("autorouting-dataset:infinite-grid-ijump-astar")
 
@@ -629,8 +630,17 @@ export function autoroute(soup: AnySoupElement[]): SolutionWithDebugInfo {
   const input = getSimpleRouteJson(soup)
   const traces: SimplifiedPcbTrace[] = []
 
+  const traceObstacles: Obstacle[] = []
+
   for (const connection of input.connections) {
-    const trace = routeConnection(connection, input)
+    const trace = routeConnection(connection, {
+      ...input,
+      obstacles: input.obstacles.concat(traceObstacles),
+    })
+
+    // Add traceObstacles created by this trace
+    traceObstacles.push(...getObstaclesFromTrace(trace, connection.name))
+
     traces.push(trace)
   }
 
