@@ -189,7 +189,7 @@ const MAX_STEP = 100
  */
 const HEURISTIC_PENALTY_MULTIPLIER = 3
 
-// Still validating this, see
+// Still validating this, see https://github.com/tscircuit/autorouting-dataset/issues/28
 const SHOULD_IGNORE_SMALL_UNNECESSARY_BACKSTEPS = true
 
 function getNeighbors(node: Node, goal: Point, input: SimpleRouteJson): Node[] {
