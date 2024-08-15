@@ -82,7 +82,12 @@ export default () => {
     <div>
       <Header />
       <DatasetNavigation />
-      <div style={{ display: "flex", justifyContent: "space-between" }}>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+        }}
+      >
         <div style={{ flex: 1, marginRight: "10px" }}>
           <h2 style={{ fontSize: 18 }}>Problem</h2>
           {problemSoup ? (

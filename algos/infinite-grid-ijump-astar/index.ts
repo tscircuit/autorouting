@@ -14,6 +14,7 @@ import Debug from "debug"
 
 const debug = Debug("autorouting-dataset:infinite-grid-ijump-astar")
 
+let debugGroup: string | null = null
 const debugSolutions: any = {}
 
 const clamp = (min: number, max: number, value: number) => {
@@ -40,7 +41,7 @@ function manhattanDistance(a: Point, b: Point): number {
 }
 
 function dist(a: Point, b: Point): number {
-  return (a.x - b.x ** 2 + (a.y - b.y) ** 2) ** 0.5
+  return ((a.x - b.x) ** 2 + (a.y - b.y) ** 2) ** 0.5
 }
 
 function diagonalDistance(a: Point, b: Point): number {
@@ -152,10 +153,33 @@ function isGridWalkable(x: number, y: number, obstacles: Obstacle[]): boolean {
   return true
 }
 
+// TODO implement getLargestObstacleAt in case of overlap, sometimes we care
+// about obstacle that goes the highest Y, lowest Y, leftmost/rightmost etc.
+function getObstacleAt(
+  x: number,
+  y: number,
+  obstacles: Obstacle[],
+): Obstacle | null {
+  for (const obstacle of obstacles) {
+    if (obstacle.type === "rect") {
+      const halfWidth = obstacle.width / 2 + OBSTACLE_MARGIN
+      const halfHeight = obstacle.height / 2 + OBSTACLE_MARGIN
+      if (
+        x >= obstacle.center.x - halfWidth &&
+        x <= obstacle.center.x + halfWidth &&
+        y >= obstacle.center.y - halfHeight &&
+        y <= obstacle.center.y + halfHeight
+      ) {
+        return obstacle
+      }
+    }
+  }
+  return null
+}
+
 const GRID_STEP = 0.1
 const FAST_STEP = 2
 const EXTRA_STEP_PENALTY = 1
-const AXIS_LOCK_ESCAPE_STEP = 0.5
 const MAX_STEP = 100
 /**
  * The higher the heuristic distance penalty, the more likely we are to explore
@@ -163,31 +187,87 @@ const MAX_STEP = 100
  * paths, but often sacrificing speed. Making it higher than 1 will make it go
  * down more rabbitholes, but in most cases find a path faster.
  */
-const HEURISTIC_PENALTY_MULTIPLIER = 1.5
+const HEURISTIC_PENALTY_MULTIPLIER = 3
+
+// Still validating this, see https://github.com/tscircuit/autorouting-dataset/issues/28
+const SHOULD_IGNORE_SMALL_UNNECESSARY_BACKSTEPS = true
+
 function getNeighbors(node: Node, goal: Point, input: SimpleRouteJson): Node[] {
   const neighbors: Node[] = []
   const distances = directionDistancesToNearestObstacle(node.x, node.y, input)
-
-  const directions = [
-    { x: 0, y: 1, distance: distances.top }, // Up
-    { x: 1, y: 0, distance: distances.right }, // Right
-    { x: 0, y: -1, distance: distances.bottom }, // Down
-    { x: -1, y: 0, distance: distances.left }, // Left
-    // { x: 1, y: 1, distance: distances.topRight }, // Top-Right
-    // { x: -1, y: 1, distance: distances.topLeft }, // Top-Left
-    // { x: 1, y: -1, distance: distances.bottomRight }, // Bottom-Right
-    // { x: -1, y: -1, distance: distances.bottomLeft }, // Bottom-Left
-  ]
 
   const remainingGoalDist = {
     x: goal.x - node.x,
     y: goal.y - node.y,
   }
 
-  const minStepX = Math.min(remainingGoalDist.x, -GRID_STEP)
-  const maxStepX = Math.max(remainingGoalDist.x, GRID_STEP)
-  const minStepY = Math.min(remainingGoalDist.y, -GRID_STEP)
-  const maxStepY = Math.max(remainingGoalDist.y, GRID_STEP)
+  const parentDir = {
+    x: node.parent ? Math.sign(node.parent.x - node.x) : 0,
+    y: node.parent ? Math.sign(node.parent.y - node.y) : 0,
+    distance: node.parent ? manhattanDistance(node.parent, node) : 0,
+  }
+
+  const goalUnitD: {
+    x: number
+    y: number
+    dirX: "left" | "right"
+    dirY: "top" | "bottom"
+  } = {
+    x: Math.sign(remainingGoalDist.x),
+    y: Math.sign(remainingGoalDist.y),
+    dirX: remainingGoalDist.x > 0 ? "right" : "left",
+    dirY: remainingGoalDist.y > 0 ? "top" : "bottom",
+  }
+
+  const directions: Array<{
+    x: number
+    y: number
+    distance: number
+    maxOrthoDist: number
+    orthoDir: { x: number; y: number; distance: number }
+  }> = [
+    // Up
+    {
+      x: 0,
+      y: 1,
+      distance: distances.top,
+      maxOrthoDist: Math.max(distances.left, distances.right),
+      orthoDir: { x: goalUnitD.x, y: 0, distance: distances[goalUnitD.dirX] },
+    },
+    // Right
+    {
+      x: 1,
+      y: 0,
+      distance: distances.right,
+      maxOrthoDist: Math.max(distances.top, distances.bottom),
+      orthoDir: { x: 0, y: goalUnitD.y, distance: distances[goalUnitD.dirY] },
+    },
+    // Down
+    {
+      x: 0,
+      y: -1,
+      distance: distances.bottom,
+      maxOrthoDist: Math.max(distances.left, distances.right),
+      orthoDir: { x: goalUnitD.x, y: 0, distance: distances[goalUnitD.dirX] },
+    },
+    // Left
+    {
+      x: -1,
+      y: 0,
+      distance: distances.left,
+      maxOrthoDist: Math.max(distances.top, distances.bottom),
+      orthoDir: { x: 0, y: goalUnitD.y, distance: distances[goalUnitD.dirY] },
+    },
+    // { x: 1, y: 1, distance: distances.topRight }, // Top-Right
+    // { x: -1, y: 1, distance: distances.topLeft }, // Top-Left
+    // { x: 1, y: -1, distance: distances.bottomRight }, // Bottom-Right
+    // { x: -1, y: -1, distance: distances.bottomLeft }, // Bottom-Left
+  ]
+
+  const minBStepX = Math.min(remainingGoalDist.x, -GRID_STEP)
+  const maxBStepX = Math.max(remainingGoalDist.x, GRID_STEP)
+  const minBStepY = Math.min(remainingGoalDist.y, -GRID_STEP)
+  const maxBStepY = Math.max(remainingGoalDist.y, GRID_STEP)
 
   const subDirections: Array<{
     x: number
@@ -199,26 +279,112 @@ function getNeighbors(node: Node, goal: Point, input: SimpleRouteJson): Node[] {
   }> = []
   for (const dir of directions) {
     const baseStep = clamp(GRID_STEP, MAX_STEP, dir.distance - GRID_STEP)
-    const stepX = clamp(minStepX, maxStepX, baseStep * dir.x)
-    const stepY = clamp(minStepY, maxStepY, baseStep * dir.y)
 
-    const stepDist = (stepX ** 2 + stepY ** 2) ** 0.5
+    const bStepX = clamp(minBStepX, maxBStepX, baseStep * dir.x)
+    const bStepY = clamp(minBStepY, maxBStepY, baseStep * dir.y)
 
-    subDirections.push({
-      x: dir.x,
-      y: dir.y,
-      distance: dir.distance,
-      step: baseStep,
-      stepX,
-      stepY,
-    })
+    const stepDist = (bStepX ** 2 + bStepY ** 2) ** 0.5
+    const bStepManDist = Math.abs(bStepX) + Math.abs(bStepY)
+
+    // Each direction has an two orthogonal directions, it can be blocked in those
+    // directions, and they can indicate a good sub-direction to take. For example,
+    // you might have something like this:
+    //
+    //         |
+    //  G      | C
+    //         |
+    //
+    // Above, if C takes one step up (A), it will still be blocked by the obstacle,
+    // but we can compute where the obstacle _ends_ (B), and decide to take two
+    // steps up instead of one.
+    //           B
+    //         | A
+    //  G      | C
+    //         |
+    //
+    // So here's what we do to compute B:
+    // - Determine the orthogonal direction for C, you have two candidate
+    //   direction (left or right), and you choose the one that's closer to the
+    //   goal
+    // - Determine the orthogonal distance to the wall (use the distances object)
+    // - Compute the distance to overcome the obstacle
+    // - Set step to overcome the obstacle
+    let usedOrthogonalOptimalPlacement = false
+    if (
+      dir.orthoDir.distance < FAST_STEP + GRID_STEP &&
+      dir.distance > FAST_STEP
+    ) {
+      const { orthoDir } = dir
+      const obstacle = getObstacleAt(
+        node.x + orthoDir.x * (orthoDir.distance + 0.001),
+        node.y + orthoDir.y * (orthoDir.distance + 0.001),
+        input.obstacles,
+      )
+
+      if (obstacle && obstacle.type === "rect") {
+        let distToOvercomeObstacle: number
+        if (dir.x === 0) {
+          if (dir.y > 0) {
+            distToOvercomeObstacle =
+              obstacle.center.y + obstacle.height / 2 - node.y
+          } else {
+            distToOvercomeObstacle =
+              node.y - (obstacle.center.y - obstacle.height / 2)
+          }
+        } else {
+          if (dir.x > 0) {
+            distToOvercomeObstacle =
+              obstacle.center.x + obstacle.width / 2 - node.x
+          } else {
+            distToOvercomeObstacle =
+              node.x - (obstacle.center.x - obstacle.width / 2)
+          }
+        }
+        distToOvercomeObstacle += OBSTACLE_MARGIN + GRID_STEP
+
+        const oStepX = dir.x * distToOvercomeObstacle
+        const oStepY = dir.y * distToOvercomeObstacle
+        const oStepManDist = Math.abs(oStepX) + Math.abs(oStepY)
+        if (oStepManDist > bStepManDist) {
+          subDirections.push({
+            x: dir.x,
+            y: dir.y,
+            distance: dir.distance,
+            step: distToOvercomeObstacle,
+            stepX: dir.x * distToOvercomeObstacle,
+            stepY: dir.y * distToOvercomeObstacle,
+          })
+          usedOrthogonalOptimalPlacement = true
+        }
+      }
+    }
+
+    if (!usedOrthogonalOptimalPlacement) {
+      if (SHOULD_IGNORE_SMALL_UNNECESSARY_BACKSTEPS) {
+        const isSmallStep = bStepManDist <= GRID_STEP
+        const isEscapingSmallSpace = dir.maxOrthoDist < FAST_STEP
+        const isBackstep = dir.x === parentDir.x && dir.y === parentDir.y
+
+        if (isSmallStep && !isEscapingSmallSpace && isBackstep) {
+          continue
+        }
+      }
+      subDirections.push({
+        x: dir.x,
+        y: dir.y,
+        distance: dir.distance,
+        step: baseStep,
+        stepX: bStepX,
+        stepY: bStepY,
+      })
+    }
 
     // If we're stepping greater than FAST_STEP, add a neighbor inbetween, this
     // breaks up large steps (TODO, we should really break into d/FAST_STEP
     // segments)
     if (stepDist > FAST_STEP) {
-      const halfStepX = clamp(minStepX, maxStepX, stepX * 0.5)
-      const halfStepY = clamp(minStepY, maxStepY, stepY * 0.5)
+      const halfStepX = clamp(minBStepX, maxBStepX, bStepX * 0.5)
+      const halfStepY = clamp(minBStepY, maxBStepY, bStepY * 0.5)
 
       subDirections.push({
         x: dir.x,
@@ -233,19 +399,19 @@ function getNeighbors(node: Node, goal: Point, input: SimpleRouteJson): Node[] {
     // "axis lock" happens when we're close to the goal on one axis but not the
     // other, we want to add a neighbor that's a more distant step to
     // avoid slowly exploring
-    if (dir.distance > FAST_STEP && stepDist <= GRID_STEP * 1.5) {
-      const fastStepX = stepX * (AXIS_LOCK_ESCAPE_STEP / GRID_STEP)
-      const fastStepY = stepY * (AXIS_LOCK_ESCAPE_STEP / GRID_STEP)
+    // if (dir.distance > FAST_STEP && stepDist <= GRID_STEP * 1.5) {
+    //   const fastStepX = stepX * (AXIS_LOCK_ESCAPE_STEP / GRID_STEP)
+    //   const fastStepY = stepY * (AXIS_LOCK_ESCAPE_STEP / GRID_STEP)
 
-      subDirections.push({
-        x: dir.x,
-        y: dir.y,
-        distance: dir.distance,
-        step: baseStep,
-        stepX: fastStepX,
-        stepY: fastStepY,
-      })
-    }
+    //   subDirections.push({
+    //     x: dir.x,
+    //     y: dir.y,
+    //     distance: dir.distance,
+    //     step: baseStep,
+    //     stepX: fastStepX,
+    //     stepY: fastStepY,
+    //   })
+    // }
   }
 
   for (const dir of subDirections) {
@@ -304,52 +470,25 @@ function aStar(
       console.log("ITERATIONS MAXED OUT")
       return null
     }
-    let debugSolution: Array<PcbFabricationNoteText | PcbFabricationNotePath>
+    let debugSolution: Array<
+      PcbFabricationNoteText | PcbFabricationNotePath
+    > | null = null
     if (debug.enabled) {
-      const debugGroupNum = Math.floor(iters / 10)
-      const debugGroup = `iter${debugGroupNum * 10}_${(debugGroupNum + 1) * 10}`
-      debugSolutions[debugGroup] ??= []
-      debugSolution = debugSolutions[debugGroup]
+      const groupSize = 1
+      const debugGroupNum = Math.floor((iters - 1) / groupSize)
+      // No more than 10 groups to avoid massive output
+      if (debugGroupNum < 10) {
+        debugGroup = `iter${debugGroupNum * groupSize}_${(debugGroupNum + 1) * groupSize}`
+        debugSolutions[debugGroup] ??= []
+        debugSolution = debugSolutions[debugGroup]
+      } else {
+        debugGroup = null
+      }
     }
 
     // TODO priority queue instead of constant resort
     openSet.sort((a, b) => a.f - b.f)
     const current = openSet.shift()!
-
-    if (debug.enabled) {
-      debugSolution!.push({
-        type: "pcb_fabrication_note_text",
-        font: "tscircuit2024",
-        font_size: 0.1,
-        text: iters.toString(),
-        pcb_component_id: "",
-        layer: "top",
-        anchor_position: {
-          x: current.x,
-          y: current.y,
-        },
-        anchor_alignment: "center",
-      })
-      if (current.parent) {
-        debugSolution!.push({
-          type: "pcb_fabrication_note_path",
-          pcb_component_id: "",
-          fabrication_note_path_id: `note_path_${current.x}_${current.y}`,
-          layer: "top",
-          route: [
-            {
-              x: current.x,
-              y: current.y,
-            },
-            {
-              x: current.parent.x,
-              y: current.parent.y,
-            },
-          ],
-          stroke_width: 0.01,
-        })
-      }
-    }
 
     const goalDist = manhattanDistance(current, goal)
     if (goalDist <= GRID_STEP * 2) {
@@ -358,6 +497,9 @@ function aStar(
       while (node) {
         path.unshift({ x: node.x, y: node.y })
         node = node.parent
+      }
+      if (debug.enabled) {
+        console.log(`Path found after ${iters} iterations`)
       }
       return path
     }
@@ -388,6 +530,79 @@ function aStar(
         if (!existingNeighbor) {
           openSet.push(neighbor)
         }
+      }
+    }
+
+    if (debug.enabled && debugSolution) {
+      // Redundant sort, but much better for debugging
+      openSet.sort((a, b) => a.f - b.f)
+      debugSolution.push({
+        type: "pcb_fabrication_note_text",
+        font: "tscircuit2024",
+        font_size: 0.25,
+        text: "X",
+        pcb_component_id: "",
+        layer: "top",
+        anchor_position: {
+          x: current.x,
+          y: current.y,
+        },
+        anchor_alignment: "center",
+      })
+      // Add all the openSet as small diamonds
+      for (let i = 0; i < openSet.length; i++) {
+        const node = openSet[i]
+        debugSolution.push({
+          type: "pcb_fabrication_note_path",
+          pcb_component_id: "",
+          fabrication_note_path_id: `note_path_${node.x}_${node.y}`,
+          layer: "top",
+          route: [
+            [0, 0.1],
+            [0.1, 0],
+            [0, -0.1],
+            [-0.1, 0],
+            [0, 0.1],
+          ].map(([dx, dy]) => ({
+            x: node.x + dx,
+            y: node.y + dy,
+          })),
+          stroke_width: 0.02,
+        })
+        // Add text that indicates the order of this point
+        debugSolution.push({
+          type: "pcb_fabrication_note_text",
+          font: "tscircuit2024",
+          font_size: 0.1,
+          text: i.toString(),
+          pcb_component_id: "",
+          layer: "top",
+          anchor_position: {
+            x: node.x,
+            y: node.y,
+          },
+          anchor_alignment: "center",
+        })
+      }
+
+      if (current.parent) {
+        debugSolution!.push({
+          type: "pcb_fabrication_note_path",
+          pcb_component_id: "",
+          fabrication_note_path_id: `note_path_${current.x}_${current.y}`,
+          layer: "top",
+          route: [
+            {
+              x: current.x,
+              y: current.y,
+            },
+            {
+              x: current.parent.x,
+              y: current.parent.y,
+            },
+          ],
+          stroke_width: 0.01,
+        })
       }
     }
   }
@@ -438,6 +653,7 @@ function routeConnection(
 
 export function autoroute(soup: AnySoupElement[]): SolutionWithDebugInfo {
   if (debug.enabled) {
+    debugGroup = null
     for (const key in debugSolutions) {
       delete debugSolutions[key]
     }
