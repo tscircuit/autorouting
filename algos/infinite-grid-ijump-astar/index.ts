@@ -14,6 +14,7 @@ import Debug from "debug"
 
 const debug = Debug("autorouting-dataset:infinite-grid-ijump-astar")
 
+let debugGroup: string | null = null
 const debugSolutions: any = {}
 
 const clamp = (min: number, max: number, value: number) => {
@@ -179,7 +180,6 @@ function getObstacleAt(
 const GRID_STEP = 0.1
 const FAST_STEP = 2
 const EXTRA_STEP_PENALTY = 1
-const AXIS_LOCK_ESCAPE_STEP = 0.5
 const MAX_STEP = 100
 /**
  * The higher the heuristic distance penalty, the more likely we are to explore
@@ -187,7 +187,11 @@ const MAX_STEP = 100
  * paths, but often sacrificing speed. Making it higher than 1 will make it go
  * down more rabbitholes, but in most cases find a path faster.
  */
-const HEURISTIC_PENALTY_MULTIPLIER = 1.5
+const HEURISTIC_PENALTY_MULTIPLIER = 3
+
+// Still validating this, see
+const SHOULD_IGNORE_SMALL_UNNECESSARY_BACKSTEPS = true
+
 function getNeighbors(node: Node, goal: Point, input: SimpleRouteJson): Node[] {
   const neighbors: Node[] = []
   const distances = directionDistancesToNearestObstacle(node.x, node.y, input)
@@ -195,6 +199,12 @@ function getNeighbors(node: Node, goal: Point, input: SimpleRouteJson): Node[] {
   const remainingGoalDist = {
     x: goal.x - node.x,
     y: goal.y - node.y,
+  }
+
+  const parentDir = {
+    x: node.parent ? Math.sign(node.parent.x - node.x) : 0,
+    y: node.parent ? Math.sign(node.parent.y - node.y) : 0,
+    distance: node.parent ? manhattanDistance(node.parent, node) : 0,
   }
 
   const goalUnitD: {
@@ -213,6 +223,7 @@ function getNeighbors(node: Node, goal: Point, input: SimpleRouteJson): Node[] {
     x: number
     y: number
     distance: number
+    maxOrthoDist: number
     orthoDir: { x: number; y: number; distance: number }
   }> = [
     // Up
@@ -220,6 +231,7 @@ function getNeighbors(node: Node, goal: Point, input: SimpleRouteJson): Node[] {
       x: 0,
       y: 1,
       distance: distances.top,
+      maxOrthoDist: Math.max(distances.left, distances.right),
       orthoDir: { x: goalUnitD.x, y: 0, distance: distances[goalUnitD.dirX] },
     },
     // Right
@@ -227,6 +239,7 @@ function getNeighbors(node: Node, goal: Point, input: SimpleRouteJson): Node[] {
       x: 1,
       y: 0,
       distance: distances.right,
+      maxOrthoDist: Math.max(distances.top, distances.bottom),
       orthoDir: { x: 0, y: goalUnitD.y, distance: distances[goalUnitD.dirY] },
     },
     // Down
@@ -234,6 +247,7 @@ function getNeighbors(node: Node, goal: Point, input: SimpleRouteJson): Node[] {
       x: 0,
       y: -1,
       distance: distances.bottom,
+      maxOrthoDist: Math.max(distances.left, distances.right),
       orthoDir: { x: goalUnitD.x, y: 0, distance: distances[goalUnitD.dirX] },
     },
     // Left
@@ -241,6 +255,7 @@ function getNeighbors(node: Node, goal: Point, input: SimpleRouteJson): Node[] {
       x: -1,
       y: 0,
       distance: distances.left,
+      maxOrthoDist: Math.max(distances.top, distances.bottom),
       orthoDir: { x: 0, y: goalUnitD.y, distance: distances[goalUnitD.dirY] },
     },
     // { x: 1, y: 1, distance: distances.topRight }, // Top-Right
@@ -345,6 +360,15 @@ function getNeighbors(node: Node, goal: Point, input: SimpleRouteJson): Node[] {
     }
 
     if (!usedOrthogonalOptimalPlacement) {
+      if (SHOULD_IGNORE_SMALL_UNNECESSARY_BACKSTEPS) {
+        const isSmallStep = bStepManDist <= GRID_STEP
+        const isEscapingSmallSpace = dir.maxOrthoDist < FAST_STEP
+        const isBackstep = dir.x === parentDir.x && dir.y === parentDir.y
+
+        if (isSmallStep && !isEscapingSmallSpace && isBackstep) {
+          continue
+        }
+      }
       subDirections.push({
         x: dir.x,
         y: dir.y,
@@ -454,9 +478,11 @@ function aStar(
       const debugGroupNum = Math.floor((iters - 1) / groupSize)
       // No more than 10 groups to avoid massive output
       if (debugGroupNum < 10) {
-        const debugGroup = `iter${debugGroupNum * groupSize}_${(debugGroupNum + 1) * groupSize}`
+        debugGroup = `iter${debugGroupNum * groupSize}_${(debugGroupNum + 1) * groupSize}`
         debugSolutions[debugGroup] ??= []
         debugSolution = debugSolutions[debugGroup]
+      } else {
+        debugGroup = null
       }
     }
 
@@ -471,6 +497,9 @@ function aStar(
       while (node) {
         path.unshift({ x: node.x, y: node.y })
         node = node.parent
+      }
+      if (debug.enabled) {
+        console.log(`Path found after ${iters} iterations`)
       }
       return path
     }
@@ -624,6 +653,7 @@ function routeConnection(
 
 export function autoroute(soup: AnySoupElement[]): SolutionWithDebugInfo {
   if (debug.enabled) {
+    debugGroup = null
     for (const key in debugSolutions) {
       delete debugSolutions[key]
     }
