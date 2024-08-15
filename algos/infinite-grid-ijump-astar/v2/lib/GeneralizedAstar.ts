@@ -4,14 +4,19 @@ import type { Node, Point } from "./types"
 import { manDist, nodeName } from "./util"
 
 import Debug from "debug"
-import type { Obstacle, SimpleRouteConnection } from "autorouting-dataset"
+import type {
+  Obstacle,
+  SimpleRouteConnection,
+  SimpleRouteJson,
+  SimplifiedPcbTrace,
+} from "autorouting-dataset"
 import { getObstaclesFromRoute } from "./getObstaclesFromRoute"
 
 const debug = Debug("autorouting-dataset:astar")
 
 export type ConnectionSolveResult =
-  | { solved: false }
-  | { solved: true; route: Point[] }
+  | { solved: false; connectionName: string }
+  | { solved: true; connectionName: string; route: Point[] }
 
 export class GeneralizedAstarAutorouter {
   openSet: Node[] = []
@@ -21,23 +26,25 @@ export class GeneralizedAstarAutorouter {
   debugMessage: string | null = null
   debugTraceCount: number = 0
 
+  input: SimpleRouteJson
   obstacles?: FastObstacleList
   allObstacles: Obstacle[]
-  startNode: Node
-  goalPoint: Point
+  startNode?: Node
+  goalPoint?: Point
   GRID_STEP: number
   MAX_ITERATIONS: number
 
   iterations: number = -1
 
   constructor(opts: {
-    allObstacles: Obstacle[]
-    startNode: Node
-    goalPoint: Point
+    input: SimpleRouteJson
+    startNode?: Node
+    goalPoint?: Point
     GRID_STEP?: number
     MAX_ITERATIONS?: number
   }) {
-    this.allObstacles = opts.allObstacles
+    this.input = opts.input
+    this.allObstacles = opts.input.obstacles
     this.startNode = opts.startNode
     this.goalPoint = opts.goalPoint
     this.GRID_STEP = opts.GRID_STEP ?? 0.1
@@ -85,7 +92,7 @@ export class GeneralizedAstarAutorouter {
     openSet.sort((a, b) => a.f - b.f)
 
     const current = openSet.shift()!
-    const goalDist = manDist(current, this.goalPoint)
+    const goalDist = manDist(current, this.goalPoint!)
     if (goalDist <= GRID_STEP * 2) {
       return {
         solved: true,
@@ -107,7 +114,7 @@ export class GeneralizedAstarAutorouter {
       )
 
       if (!existingNeighbor || tentativeG < existingNeighbor.g) {
-        const h = manDist(neighbor, this.goalPoint)
+        const h = manDist(neighbor, this.goalPoint!)
 
         const f = tentativeG + h
 
@@ -173,10 +180,10 @@ export class GeneralizedAstarAutorouter {
         this.debugMessage += `t${this.debugTraceCount}: ${this.iterations} iterations\n`
       }
 
-      return { solved: true, route }
+      return { solved: true, route, connectionName: connection.name }
     }
 
-    return { solved: false }
+    return { solved: false, connectionName: connection.name }
   }
 
   /**
@@ -184,12 +191,10 @@ export class GeneralizedAstarAutorouter {
    * and add obstacles for each successfully solved connection. Override this
    * to implement "rip and replace" rerouting strategies.
    */
-  solveAllConnections(
-    connections: SimpleRouteConnection[],
-  ): ConnectionSolveResult[] {
+  solve(): ConnectionSolveResult[] {
     const solutions: ConnectionSolveResult[] = []
     const obstaclesFromTraces: Obstacle[] = []
-    for (const connection of connections) {
+    for (const connection of this.input.connections) {
       this.obstacles = new FastObstacleList(
         this.allObstacles
           .filter((obstacle) => !obstacle.connectedTo.includes(connection.name))
@@ -204,7 +209,29 @@ export class GeneralizedAstarAutorouter {
         )
       }
     }
+
     return solutions
+  }
+
+  solveAndMapToTraces(): SimplifiedPcbTrace[] {
+    const solutions = this.solve()
+
+    return solutions.flatMap((solution) => {
+      if (!solution.solved) return []
+      return [
+        {
+          type: "pcb_trace",
+          pcb_trace_id: `pcb_trace_for_${solution.connectionName}`,
+          route: solution.route.map((point) => ({
+            route_type: "wire",
+            x: point.x,
+            y: point.y,
+            width: 0.1, // TODO use configurable width
+            layer: "top", // Default layer, adjust as needed
+          })),
+        },
+      ]
+    })
   }
 
   drawDebugSolution({
