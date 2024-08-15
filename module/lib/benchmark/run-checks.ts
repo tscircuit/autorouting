@@ -10,7 +10,7 @@ export const runChecks = (
 ): AnySoupElement[] => {
   const errors = [
     ...checkEachPcbTraceNonOverlapping(problemSoup.concat(solutionSoup)),
-    ...checkEachPcbPortConnected(solutionSoup),
+    ...checkEachPcbPortConnected(problemSoup.concat(solutionSoup)),
   ]
   return errors
 }

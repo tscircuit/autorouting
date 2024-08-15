@@ -11,10 +11,13 @@ import type {
 } from "@tscircuit/soup"
 import type { SolutionWithDebugInfo } from "autorouting-dataset/lib/solver-utils/ProblemSolver"
 import Debug from "debug"
+import { getObstaclesFromTrace } from "./lib/getObstaclesFromTrace"
 
 const debug = Debug("autorouting-dataset:infinite-grid-ijump-astar")
 
 let debugGroup: string | null = null
+let debugTraceCount = 0
+let debugMessage: string | null = null
 const debugSolutions: any = {}
 
 const clamp = (min: number, max: number, value: number) => {
@@ -144,6 +147,7 @@ function getObstacleAt(
   return null
 }
 
+const MAX_ITERATIONS = 100
 const GRID_STEP = 0.1
 const FAST_STEP = 2
 const EXTRA_STEP_PENALTY = 1
@@ -154,17 +158,103 @@ const MAX_STEP = 100
  * paths, but often sacrificing speed. Making it higher than 1 will make it go
  * down more rabbitholes, but in most cases find a path faster.
  */
-const HEURISTIC_PENALTY_MULTIPLIER = 3
+const HEURISTIC_PENALTY_MULTIPLIER = 1.5
 
-// Still validating this, see https://github.com/tscircuit/autorouting-dataset/issues/28
+/**
+ * EXPERIMENTAL
+ * If there are no obstacles to our left or right, don't move backwards
+ *
+ * Still validating this, see https://github.com/tscircuit/autorouting-dataset/issues/28
+ **/
 const SHOULD_IGNORE_SMALL_UNNECESSARY_BACKSTEPS = true
 
 /**
+ * EXPERIMENTAL
  * If we're stepping greater than FAST_STEP, add a neighbor inbetween, this
  * breaks up large steps (TODO, we should really break into d/FAST_STEP
  * segments)
  */
 const SHOULD_SEGMENT_LARGE_STEPS = true
+
+/**
+ * EXPERIMENTAL, EXPENSIVE
+ * Conjoined obstacle detection means that when we're trying to find the
+ * distance to overcome an obstacle, we check to see if there's another obstacle
+ * at the end of our run. If there is, we continue adding to the distance to
+ * overcome.
+ *
+ * This increases the number of obstacle checks dramatically, but decreases
+ * the number of iterations. Pre-merging obstacles (based on trace width) may be
+ * much more efficient.
+ *
+ */
+const SHOULD_DETECT_CONJOINED_OBSTACLES = true
+const MAX_CONJOINED_OBSTACLES = 20
+
+function getDistanceToOvercomeObstacle(
+  node: { x: number; y: number },
+  dir: { x: number; y: number; distance: number },
+  orthoDir: { x: number; y: number; distance: number },
+  obstacle: Obstacle,
+  obstacles: Obstacle[],
+  obstaclesInRow: number = 0,
+): number {
+  let distToOvercomeObstacle: number
+  if (dir.x === 0) {
+    if (dir.y > 0) {
+      distToOvercomeObstacle = obstacle.center.y + obstacle.height / 2 - node.y
+    } else {
+      distToOvercomeObstacle =
+        node.y - (obstacle.center.y - obstacle.height / 2)
+    }
+  } else {
+    if (dir.x > 0) {
+      distToOvercomeObstacle = obstacle.center.x + obstacle.width / 2 - node.x
+    } else {
+      distToOvercomeObstacle = node.x - (obstacle.center.x - obstacle.width / 2)
+    }
+  }
+  distToOvercomeObstacle += OBSTACLE_MARGIN // + GRID_STEP
+
+  if (
+    SHOULD_DETECT_CONJOINED_OBSTACLES &&
+    obstaclesInRow < MAX_CONJOINED_OBSTACLES
+  ) {
+    const obstacleAtEnd = getObstacleAt(
+      node.x +
+        dir.x * distToOvercomeObstacle +
+        orthoDir.x * (orthoDir.distance + 0.001),
+      node.y +
+        dir.y * distToOvercomeObstacle +
+        orthoDir.y * (orthoDir.distance + 0.001),
+      obstacles,
+    )
+    if (obstacleAtEnd === obstacle) {
+      return distToOvercomeObstacle
+      // TODO Not sure why this happens, it does happen often
+      throw new Error(
+        "obstacleAtEnd === obstacle, we're bad at computing overcoming distance because it didn't overcome the obstacle",
+      )
+    }
+
+    if (obstacleAtEnd && obstacleAtEnd.type === "rect") {
+      const endObstacleDistToOvercome = getDistanceToOvercomeObstacle(
+        {
+          x: node.x + dir.x * distToOvercomeObstacle,
+          y: node.y + dir.y * distToOvercomeObstacle,
+        },
+        dir,
+        orthoDir,
+        obstacleAtEnd,
+        obstacles,
+        obstaclesInRow + 1,
+      )
+      distToOvercomeObstacle += endObstacleDistToOvercome
+    }
+  }
+
+  return distToOvercomeObstacle
+}
 
 function getNeighbors(node: Node, goal: Point, input: SimpleRouteJson): Node[] {
   const neighbors: Node[] = []
@@ -292,25 +382,13 @@ function getNeighbors(node: Node, goal: Point, input: SimpleRouteJson): Node[] {
       )
 
       if (obstacle && obstacle.type === "rect") {
-        let distToOvercomeObstacle: number
-        if (dir.x === 0) {
-          if (dir.y > 0) {
-            distToOvercomeObstacle =
-              obstacle.center.y + obstacle.height / 2 - node.y
-          } else {
-            distToOvercomeObstacle =
-              node.y - (obstacle.center.y - obstacle.height / 2)
-          }
-        } else {
-          if (dir.x > 0) {
-            distToOvercomeObstacle =
-              obstacle.center.x + obstacle.width / 2 - node.x
-          } else {
-            distToOvercomeObstacle =
-              node.x - (obstacle.center.x - obstacle.width / 2)
-          }
-        }
-        distToOvercomeObstacle += OBSTACLE_MARGIN + GRID_STEP
+        const distToOvercomeObstacle = getDistanceToOvercomeObstacle(
+          node,
+          dir,
+          orthoDir,
+          obstacle,
+          input.obstacles,
+        )
 
         const oStepX = dir.x * distToOvercomeObstacle
         const oStepY = dir.y * distToOvercomeObstacle
@@ -431,22 +509,21 @@ function aStar(
   }
   openSet.push(startNode)
 
-  let iters = 0
+  let iters = -1
   while (openSet.length > 0) {
     iters++
-    if (iters > 2000) {
-      console.log("ITERATIONS MAXED OUT")
+    if (iters > MAX_ITERATIONS) {
+      debug("ITERATIONS MAXED OUT")
       return null
     }
     let debugSolution: Array<
       PcbFabricationNoteText | PcbFabricationNotePath
     > | null = null
     if (debug.enabled) {
-      const groupSize = 1
-      const debugGroupNum = Math.floor((iters - 1) / groupSize)
-      // No more than 10 groups to avoid massive output
-      if (debugGroupNum < 10) {
-        debugGroup = `iter${debugGroupNum * groupSize}_${(debugGroupNum + 1) * groupSize}`
+      const debugGroupNum = iters
+      // No more than 20 groups to avoid massive output
+      if (debugGroupNum < 20) {
+        debugGroup = `t${debugTraceCount}_iter[${debugGroupNum}]`
         debugSolutions[debugGroup] ??= []
         debugSolution = debugSolutions[debugGroup]
       } else {
@@ -466,8 +543,9 @@ function aStar(
         path.unshift({ x: node.x, y: node.y })
         node = node.parent
       }
+      debug(`Path found after ${iters} iterations`)
       if (debug.enabled) {
-        console.log(`Path found after ${iters} iterations`)
+        debugMessage += `t${debugTraceCount}: ${iters} iterations\n`
       }
       return path
     }
@@ -598,11 +676,8 @@ function routeConnection(
     if (path) {
       routes.push(...path)
     } else {
-      console.warn(
-        `No path found for connection ${connection.name} between points`,
-        start,
-        end,
-      )
+      debugMessage += `t${debugTraceCount}: could not find path\n`
+      debug(`No path found for connection ${connection.name} between points`)
     }
   }
 
@@ -622,6 +697,8 @@ function routeConnection(
 export function autoroute(soup: AnySoupElement[]): SolutionWithDebugInfo {
   if (debug.enabled) {
     debugGroup = null
+    debugTraceCount = 0
+    debugMessage = ""
     for (const key in debugSolutions) {
       delete debugSolutions[key]
     }
@@ -629,13 +706,24 @@ export function autoroute(soup: AnySoupElement[]): SolutionWithDebugInfo {
   const input = getSimpleRouteJson(soup)
   const traces: SimplifiedPcbTrace[] = []
 
+  const traceObstacles: Obstacle[] = []
+
   for (const connection of input.connections) {
-    const trace = routeConnection(connection, input)
+    const trace = routeConnection(connection, {
+      ...input,
+      obstacles: input.obstacles.concat(traceObstacles),
+    })
+
+    // Add traceObstacles created by this trace
+    traceObstacles.push(...getObstaclesFromTrace(trace, connection.name))
+
     traces.push(trace)
+    debugTraceCount++
   }
 
   return {
     solution: traces,
     debugSolutions,
+    debugMessage,
   }
 }
