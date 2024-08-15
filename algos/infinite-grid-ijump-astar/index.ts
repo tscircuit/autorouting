@@ -8,6 +8,7 @@ import type {
   AnySoupElement,
   PcbFabricationNotePath,
   PcbFabricationNoteText,
+  PCBSMTPad,
 } from "@tscircuit/soup"
 import type { SolutionWithDebugInfo } from "autorouting-dataset/lib/solver-utils/ProblemSolver"
 import Debug from "debug"
@@ -158,7 +159,7 @@ const MAX_STEP = 100
  * paths, but often sacrificing speed. Making it higher than 1 will make it go
  * down more rabbitholes, but in most cases find a path faster.
  */
-const HEURISTIC_PENALTY_MULTIPLIER = 1.5
+const HEURISTIC_PENALTY_MULTIPLIER = 2
 
 /**
  * EXPERIMENTAL
@@ -238,6 +239,24 @@ function getDistanceToOvercomeObstacle(
     }
 
     if (obstacleAtEnd && obstacleAtEnd.type === "rect") {
+      // Make sure obstacle cannot block the path if the path is extended, this
+      // is guaranteed if the obstacleAtEnd's dimension orthogonal to the path
+      // we're traveling is smaller or equal to the previous obstacle's
+      // orthogonal dimension
+      // Said another way: The path could be blocked if the next conjoined
+      // obstacle is bigger and is extending in the same direction as the path
+      // https://github.com/tscircuit/autorouting-dataset/issues/31
+      const extendingAlongXAxis = dir.y === 0
+      const o1OrthoDim = extendingAlongXAxis ? obstacle.height : obstacle.width
+      const o2OrthoDim = extendingAlongXAxis
+        ? obstacleAtEnd.height
+        : obstacleAtEnd.width
+
+      if (o2OrthoDim > o1OrthoDim) {
+        debug("next obstacle on path is bigger, not trying to overcome it")
+        return distToOvercomeObstacle
+      }
+
       const endObstacleDistToOvercome = getDistanceToOvercomeObstacle(
         {
           x: node.x + dir.x * distToOvercomeObstacle,
@@ -561,7 +580,8 @@ function aStar(
         current.g + EXTRA_STEP_PENALTY + neighbor.distFromParent // manhattanDistance(current, neighbor) // neighbor.distFromParent // GRID_STEP
 
       const existingNeighbor = openSet.find(
-        (n) => n.x === neighbor.x && n.y === neighbor.y,
+        // (n) => n.x === neighbor.x && n.y === neighbor.y,
+        (n) => manhattanDistance(n, neighbor) < GRID_STEP,
       )
 
       if (!existingNeighbor || tentativeG < existingNeighbor.g) {
@@ -676,7 +696,9 @@ function routeConnection(
     if (path) {
       routes.push(...path)
     } else {
-      debugMessage += `t${debugTraceCount}: could not find path\n`
+      if (debug.enabled) {
+        debugMessage += `t${debugTraceCount}: could not find path\n`
+      }
       debug(`No path found for connection ${connection.name} between points`)
     }
   }
@@ -713,6 +735,30 @@ export function autoroute(soup: AnySoupElement[]): SolutionWithDebugInfo {
       ...input,
       obstacles: input.obstacles.concat(traceObstacles),
     })
+
+    // HACK: add trace obstacles to last debugSolution
+    if (debug.enabled) {
+      for (const key in debugSolutions) {
+        if (key.startsWith(`t${debugTraceCount}_`)) {
+          debugSolutions[key].push(
+            ...traceObstacles.map(
+              (obstacle, i) =>
+                ({
+                  type: "pcb_smtpad",
+                  pcb_component_id: "",
+                  layer: "top",
+                  width: obstacle.width,
+                  shape: "rect",
+                  x: obstacle.center.x,
+                  y: obstacle.center.y,
+                  pcb_smtpad_id: `trace_obstacle_${i}`,
+                  height: obstacle.height,
+                }) as PCBSMTPad,
+            ),
+          )
+        }
+      }
+    }
 
     // Add traceObstacles created by this trace
     traceObstacles.push(...getObstaclesFromTrace(trace, connection.name))

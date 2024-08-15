@@ -3,6 +3,7 @@ import { renderCircuitToSoup } from "../../generator-utils/renderCircuitToSoup"
 import type { ProblemGenerator } from "../types"
 import { TracesCircuit } from "./TracesCircuit"
 import { replaceTracesWithErrors } from "../../generator-utils/replaceTracesWithErrors"
+import { withCheckRegenerate } from "../utils/with-check-regenerate"
 
 export const getTracesProblemGenerator = (): ProblemGenerator => {
   const generateTracesProblem: ProblemGenerator["getExample"] = async ({
@@ -14,6 +15,6 @@ export const getTracesProblemGenerator = (): ProblemGenerator => {
   }
 
   return {
-    getExample: generateTracesProblem,
+    getExample: withCheckRegenerate(generateTracesProblem),
   }
 }
