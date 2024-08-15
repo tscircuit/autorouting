@@ -696,7 +696,9 @@ function routeConnection(
     if (path) {
       routes.push(...path)
     } else {
-      debugMessage += `t${debugTraceCount}: could not find path\n`
+      if (debug.enabled) {
+        debugMessage += `t${debugTraceCount}: could not find path\n`
+      }
       debug(`No path found for connection ${connection.name} between points`)
     }
   }
