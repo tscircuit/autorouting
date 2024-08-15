@@ -21,6 +21,12 @@ export type SolutionWithDebugInfo<
    * that outputs a visualization of it's mesh.
    */
   debugSolutions?: Record<string, AnySoupElement[]>
+
+  /**
+   * Solvers can return a debugMessage, usually with the iteration count or odd
+   * cases etc. This is displayed below the solution in the dev server.
+   */
+  debugMessage?: string | null
 }
 
 export type ProblemSolver = (

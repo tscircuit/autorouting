@@ -17,6 +17,7 @@ const debug = Debug("autorouting-dataset:infinite-grid-ijump-astar")
 
 let debugGroup: string | null = null
 let debugTraceCount = 0
+let debugMessage: string | null = null
 const debugSolutions: any = {}
 
 const clamp = (min: number, max: number, value: number) => {
@@ -146,7 +147,7 @@ function getObstacleAt(
   return null
 }
 
-const MAX_ITERATIONS = 2
+const MAX_ITERATIONS = 100
 const GRID_STEP = 0.1
 const FAST_STEP = 2
 const EXTRA_STEP_PENALTY = 1
@@ -157,7 +158,7 @@ const MAX_STEP = 100
  * paths, but often sacrificing speed. Making it higher than 1 will make it go
  * down more rabbitholes, but in most cases find a path faster.
  */
-const HEURISTIC_PENALTY_MULTIPLIER = 3
+const HEURISTIC_PENALTY_MULTIPLIER = 1.5
 
 /**
  * EXPERIMENTAL
@@ -181,20 +182,22 @@ const SHOULD_SEGMENT_LARGE_STEPS = true
  * distance to overcome an obstacle, we check to see if there's another obstacle
  * at the end of our run. If there is, we continue adding to the distance to
  * overcome.
- * 
+ *
  * This increases the number of obstacle checks dramatically, but decreases
  * the number of iterations. Pre-merging obstacles (based on trace width) may be
  * much more efficient.
  *
  */
 const SHOULD_DETECT_CONJOINED_OBSTACLES = true
+const MAX_CONJOINED_OBSTACLES = 20
 
 function getDistanceToOvercomeObstacle(
   node: { x: number; y: number },
   dir: { x: number; y: number; distance: number },
+  orthoDir: { x: number; y: number; distance: number },
   obstacle: Obstacle,
   obstacles: Obstacle[],
-  obstaclesInRow?: number=  0
+  obstaclesInRow: number = 0,
 ): number {
   let distToOvercomeObstacle: number
   if (dir.x === 0) {
@@ -213,25 +216,40 @@ function getDistanceToOvercomeObstacle(
   }
   distToOvercomeObstacle += OBSTACLE_MARGIN // + GRID_STEP
 
-  if (SHOULD_DETECT_CONJOINED_OBSTACLES) {
+  if (
+    SHOULD_DETECT_CONJOINED_OBSTACLES &&
+    obstaclesInRow < MAX_CONJOINED_OBSTACLES
+  ) {
     const obstacleAtEnd = getObstacleAt(
-      node.x + dir.x * distToOvercomeObstacle,
-      node.y + dir.y * distToOvercomeObstacle,
+      node.x +
+        dir.x * distToOvercomeObstacle +
+        orthoDir.x * (orthoDir.distance + 0.001),
+      node.y +
+        dir.y * distToOvercomeObstacle +
+        orthoDir.y * (orthoDir.distance + 0.001),
       obstacles,
     )
-    console.log("detected conjoined obstacle", obstaclesInRow)
+    if (obstacleAtEnd === obstacle) {
+      return distToOvercomeObstacle
+      // TODO Not sure why this happens, it does happen often
+      throw new Error(
+        "obstacleAtEnd === obstacle, we're bad at computing overcoming distance because it didn't overcome the obstacle",
+      )
+    }
 
     if (obstacleAtEnd && obstacleAtEnd.type === "rect") {
-      distToOvercomeObstacle += getDistanceToOvercomeObstacle(
+      const endObstacleDistToOvercome = getDistanceToOvercomeObstacle(
         {
           x: node.x + dir.x * distToOvercomeObstacle,
           y: node.y + dir.y * distToOvercomeObstacle,
         },
         dir,
+        orthoDir,
         obstacleAtEnd,
         obstacles,
         obstaclesInRow + 1,
       )
+      distToOvercomeObstacle += endObstacleDistToOvercome
     }
   }
 
@@ -367,6 +385,7 @@ function getNeighbors(node: Node, goal: Point, input: SimpleRouteJson): Node[] {
         const distToOvercomeObstacle = getDistanceToOvercomeObstacle(
           node,
           dir,
+          orthoDir,
           obstacle,
           input.obstacles,
         )
@@ -525,6 +544,9 @@ function aStar(
         node = node.parent
       }
       debug(`Path found after ${iters} iterations`)
+      if (debug.enabled) {
+        debugMessage += `t${debugTraceCount}: ${iters} iterations\n`
+      }
       return path
     }
 
@@ -654,13 +676,8 @@ function routeConnection(
     if (path) {
       routes.push(...path)
     } else {
-      if (debug.enabled) {
-        console.warn(
-          `No path found for connection ${connection.name} between points`,
-          start,
-          end,
-        )
-      }
+      debugMessage += `t${debugTraceCount}: could not find path\n`
+      debug(`No path found for connection ${connection.name} between points`)
     }
   }
 
@@ -681,6 +698,7 @@ export function autoroute(soup: AnySoupElement[]): SolutionWithDebugInfo {
   if (debug.enabled) {
     debugGroup = null
     debugTraceCount = 0
+    debugMessage = ""
     for (const key in debugSolutions) {
       delete debugSolutions[key]
     }
@@ -706,5 +724,6 @@ export function autoroute(soup: AnySoupElement[]): SolutionWithDebugInfo {
   return {
     solution: traces,
     debugSolutions,
+    debugMessage,
   }
 }

@@ -188,6 +188,7 @@ export default () => {
               "No solution preloaded"
             )}
           </ErrorBoundary>
+          <div style={{ whiteSpace: "pre-wrap" }}>{window.DEBUG_MESSAGE}</div>
         </div>
       </div>
     </div>

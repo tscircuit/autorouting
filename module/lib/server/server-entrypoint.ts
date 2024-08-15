@@ -91,12 +91,15 @@ export const serverEntrypoint = async (
 
   let solutionComputeTime: number | undefined
   let debugSolutions: Record<string, AnySoupElement[]> | undefined
+  let debugMessage: string | undefined
+
   if (problemSoup) {
     const startTime = performance.now()
     const solverResult = await normalizeSolution(
       solver(problemSoup as AnySoupElement[]),
     )
     debugSolutions = solverResult.debugSolutions
+    debugMessage = solverResult.debugMessage
 
     const endTime = performance.now()
     solutionComputeTime = endTime - startTime
@@ -139,6 +142,7 @@ export const serverEntrypoint = async (
         problemSoup,
         solutionSoup,
         debugSolutions,
+        debugMessage,
         solutionComputeTime,
         userMessage,
         solverName: ctx.solverName,
