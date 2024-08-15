@@ -88,11 +88,11 @@ export class GeneralizedAstarAutorouter {
     newNeighbors: Node[]
   } {
     this.iterations += 1
-    const { openSet, closedSet, GRID_STEP } = this
+    const { openSet, closedSet, GRID_STEP, goalPoint } = this
     openSet.sort((a, b) => a.f - b.f)
 
     const current = openSet.shift()!
-    const goalDist = manDist(current, this.goalPoint!)
+    const goalDist = manDist(current, goalPoint!)
     if (goalDist <= GRID_STEP * 2) {
       return {
         solved: true,
@@ -146,15 +146,18 @@ export class GeneralizedAstarAutorouter {
   }
 
   solveConnection(connection: SimpleRouteConnection): ConnectionSolveResult {
-    if (connection.pointsToConnect.length > 2) {
+    const { pointsToConnect } = connection
+    if (pointsToConnect.length > 2) {
       throw new Error(
         "GeneralizedAstarAutorouter doesn't currently support 2+ points in a connection",
       )
     }
 
+    this.iterations = 0
+    this.closedSet = new Set()
     this.startNode = {
-      x: connection.pointsToConnect[0].x,
-      y: connection.pointsToConnect[0].y,
+      x: pointsToConnect[0].x,
+      y: pointsToConnect[0].y,
       manDistFromParent: 0,
       f: 0,
       g: 0,
@@ -162,25 +165,30 @@ export class GeneralizedAstarAutorouter {
       nodesInPath: 0,
       parent: null,
     }
-
-    this.goalPoint =
-      connection.pointsToConnect[connection.pointsToConnect.length - 1]
+    this.goalPoint = pointsToConnect[pointsToConnect.length - 1]
+    this.openSet = [this.startNode]
 
     while (this.iterations < this.MAX_ITERATIONS) {
       const { solved, current } = this.solveOneStep()
 
-      const route: Point[] = []
-      let node: Node | null = current
-      while (node) {
-        route.unshift({ x: node.x, y: node.y })
-        node = node.parent
-      }
+      if (solved) {
+        const route: Point[] = []
+        let node: Node | null = current
+        while (node) {
+          route.unshift({ x: node.x, y: node.y })
+          node = node.parent
+        }
 
-      if (debug.enabled) {
-        this.debugMessage += `t${this.debugTraceCount}: ${this.iterations} iterations\n`
-      }
+        if (debug.enabled) {
+          this.debugMessage += `t${this.debugTraceCount}: ${this.iterations} iterations\n`
+        }
 
-      return { solved: true, route, connectionName: connection.name }
+        return { solved: true, route, connectionName: connection.name }
+      }
+    }
+
+    if (debug.enabled) {
+      this.debugMessage += `t${this.debugTraceCount}: ${this.iterations} iterations (failed)\n`
     }
 
     return { solved: false, connectionName: connection.name }
@@ -194,7 +202,9 @@ export class GeneralizedAstarAutorouter {
   solve(): ConnectionSolveResult[] {
     const solutions: ConnectionSolveResult[] = []
     const obstaclesFromTraces: Obstacle[] = []
+    this.debugTraceCount = 0
     for (const connection of this.input.connections) {
+      this.debugTraceCount += 1
       this.obstacles = new FastObstacleList(
         this.allObstacles
           .filter((obstacle) => !obstacle.connectedTo.includes(connection.name))
@@ -241,6 +251,7 @@ export class GeneralizedAstarAutorouter {
     current: Node
     newNeighbors: Node[]
   }) {
+    if (this.iterations > 20) return
     const { openSet, debugTraceCount, debugSolutions } = this
     const debugGroup = `t${debugTraceCount}_iter[${this.iterations - 1}]`
 

@@ -1,6 +1,6 @@
 import type { SimpleRouteJson, SimplifiedPcbTrace } from "autorouting-dataset"
-import { GeneralizedAstarAutorouter } from "./lib/GeneralizedAstar"
-import type { Node, Point } from "./lib/types"
+import { GeneralizedAstarAutorouter } from "../infinite-grid-ijump-astar/v2/lib/GeneralizedAstar"
+import type { Node, Point } from "../infinite-grid-ijump-astar/v2/lib/types"
 
 export class InfgridAutorouter extends GeneralizedAstarAutorouter {
   getNeighbors(node: Node): Array<Point> {

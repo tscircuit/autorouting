@@ -1,6 +1,6 @@
 import type { AnySoupElement } from "@tscircuit/soup"
 import type { SolutionWithDebugInfo } from "autorouting-dataset/lib/solver-utils/ProblemSolver"
-import { InfgridAutorouter } from "./InfgridAutorouter"
+import { InfgridAutorouter } from "../../infinite-grid-astar/InfgridAutorouter"
 import { getSimpleRouteJson } from "autorouting-dataset"
 
 export function autoroute(soup: AnySoupElement[]): SolutionWithDebugInfo {
@@ -9,7 +9,7 @@ export function autoroute(soup: AnySoupElement[]): SolutionWithDebugInfo {
   const autorouter = new InfgridAutorouter({
     input,
   })
-  autorouter.MAX_ITERATIONS = 20_000
+  autorouter.MAX_ITERATIONS = 10_000
 
   const solution = autorouter.solveAndMapToTraces()
 
