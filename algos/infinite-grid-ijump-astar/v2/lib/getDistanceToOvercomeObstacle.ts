@@ -1,6 +1,7 @@
 import type { Obstacle } from "autorouting-dataset"
 import Debug from "debug"
-import type { QuadtreeObstacleList } from "./QuadtreeObstacleList"
+import type { PointWithDistance } from "./types"
+import type { ObstacleList } from "./ObstacleList"
 
 const debug = Debug(
   "autorouting-dataset:infinite-grid-ijump-astar:get-distance-to-overcome-obstacle",
@@ -8,8 +9,8 @@ const debug = Debug(
 
 export function getDistanceToOvercomeObstacle({
   node,
-  dir,
-  orthoDir,
+  travelDir,
+  primaryDir,
   obstacle,
   obstacles,
   obstaclesInRow = 0,
@@ -18,25 +19,25 @@ export function getDistanceToOvercomeObstacle({
   MAX_CONJOINED_OBSTACLES = 20,
 }: {
   node: { x: number; y: number }
-  dir: { x: number; y: number; distance: number }
-  orthoDir: { x: number; y: number; distance: number }
+  travelDir: PointWithDistance
+  primaryDir: PointWithDistance
   obstacle: Obstacle
-  obstacles: QuadtreeObstacleList
+  obstacles: ObstacleList
   OBSTACLE_MARGIN: number
   SHOULD_DETECT_CONJOINED_OBSTACLES: boolean
   MAX_CONJOINED_OBSTACLES: number
   obstaclesInRow: number
 }): number {
   let distToOvercomeObstacle: number
-  if (dir.x === 0) {
-    if (dir.y > 0) {
+  if (travelDir.x === 0) {
+    if (travelDir.y > 0) {
       distToOvercomeObstacle = obstacle.center.y + obstacle.height / 2 - node.y
     } else {
       distToOvercomeObstacle =
         node.y - (obstacle.center.y - obstacle.height / 2)
     }
   } else {
-    if (dir.x > 0) {
+    if (travelDir.x > 0) {
       distToOvercomeObstacle = obstacle.center.x + obstacle.width / 2 - node.x
     } else {
       distToOvercomeObstacle = node.x - (obstacle.center.x - obstacle.width / 2)
@@ -50,11 +51,11 @@ export function getDistanceToOvercomeObstacle({
   ) {
     const obstacleAtEnd = obstacles.getObstacleAt(
       node.x +
-        dir.x * distToOvercomeObstacle +
-        orthoDir.x * (orthoDir.distance + 0.001),
+        travelDir.x * distToOvercomeObstacle +
+        primaryDir.x * (primaryDir.distance + 0.001),
       node.y +
-        dir.y * distToOvercomeObstacle +
-        orthoDir.y * (orthoDir.distance + 0.001),
+        travelDir.y * distToOvercomeObstacle +
+        primaryDir.y * (primaryDir.distance + 0.001),
     )
     if (obstacleAtEnd === obstacle) {
       return distToOvercomeObstacle
@@ -72,7 +73,7 @@ export function getDistanceToOvercomeObstacle({
       // Said another way: The path could be blocked if the next conjoined
       // obstacle is bigger and is extending in the same direction as the path
       // https://github.com/tscircuit/autorouting-dataset/issues/31
-      const extendingAlongXAxis = dir.y === 0
+      const extendingAlongXAxis = travelDir.y === 0
       const o1OrthoDim = extendingAlongXAxis ? obstacle.height : obstacle.width
       const o2OrthoDim = extendingAlongXAxis
         ? obstacleAtEnd.height
@@ -85,11 +86,11 @@ export function getDistanceToOvercomeObstacle({
 
       const endObstacleDistToOvercome = getDistanceToOvercomeObstacle({
         node: {
-          x: node.x + dir.x * distToOvercomeObstacle,
-          y: node.y + dir.y * distToOvercomeObstacle,
+          x: node.x + travelDir.x * distToOvercomeObstacle,
+          y: node.y + travelDir.y * distToOvercomeObstacle,
         },
-        dir,
-        orthoDir,
+        travelDir: travelDir,
+        primaryDir: primaryDir,
         obstacle: obstacleAtEnd,
         obstacles,
         obstaclesInRow: obstaclesInRow + 1,

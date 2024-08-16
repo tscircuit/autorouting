@@ -39,9 +39,9 @@ export class GeneralizedAstarAutorouter {
    * Setting this greater than 1 makes the algorithm find suboptimal paths and
    * act more greedy, but at greatly improves performance.
    *
-   * Recommended value is between 1 and 1.5
+   * Recommended value is between 1.1 and 1.5
    */
-  GREEDY_MULTIPLIER = 10
+  GREEDY_MULTIPLIER = 1.1
 
   iterations: number = -1
 

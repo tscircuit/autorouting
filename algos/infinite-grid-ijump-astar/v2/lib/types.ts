@@ -1,3 +1,5 @@
+import type { Obstacle } from "autorouting-dataset"
+
 export interface DirectionDistances {
   left: number
   top: number
@@ -10,6 +12,10 @@ export interface Point {
   y: number
 }
 
+export interface PointWithDistance extends Point {
+  distance: number
+}
+
 export interface Node extends Point {
   /** Distance from the parent node (along path) */
   g: number
@@ -20,5 +26,6 @@ export interface Node extends Point {
   /** Manhattan Distance from the parent node */
   manDistFromParent: number
   nodesInPath: number
+  obstacleHit?: Obstacle
   parent: Node | null
 }
