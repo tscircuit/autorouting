@@ -9,7 +9,7 @@ export function autoroute(soup: AnySoupElement[]): SolutionWithDebugInfo {
   const autorouter = new InfgridAutorouter({
     input,
   })
-  autorouter.MAX_ITERATIONS = 5_000
+  autorouter.MAX_ITERATIONS = 20_000
 
   const solution = autorouter.solveAndMapToTraces()
 

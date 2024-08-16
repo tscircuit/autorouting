@@ -17,3 +17,12 @@ export type Obstacle = {
   height: number
   connectedTo: string[]
 }
+
+export interface ObstacleWithEdges extends Obstacle {
+  top: number
+  bottom: number
+  left: number
+  right: number
+}
+
+export type Edge = "top" | "bottom" | "left" | "right"

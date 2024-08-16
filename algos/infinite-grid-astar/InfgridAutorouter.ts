@@ -13,7 +13,8 @@ export class InfgridAutorouter extends GeneralizedAstarAutorouter {
 
     return dirs
       .filter(
-        (dir) => !this.obstacles!.isObstacleAt(node.x + dir.x, node.y + dir.y),
+        (dir) =>
+          !this.obstacles!.isObstacleAt(node.x + dir.x, node.y + dir.y, 0),
       )
       .map((dir) => ({
         x: node.x + dir.x,

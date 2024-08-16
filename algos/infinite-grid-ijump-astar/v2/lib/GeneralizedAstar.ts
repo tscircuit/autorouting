@@ -1,5 +1,5 @@
 import type { AnySoupElement } from "@tscircuit/soup"
-import { FastObstacleList } from "./FastObstacleList"
+import { QuadtreeObstacleList } from "./QuadtreeObstacleList"
 import type { Node, Point } from "./types"
 import { manDist, nodeName } from "./util"
 
@@ -11,6 +11,7 @@ import type {
   SimplifiedPcbTrace,
 } from "autorouting-dataset"
 import { getObstaclesFromRoute } from "./getObstaclesFromRoute"
+import { ObstacleList } from "./ObstacleList"
 
 const debug = Debug("autorouting-dataset:astar")
 
@@ -27,12 +28,20 @@ export class GeneralizedAstarAutorouter {
   debugTraceCount: number = 0
 
   input: SimpleRouteJson
-  obstacles?: FastObstacleList
+  obstacles?: ObstacleList
   allObstacles: Obstacle[]
   startNode?: Node
   goalPoint?: Point
   GRID_STEP: number
   MAX_ITERATIONS: number
+
+  /**
+   * Setting this greater than 1 makes the algorithm find suboptimal paths and
+   * act more greedy, but at greatly improves performance.
+   *
+   * Recommended value is between 1 and 1.5
+   */
+  GREEDY_MULTIPLIER = 10
 
   iterations: number = -1
 
@@ -116,7 +125,7 @@ export class GeneralizedAstarAutorouter {
       if (!existingNeighbor || tentativeG < existingNeighbor.g) {
         const h = manDist(neighbor, this.goalPoint!)
 
-        const f = tentativeG + h
+        const f = tentativeG + h * this.GREEDY_MULTIPLIER
 
         const neighborNode: Node = {
           ...neighbor,
@@ -185,6 +194,10 @@ export class GeneralizedAstarAutorouter {
 
         return { solved: true, route, connectionName: connection.name }
       }
+
+      if (this.openSet.length === 0) {
+        break
+      }
     }
 
     if (debug.enabled) {
@@ -205,7 +218,7 @@ export class GeneralizedAstarAutorouter {
     this.debugTraceCount = 0
     for (const connection of this.input.connections) {
       this.debugTraceCount += 1
-      this.obstacles = new FastObstacleList(
+      this.obstacles = new ObstacleList(
         this.allObstacles
           .filter((obstacle) => !obstacle.connectedTo.includes(connection.name))
           .concat(obstaclesFromTraces),
@@ -251,7 +264,11 @@ export class GeneralizedAstarAutorouter {
     current: Node
     newNeighbors: Node[]
   }) {
-    if (this.iterations > 20) return
+    let shouldDraw = false
+    if (this.iterations < 20) shouldDraw = true
+    if (this.iterations < 1000 && this.iterations % 100 === 0) shouldDraw = true
+    if (!shouldDraw) return
+
     const { openSet, debugTraceCount, debugSolutions } = this
     const debugGroup = `t${debugTraceCount}_iter[${this.iterations - 1}]`
 
@@ -280,22 +297,22 @@ export class GeneralizedAstarAutorouter {
         fabrication_note_path_id: `note_path_${node.x}_${node.y}`,
         layer: "top",
         route: [
-          [0, 0.1],
-          [0.1, 0],
-          [0, -0.1],
-          [-0.1, 0],
-          [0, 0.1],
+          [0, 0.05],
+          [0.05, 0],
+          [0, -0.05],
+          [-0.05, 0],
+          [0, 0.05],
         ].map(([dx, dy]) => ({
           x: node.x + dx,
           y: node.y + dy,
         })),
-        stroke_width: 0.02,
+        stroke_width: 0.01,
       })
       // Add text that indicates the order of this point
       debugSolution.push({
         type: "pcb_fabrication_note_text",
         font: "tscircuit2024",
-        font_size: 0.1,
+        font_size: 0.03,
         text: i.toString(),
         pcb_component_id: "",
         layer: "top",

@@ -1,6 +1,6 @@
 import type { Obstacle } from "autorouting-dataset"
 import Debug from "debug"
-import type { FastObstacleList } from "./FastObstacleList"
+import type { QuadtreeObstacleList } from "./QuadtreeObstacleList"
 
 const debug = Debug(
   "autorouting-dataset:infinite-grid-ijump-astar:get-distance-to-overcome-obstacle",
@@ -21,7 +21,7 @@ export function getDistanceToOvercomeObstacle({
   dir: { x: number; y: number; distance: number }
   orthoDir: { x: number; y: number; distance: number }
   obstacle: Obstacle
-  obstacles: FastObstacleList
+  obstacles: QuadtreeObstacleList
   OBSTACLE_MARGIN: number
   SHOULD_DETECT_CONJOINED_OBSTACLES: boolean
   MAX_CONJOINED_OBSTACLES: number
