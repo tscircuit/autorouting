@@ -12,10 +12,14 @@ export const dist = (a: Point, b: Point): number => {
   return ((a.x - b.x) ** 2 + (a.y - b.y) ** 2) ** 0.5
 }
 
-export const dirFromAToB = (a: Point, b: Point): { x: number; y: number } => {
-  return {
-    x: Math.sign(b.x - a.x),
-    y: Math.sign(b.y - a.y),
+export const dirFromAToB = (a: Point, b: Point): { dx: number; dy: number } => {
+  const dx = b.x - a.x
+  const dy = b.y - a.y
+
+  if (Math.abs(dx) > Math.abs(dy)) {
+    return { dx: Math.sign(dx), dy: 0 }
+  } else {
+    return { dx: 0, dy: Math.sign(dy) }
   }
 }
 

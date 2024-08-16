@@ -1,5 +1,10 @@
 import type { Obstacle, ObstacleWithEdges } from "autorouting-dataset"
-import type { DirectionDistances } from "./types"
+import type {
+  Direction,
+  DirectionDistances,
+  DirectionWithCollisionInfo,
+  Point,
+} from "./types"
 
 /**
  * A list of obstacles with functions for fast lookups, this default implementation
@@ -82,5 +87,55 @@ export class ObstacleList {
     }
 
     return result
+  }
+
+  getOrthoDirectionCollisionInfo(
+    point: Point,
+    dir: Direction,
+  ): DirectionWithCollisionInfo {
+    const { x, y } = point
+    const { dx, dy } = dir
+    let minDistance = Infinity
+    let collisionObstacle: ObstacleWithEdges | null = null
+
+    for (const obstacle of this.obstacles) {
+      const { left, right, top, bottom } = obstacle
+
+      let distance: number | null = null
+
+      if (dx === 1 && dy === 0) {
+        // Right
+        if (y >= bottom && y <= top && x < left) {
+          distance = left - x
+        }
+      } else if (dx === -1 && dy === 0) {
+        // Left
+        if (y >= bottom && y <= top && x > right) {
+          distance = x - right
+        }
+      } else if (dx === 0 && dy === 1) {
+        // Up
+        if (x >= left && x <= right && y < bottom) {
+          distance = bottom - y
+        }
+      } else if (dx === 0 && dy === -1) {
+        // Down
+        if (x >= left && x <= right && y > top) {
+          distance = y - top
+        }
+      }
+
+      if (distance !== null && distance < minDistance) {
+        minDistance = distance
+        collisionObstacle = obstacle
+      }
+    }
+
+    return {
+      dx,
+      dy,
+      wallDistance: minDistance,
+      obstacle: collisionObstacle as ObstacleWithEdges,
+    }
   }
 }

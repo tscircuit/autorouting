@@ -1,6 +1,12 @@
 import type { SimpleRouteJson, SimplifiedPcbTrace } from "autorouting-dataset"
 import { GeneralizedAstarAutorouter } from "./GeneralizedAstar"
-import type { Node, Point, PointWithDistance } from "./types"
+import type {
+  Direction,
+  DirectionWithCollisionInfo,
+  Node,
+  Point,
+  PointWithWallDistance,
+} from "./types"
 import { clamp, dirFromAToB, dist } from "./util"
 import { getDistanceToOvercomeObstacle } from "./getDistanceToOvercomeObstacle"
 import { distance } from "@tscircuit/soup"
@@ -23,16 +29,16 @@ export class IJumpAutorouter extends GeneralizedAstarAutorouter {
     primaryDir,
   }: {
     node: Node
-    travelDir: PointWithDistance
+    travelDir: PointWithWallDistance
     wallDistance: number
-    primaryDir: PointWithDistance
+    primaryDir: PointWithWallDistance
   }): Point | null {
     const obstacles = this.obstacles!
 
     const dist = getDistanceToOvercomeObstacle({
       node,
       travelDir,
-      primaryDir,
+      wallDir: primaryDir,
       obstacle: node.obstacleHit!,
       obstacles,
       OBSTACLE_MARGIN: 0.15,
@@ -54,38 +60,79 @@ export class IJumpAutorouter extends GeneralizedAstarAutorouter {
      * This is considered "forward" if we were to continue from the parent,
      * through the current node.
      */
-    let forwardDir: Point
+    let forwardDir: Direction
     if (!node.parent) {
+      forwardDir = dirFromAToB(node, this.goalPoint!)
     } else {
       forwardDir = dirFromAToB(node.parent, node)
     }
 
-    const distances = obstacles.getDirectionDistancesToNearestObstacle(
-      node.x,
-      node.y,
-    )
-
-    const dirs = [
-      { x: 0, y: 1, distance: distances.top },
-      { x: 1, y: 0, distance: distances.right },
-      { x: 0, y: -1, distance: distances.bottom },
-      { x: -1, y: 0, distance: distances.left },
+    /**
+     * All four directions and the distance to the nearest wall
+     */
+    const travelDirs1 = [
+      { dx: 0, dy: 1 },
+      { dx: 1, dy: 0 },
+      { dx: 0, dy: -1 },
+      { dx: -1, dy: 0 },
     ]
+      .filter((dir) => {
+        // If we have a parent, don't go backwards towards the parent
+        if (dir.dx === forwardDir.dx * -1 && dir.dy === forwardDir.dy * -1) {
+          return false
+        }
+        return true
+      })
+      .map((dir) => obstacles.getOrthoDirectionCollisionInfo(node, dir))
 
-    return dirs
+    console.log(travelDirs1)
+
+    /**
+     * Figure out how far to travel
+     */
+    const travelDirs2: Array<
+      DirectionWithCollisionInfo & { travelDistance: number }
+    > = []
+    for (const travelDir of travelDirs1) {
+      // const travelDistance = getDistanceToOvercomeObstacle({
+      //   node,
+      //   travelDir,
+      //   wallDir: { ...forwardDir, wallDistance: this.GRID_STEP },
+      //   obstacle: ,
+      //   obstacles,
+      //   OBSTACLE_MARGIN: 0.15,
+      //   SHOULD_DETECT_CONJOINED_OBSTACLES: false,
+      //   MAX_CONJOINED_OBSTACLES: 10, // You may need to adjust this value
+      //   obstaclesInRow: 0, // You may need to calculate this value
+      // })
+      // console.log({ travelDir, travelDistance })
+    }
+
+    return travelDirs1
       .map((dir) => ({
         ...dir,
-        stepSize: clamp(this.GRID_STEP, 1, dir.distance - this.GRID_STEP),
+        stepSize: clamp(
+          this.GRID_STEP,
+          1,
+          dir.wallDistance - this.OBSTACLE_MARGIN,
+        ),
       }))
       .filter((dir) => {
+        console.log({
+          dir,
+          isObstacleAtPoint: obstacles.isObstacleAt(
+            node.x + dir.dx * dir.stepSize,
+            node.y + dir.dy * dir.stepSize,
+          ),
+        })
         return !obstacles.isObstacleAt(
-          node.x + dir.x * dir.stepSize,
-          node.y + dir.y * dir.stepSize,
+          node.x + dir.dx * dir.stepSize,
+          node.y + dir.dy * dir.stepSize,
         )
       })
       .map((dir) => ({
-        x: node.x + dir.x * dir.stepSize,
-        y: node.y + dir.y * dir.stepSize,
+        x: node.x + dir.dx * dir.stepSize,
+        y: node.y + dir.dy * dir.stepSize,
       }))
   }
 }

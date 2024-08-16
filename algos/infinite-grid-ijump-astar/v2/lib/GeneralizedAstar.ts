@@ -33,6 +33,7 @@ export class GeneralizedAstarAutorouter {
   startNode?: Node
   goalPoint?: Point
   GRID_STEP: number
+  OBSTACLE_MARGIN: number
   MAX_ITERATIONS: number
 
   /**
@@ -50,6 +51,7 @@ export class GeneralizedAstarAutorouter {
     startNode?: Node
     goalPoint?: Point
     GRID_STEP?: number
+    OBSTACLE_MARGIN?: number
     MAX_ITERATIONS?: number
   }) {
     this.input = opts.input
@@ -57,6 +59,7 @@ export class GeneralizedAstarAutorouter {
     this.startNode = opts.startNode
     this.goalPoint = opts.goalPoint
     this.GRID_STEP = opts.GRID_STEP ?? 0.1
+    this.OBSTACLE_MARGIN = opts.OBSTACLE_MARGIN ?? 0.15
     this.MAX_ITERATIONS = opts.MAX_ITERATIONS ?? 100
 
     if (debug.enabled) {

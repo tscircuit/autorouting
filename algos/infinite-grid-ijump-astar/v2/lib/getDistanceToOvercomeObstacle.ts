@@ -1,6 +1,6 @@
 import type { Obstacle } from "autorouting-dataset"
 import Debug from "debug"
-import type { PointWithDistance } from "./types"
+import type { PointWithWallDistance } from "./types"
 import type { ObstacleList } from "./ObstacleList"
 
 const debug = Debug(
@@ -10,7 +10,7 @@ const debug = Debug(
 export function getDistanceToOvercomeObstacle({
   node,
   travelDir,
-  primaryDir,
+  wallDir,
   obstacle,
   obstacles,
   obstaclesInRow = 0,
@@ -19,8 +19,8 @@ export function getDistanceToOvercomeObstacle({
   MAX_CONJOINED_OBSTACLES = 20,
 }: {
   node: { x: number; y: number }
-  travelDir: PointWithDistance
-  primaryDir: PointWithDistance
+  travelDir: PointWithWallDistance
+  wallDir: PointWithWallDistance
   obstacle: Obstacle
   obstacles: ObstacleList
   OBSTACLE_MARGIN: number
@@ -52,10 +52,10 @@ export function getDistanceToOvercomeObstacle({
     const obstacleAtEnd = obstacles.getObstacleAt(
       node.x +
         travelDir.x * distToOvercomeObstacle +
-        primaryDir.x * (primaryDir.distance + 0.001),
+        wallDir.x * (wallDir.distance + 0.001),
       node.y +
         travelDir.y * distToOvercomeObstacle +
-        primaryDir.y * (primaryDir.distance + 0.001),
+        wallDir.y * (wallDir.distance + 0.001),
     )
     if (obstacleAtEnd === obstacle) {
       return distToOvercomeObstacle
@@ -90,7 +90,7 @@ export function getDistanceToOvercomeObstacle({
           y: node.y + travelDir.y * distToOvercomeObstacle,
         },
         travelDir: travelDir,
-        primaryDir: primaryDir,
+        wallDir: wallDir,
         obstacle: obstacleAtEnd,
         obstacles,
         obstaclesInRow: obstaclesInRow + 1,

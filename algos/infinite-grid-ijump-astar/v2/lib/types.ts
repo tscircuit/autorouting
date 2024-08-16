@@ -7,13 +7,23 @@ export interface DirectionDistances {
   right: number
 }
 
+export interface Direction {
+  dx: number
+  dy: number
+}
+
+export interface DirectionWithCollisionInfo extends Direction {
+  wallDistance: number
+  obstacle: Obstacle | null
+}
+
 export interface Point {
   x: number
   y: number
 }
 
-export interface PointWithDistance extends Point {
-  distance: number
+export interface PointWithWallDistance extends Point {
+  wallDistance: number
 }
 
 export interface Node extends Point {
