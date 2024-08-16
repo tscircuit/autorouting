@@ -116,13 +116,15 @@ export class IJumpAutorouter extends GeneralizedAstarAutorouter {
 
     return (
       travelDirs2
-        // .filter((dir) => {
-        //   // Probably shouldn't need this check...
-        //   return !obstacles.isObstacleAt(
-        //     node.x + dir.dx * dir.travelDistance,
-        //     node.y + dir.dy * dir.travelDistance,
-        //   )
-        // })
+        // If an obstacle fails this check, we messed up computing neighbors
+        // Currently this happens when we overcome obstacles and there's a
+        // different obstacle in the travel direction
+        .filter((dir) => {
+          return !obstacles.isObstacleAt(
+            node.x + dir.dx * dir.travelDistance,
+            node.y + dir.dy * dir.travelDistance,
+          )
+        })
         .map((dir) => ({
           x: node.x + dir.dx * dir.travelDistance,
           y: node.y + dir.dy * dir.travelDistance,

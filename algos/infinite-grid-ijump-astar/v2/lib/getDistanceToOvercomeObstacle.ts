@@ -53,6 +53,13 @@ export function getDistanceToOvercomeObstacle({
     SHOULD_DETECT_CONJOINED_OBSTACLES &&
     obstaclesInRow < MAX_CONJOINED_OBSTACLES
   ) {
+    // TODO: we need to detect all possible obstacles between the wallDistance
+    // and the node at the end of the distToOvercomeObstacle, there could be
+    // multiple obstacles that could interrupt the path of the node at it's
+    // next turn
+    // http://localhost:3080/problem/traces/18#t2_iter[14] is a great example
+    // of a path being too close because of a bad distToOvercomeObstacle b/c
+    // of missing detection of obstacles within the wallDistance
     const obstacleAtEnd = obstacles.getObstacleAt(
       node.x +
         travelDir.dx * distToOvercomeObstacle +
@@ -61,6 +68,19 @@ export function getDistanceToOvercomeObstacle({
         travelDir.dy * distToOvercomeObstacle +
         wallDir.dy * (wallDir.wallDistance + 0.001),
     )
+    // const obstaclesAtEnd = obstacles.getObstaclesOverlappingRegion({
+    //   minX: node.x + travelDir.dx * distToOvercomeObstacle,
+    //   minY: node.y + travelDir.dy * distToOvercomeObstacle,
+    //   maxX:
+    //     node.x +
+    //     travelDir.dx * distToOvercomeObstacle +
+    //     wallDir.dx * wallDir.wallDistance,
+    //   maxY:
+    //     node.y +
+    //     travelDir.dy * distToOvercomeObstacle +
+    //     wallDir.dy * wallDir.wallDistance,
+    // })
+
     if (obstacleAtEnd === obstacle) {
       return distToOvercomeObstacle
       // TODO Not sure why this happens, it does happen often

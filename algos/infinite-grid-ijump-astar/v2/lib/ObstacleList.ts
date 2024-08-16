@@ -138,4 +138,27 @@ export class ObstacleList {
       obstacle: collisionObstacle as ObstacleWithEdges,
     }
   }
+
+  getObstaclesOverlappingRegion(region: {
+    minX: number
+    minY: number
+    maxX: number
+    maxY: number
+  }): ObstacleWithEdges[] {
+    const obstacles: ObstacleWithEdges[] = []
+    for (const obstacle of this.obstacles) {
+      const { left, right, top, bottom } = obstacle
+
+      if (
+        left >= region.minX &&
+        right <= region.maxX &&
+        top >= region.minY &&
+        bottom <= region.maxY
+      ) {
+        obstacles.push(obstacle)
+      }
+    }
+
+    return obstacles
+  }
 }
