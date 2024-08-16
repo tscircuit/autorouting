@@ -1,4 +1,4 @@
-import type { AnySoupElement } from "@tscircuit/soup"
+import type { AnySoupElement, PCBSMTPad } from "@tscircuit/soup"
 import { QuadtreeObstacleList } from "./QuadtreeObstacleList"
 import type { Node, Point, PointWithObstacleHit } from "./types"
 import { manDist, nodeName } from "./util"
@@ -229,6 +229,11 @@ export class GeneralizedAstarAutorouter {
       )
       const result = this.solveConnection(connection)
       solutions.push(result)
+
+      if (debug.enabled) {
+        this.drawDebugTraceObstacles(obstaclesFromTraces)
+      }
+
       if (result.solved) {
         solutions.push(result)
         obstaclesFromTraces.push(
@@ -261,6 +266,39 @@ export class GeneralizedAstarAutorouter {
     })
   }
 
+  getDebugGroup(): string | null {
+    const dgn = `t${this.debugTraceCount}_iter[${this.iterations - 1}]`
+    if (this.iterations < 30) return dgn
+    if (this.iterations < 100 && this.iterations % 10 === 0) return dgn
+    if (this.iterations < 1000 && this.iterations % 100 === 0) return dgn
+    if (!this.debugSolutions) return dgn
+    return null
+  }
+
+  drawDebugTraceObstacles(obstacles: Obstacle[]) {
+    const { debugTraceCount, debugSolutions } = this
+    for (const key in debugSolutions) {
+      if (key.startsWith(`t${debugTraceCount}_`)) {
+        debugSolutions[key].push(
+          ...obstacles.map(
+            (obstacle, i) =>
+              ({
+                type: "pcb_smtpad",
+                pcb_component_id: "",
+                layer: "top",
+                width: obstacle.width,
+                shape: "rect",
+                x: obstacle.center.x,
+                y: obstacle.center.y,
+                pcb_smtpad_id: `trace_obstacle_${i}`,
+                height: obstacle.height,
+              }) as PCBSMTPad,
+          ),
+        )
+      }
+    }
+  }
+
   drawDebugSolution({
     current,
     newNeighbors,
@@ -268,13 +306,10 @@ export class GeneralizedAstarAutorouter {
     current: Node
     newNeighbors: Node[]
   }) {
-    let shouldDraw = false
-    if (this.iterations < 20) shouldDraw = true
-    if (this.iterations < 1000 && this.iterations % 100 === 0) shouldDraw = true
-    if (!shouldDraw) return
+    const debugGroup = this.getDebugGroup()
+    if (!debugGroup) return
 
     const { openSet, debugTraceCount, debugSolutions } = this
-    const debugGroup = `t${debugTraceCount}_iter[${this.iterations - 1}]`
 
     debugSolutions![debugGroup] ??= []
     const debugSolution = debugSolutions![debugGroup]!
@@ -329,21 +364,18 @@ export class GeneralizedAstarAutorouter {
     }
 
     if (current.parent) {
+      const path: Node[] = []
+      let p: Node | null = current
+      while (p) {
+        path.unshift(p)
+        p = p.parent
+      }
       debugSolution!.push({
         type: "pcb_fabrication_note_path",
         pcb_component_id: "",
         fabrication_note_path_id: `note_path_${current.x}_${current.y}`,
         layer: "top",
-        route: [
-          {
-            x: current.x,
-            y: current.y,
-          },
-          {
-            x: current.parent.x,
-            y: current.parent.y,
-          },
-        ],
+        route: path,
         stroke_width: 0.01,
       })
     }

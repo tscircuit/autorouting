@@ -55,6 +55,8 @@ export class IJumpAutorouter extends GeneralizedAstarAutorouter {
         return true
       })
       .map((dir) => obstacles.getOrthoDirectionCollisionInfo(node, dir))
+      // Filter out directions that are too close to the wall
+      .filter((dir) => dir.wallDistance >= this.OBSTACLE_MARGIN)
 
     /**
      * Figure out how far to travel. There are a couple reasons we would stop
