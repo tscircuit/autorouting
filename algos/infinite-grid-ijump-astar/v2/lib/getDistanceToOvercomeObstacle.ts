@@ -28,9 +28,9 @@ export function getDistanceToOvercomeObstacle({
   obstacle: Obstacle
   obstacles: ObstacleList
   OBSTACLE_MARGIN: number
-  SHOULD_DETECT_CONJOINED_OBSTACLES: boolean
-  MAX_CONJOINED_OBSTACLES: number
-  obstaclesInRow: number
+  SHOULD_DETECT_CONJOINED_OBSTACLES?: boolean
+  MAX_CONJOINED_OBSTACLES?: number
+  obstaclesInRow?: number
 }): number {
   let distToOvercomeObstacle: number
   if (travelDir.dx === 0) {

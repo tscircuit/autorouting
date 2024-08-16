@@ -1,5 +1,5 @@
 import { runBenchmark } from "autorouting-dataset"
-import { autoroute } from "./v1"
+import { autoroute } from "./v2"
 
 await runBenchmark({
   solver: autoroute,

@@ -18,6 +18,7 @@ export class IJumpAutorouter extends GeneralizedAstarAutorouter {
 
   getNeighbors(node: Node): Array<PointWithObstacleHit> {
     const obstacles = this.obstacles!
+    const goalPoint = this.goalPoint!
 
     /**
      * This is considered "forward" if we were to continue from the parent,
@@ -25,7 +26,7 @@ export class IJumpAutorouter extends GeneralizedAstarAutorouter {
      */
     let forwardDir: Direction
     if (!node.parent) {
-      forwardDir = dirFromAToB(node, this.goalPoint!)
+      forwardDir = dirFromAToB(node, goalPoint)
     } else {
       forwardDir = dirFromAToB(node.parent, node)
     }
@@ -76,21 +77,20 @@ export class IJumpAutorouter extends GeneralizedAstarAutorouter {
           obstacle: node.obstacleHit,
           obstacles,
           OBSTACLE_MARGIN: 0.15,
-          SHOULD_DETECT_CONJOINED_OBSTACLES: false,
-          MAX_CONJOINED_OBSTACLES: 10, // You may need to adjust this value
-          obstaclesInRow: 0, // You may need to calculate this value
+          SHOULD_DETECT_CONJOINED_OBSTACLES: true,
         })
       }
 
-      const goalDistAlongTravelDir = distAlongDir(
-        node,
-        this.goalPoint!,
-        travelDir,
-      )
+      const goalDistAlongTravelDir = distAlongDir(node, goalPoint, travelDir)
+      const isGoalInTravelDir =
+        (travelDir.dx === 0 ||
+          Math.sign(goalPoint.x - node.x) === travelDir.dx) &&
+        (travelDir.dy === 0 || Math.sign(goalPoint.y - node.y) === travelDir.dy)
 
       if (
         goalDistAlongTravelDir < travelDir.wallDistance &&
-        goalDistAlongTravelDir > 0
+        goalDistAlongTravelDir > 0 &&
+        isGoalInTravelDir
       ) {
         travelDirs2.push({
           ...travelDir,
@@ -107,27 +107,25 @@ export class IJumpAutorouter extends GeneralizedAstarAutorouter {
       } else if (travelDir.wallDistance !== Infinity) {
         travelDirs2.push({
           ...travelDir,
-          travelDistance: clamp(
-            this.GRID_STEP,
-            1,
-            travelDir.wallDistance - this.OBSTACLE_MARGIN,
-          ),
+          travelDistance: travelDir.wallDistance - this.OBSTACLE_MARGIN,
         })
       }
     }
 
-    return travelDirs2
-      .filter((dir) => {
-        // Probably shouldn't need this check...
-        return !obstacles.isObstacleAt(
-          node.x + dir.dx * dir.travelDistance,
-          node.y + dir.dy * dir.travelDistance,
-        )
-      })
-      .map((dir) => ({
-        x: node.x + dir.dx * dir.travelDistance,
-        y: node.y + dir.dy * dir.travelDistance,
-        obstacleHit: dir.obstacle,
-      }))
+    return (
+      travelDirs2
+        // .filter((dir) => {
+        //   // Probably shouldn't need this check...
+        //   return !obstacles.isObstacleAt(
+        //     node.x + dir.dx * dir.travelDistance,
+        //     node.y + dir.dy * dir.travelDistance,
+        //   )
+        // })
+        .map((dir) => ({
+          x: node.x + dir.dx * dir.travelDistance,
+          y: node.y + dir.dy * dir.travelDistance,
+          obstacleHit: dir.obstacle,
+        }))
+    )
   }
 }
