@@ -5,9 +5,10 @@ import type {
   DirectionWithCollisionInfo,
   Node,
   Point,
+  PointWithObstacleHit,
   PointWithWallDistance,
 } from "./types"
-import { clamp, dirFromAToB, dist } from "./util"
+import { clamp, dirFromAToB, dist, distAlongDir } from "./util"
 import { getDistanceToOvercomeObstacle } from "./getDistanceToOvercomeObstacle"
 import { distance } from "@tscircuit/soup"
 
@@ -53,7 +54,7 @@ export class IJumpAutorouter extends GeneralizedAstarAutorouter {
     }
   }
 
-  getNeighbors(node: Node): Array<Point> {
+  getNeighbors(node: Node): Array<PointWithObstacleHit> {
     const obstacles = this.obstacles!
 
     /**
@@ -68,7 +69,8 @@ export class IJumpAutorouter extends GeneralizedAstarAutorouter {
     }
 
     /**
-     * All four directions and the distance to the nearest wall
+     * Get the 2-3 next directions (excluding backwards direction), and
+     * excluding the forward direction if we just ran into a wall
      */
     const travelDirs1 = [
       { dx: 0, dy: 1 },
@@ -80,20 +82,58 @@ export class IJumpAutorouter extends GeneralizedAstarAutorouter {
         // If we have a parent, don't go backwards towards the parent
         if (dir.dx === forwardDir.dx * -1 && dir.dy === forwardDir.dy * -1) {
           return false
+        } else if (
+          dir.dx === forwardDir.dx &&
+          dir.dy === forwardDir.dy &&
+          node.parent?.obstacleHit
+        ) {
+          return false
         }
         return true
       })
       .map((dir) => obstacles.getOrthoDirectionCollisionInfo(node, dir))
 
-    console.log(travelDirs1)
-
     /**
-     * Figure out how far to travel
+     * Figure out how far to travel. There are a couple reasons we would stop
+     * traveling:
+     * - A different direction opened up while we were traveling (the obstacle
+     *   our parent hit was overcome)
+     * - We hit a wall
+     * - We passed the goal along the travel direction
      */
     const travelDirs2: Array<
       DirectionWithCollisionInfo & { travelDistance: number }
     > = []
     for (const travelDir of travelDirs1) {
+      if (node.parent?.obstacleHit) {
+        console.log("i should compute overcome distance")
+      }
+
+      const goalDistAlongTravelDir = distAlongDir(
+        node,
+        this.goalPoint!,
+        travelDir,
+      )
+
+      if (
+        goalDistAlongTravelDir < travelDir.wallDistance &&
+        goalDistAlongTravelDir > 0
+      ) {
+        travelDirs2.push({
+          ...travelDir,
+          travelDistance: goalDistAlongTravelDir,
+        })
+      } else if (travelDir.wallDistance !== Infinity) {
+        travelDirs2.push({
+          ...travelDir,
+          travelDistance: clamp(
+            this.GRID_STEP,
+            1,
+            travelDir.wallDistance - this.OBSTACLE_MARGIN,
+          ),
+        })
+      }
+
       // const travelDistance = getDistanceToOvercomeObstacle({
       //   node,
       //   travelDir,
@@ -108,31 +148,27 @@ export class IJumpAutorouter extends GeneralizedAstarAutorouter {
       // console.log({ travelDir, travelDistance })
     }
 
-    return travelDirs1
+    console.log(travelDirs2)
+
+    return travelDirs2
       .map((dir) => ({
         ...dir,
-        stepSize: clamp(
-          this.GRID_STEP,
-          1,
-          dir.wallDistance - this.OBSTACLE_MARGIN,
-        ),
+        // stepSize: clamp(
+        //   this.GRID_STEP,
+        //   1,
+        //   dir.wallDistance - this.OBSTACLE_MARGIN,
+        // ),
       }))
       .filter((dir) => {
-        console.log({
-          dir,
-          isObstacleAtPoint: obstacles.isObstacleAt(
-            node.x + dir.dx * dir.stepSize,
-            node.y + dir.dy * dir.stepSize,
-          ),
-        })
+        // Probably shouldn't need this check...
         return !obstacles.isObstacleAt(
-          node.x + dir.dx * dir.stepSize,
-          node.y + dir.dy * dir.stepSize,
+          node.x + dir.dx * dir.travelDistance,
+          node.y + dir.dy * dir.travelDistance,
         )
       })
       .map((dir) => ({
-        x: node.x + dir.dx * dir.stepSize,
-        y: node.y + dir.dy * dir.stepSize,
+        x: node.x + dir.dx * dir.travelDistance,
+        y: node.y + dir.dy * dir.travelDistance,
       }))
   }
 }

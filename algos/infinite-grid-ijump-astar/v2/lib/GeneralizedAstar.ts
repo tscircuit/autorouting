@@ -1,6 +1,6 @@
 import type { AnySoupElement } from "@tscircuit/soup"
 import { QuadtreeObstacleList } from "./QuadtreeObstacleList"
-import type { Node, Point } from "./types"
+import type { Node, Point, PointWithObstacleHit } from "./types"
 import { manDist, nodeName } from "./util"
 
 import Debug from "debug"
@@ -77,7 +77,7 @@ export class GeneralizedAstarAutorouter {
    *
    * In ijump-astar, this is the 2-4 surrounding intersections
    */
-  getNeighbors(node: Node): Array<Point> {
+  getNeighbors(node: Node): Array<PointWithObstacleHit> {
     return []
   }
 
@@ -135,6 +135,7 @@ export class GeneralizedAstarAutorouter {
           g: tentativeG,
           h,
           f,
+          obstacleHit: neighbor.obstacleHit ?? undefined,
           manDistFromParent: manDist(current, neighbor), // redundant compute...
           nodesInPath: current.nodesInPath + 1,
           parent: current,

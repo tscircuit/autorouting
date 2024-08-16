@@ -22,6 +22,10 @@ export interface Point {
   y: number
 }
 
+export interface PointWithObstacleHit extends Point {
+  obstacleHit?: Obstacle | null
+}
+
 export interface PointWithWallDistance extends Point {
   wallDistance: number
 }
