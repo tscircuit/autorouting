@@ -1,6 +1,10 @@
 import type { Obstacle } from "autorouting-dataset"
 import Debug from "debug"
-import type { Direction, PointWithWallDistance } from "./types"
+import type {
+  Direction,
+  DirectionWithWallDistance,
+  PointWithWallDistance,
+} from "./types"
 import type { ObstacleList } from "./ObstacleList"
 
 const debug = Debug(
@@ -19,8 +23,8 @@ export function getDistanceToOvercomeObstacle({
   MAX_CONJOINED_OBSTACLES = 20,
 }: {
   node: { x: number; y: number }
-  travelDir: Direction & { wallDistance: number }
-  wallDir: Direction & { wallDistance: number }
+  travelDir: DirectionWithWallDistance
+  wallDir: DirectionWithWallDistance
   obstacle: Obstacle
   obstacles: ObstacleList
   OBSTACLE_MARGIN: number

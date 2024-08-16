@@ -12,6 +12,10 @@ export interface Direction {
   dy: number
 }
 
+export interface DirectionWithWallDistance extends Direction {
+  wallDistance: number
+}
+
 export interface DirectionWithCollisionInfo extends Direction {
   wallDistance: number
   obstacle: Obstacle | null
