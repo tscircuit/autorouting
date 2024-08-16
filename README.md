@@ -295,6 +295,9 @@ await startDevServer({
 })
 ```
 
+> [!TIP] > `export DEBUG=autorouting-dataset*` will give you all the debug output
+> including additional dropdown debug information
+
 > [!TIP]
 > Check out [this directory](./algos/simple-grid/) for a typical Typescript autorouter configuration
 
