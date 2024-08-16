@@ -95,16 +95,20 @@ export const serverEntrypoint = async (
 
   if (problemSoup) {
     const startTime = performance.now()
-    const solverResult = await normalizeSolution(
-      solver(problemSoup as AnySoupElement[]),
-    )
-    debugSolutions = solverResult.debugSolutions
-    debugMessage = solverResult.debugMessage
+    try {
+      const solverResult = await normalizeSolution(
+        solver(problemSoup as AnySoupElement[]),
+      )
+      debugSolutions = solverResult.debugSolutions
+      debugMessage = solverResult.debugMessage!
 
-    const endTime = performance.now()
-    solutionComputeTime = endTime - startTime
+      const endTime = performance.now()
+      solutionComputeTime = endTime - startTime
 
-    solutionSoup = solverResult.solution.concat(problemSoup) as any
+      solutionSoup = solverResult.solution.concat(problemSoup) as any
+    } catch (e: any) {
+      userMessage = `Error running solver: ${e.message}\n\n${e.stack}`
+    }
   }
 
   // Add errors to solutionSoup for overlapping traces etc. (run eval)

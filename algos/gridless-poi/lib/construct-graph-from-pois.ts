@@ -8,7 +8,7 @@ interface Point {
 }
 
 interface Obstacle {
-  type: "rect" | "oval"
+  type: "rect"
   center: { x: number; y: number }
   width: number
   height: number

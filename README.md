@@ -33,6 +33,7 @@ problem.
     - [Generating Datasets](#generating-datasets)
     - [Generating Single Problems](#generating-single-problems)
   - [Community Solvers](#community-solvers)
+  - [References](#references)
 
 ## What is autorouting?
 
@@ -98,7 +99,7 @@ utility function from `autorouting-dataset` to convert it into a simple object w
 interface SimpleRouteJson {
   layerCount: number
   obstacles: Array<{
-    type: "rect" | "oval" // NOTE: most datasets do not contain ovals
+    type: "rect"
     center: { x: number; y: number }
     width: number
     height: number
@@ -407,3 +408,7 @@ This command generates a single problem of the specified type with the given see
 Coming soon! Please create an issue to add your solver to this repo, we will be listing benchmarks etc.!
 
 We are working on a dedicated test machine for measuring performance.
+
+## References
+
+- [Pathfinding Architecture Optimizations](https://www.gameaipro.com/GameAIPro/GameAIPro_Chapter17_Pathfinding_Architecture_Optimizations.pdf)

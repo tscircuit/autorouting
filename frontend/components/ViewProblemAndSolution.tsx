@@ -178,6 +178,9 @@ export default () => {
             {selectedDebugSolution ? (
               <PCBViewer
                 key={selectedDebugSolution}
+                initialState={{
+                  selected_layer: "bottom" as any,
+                }}
                 soup={problemSoup.concat(
                   window.DEBUG_SOLUTIONS![selectedDebugSolution as any],
                 )}

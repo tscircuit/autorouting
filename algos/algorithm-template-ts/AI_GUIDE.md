@@ -14,7 +14,7 @@ export type SimplifiedPcbTrace = {
   }>
 }
 export type Obstacle = {
-  type: "rect" | "oval" // NOTE: most datasets do not contain ovals
+  type: "rect" // NOTE: most datasets do not contain ovals
   center: { x: number; y: number }
   width: number
   height: number
