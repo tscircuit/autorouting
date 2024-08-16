@@ -13,7 +13,7 @@ import { getDistanceToOvercomeObstacle } from "./getDistanceToOvercomeObstacle"
 import { distance } from "@tscircuit/soup"
 
 export class IJumpAutorouter extends GeneralizedAstarAutorouter {
-  MAX_ITERATIONS: number = 2
+  MAX_ITERATIONS: number = 200
   /**
    * Find the optimal neighbor for a given direction
    *
@@ -105,8 +105,19 @@ export class IJumpAutorouter extends GeneralizedAstarAutorouter {
       DirectionWithCollisionInfo & { travelDistance: number }
     > = []
     for (const travelDir of travelDirs1) {
-      if (node.parent?.obstacleHit) {
-        console.log("i should compute overcome distance")
+      let overcomeDistance: number | null = null
+      if (node?.obstacleHit) {
+        overcomeDistance = getDistanceToOvercomeObstacle({
+          node,
+          travelDir,
+          wallDir: { ...forwardDir, wallDistance: this.OBSTACLE_MARGIN },
+          obstacle: node.obstacleHit,
+          obstacles,
+          OBSTACLE_MARGIN: 0.15,
+          SHOULD_DETECT_CONJOINED_OBSTACLES: false,
+          MAX_CONJOINED_OBSTACLES: 10, // You may need to adjust this value
+          obstaclesInRow: 0, // You may need to calculate this value
+        })
       }
 
       const goalDistAlongTravelDir = distAlongDir(
@@ -122,6 +133,14 @@ export class IJumpAutorouter extends GeneralizedAstarAutorouter {
         travelDirs2.push({
           ...travelDir,
           travelDistance: goalDistAlongTravelDir,
+        })
+      } else if (
+        overcomeDistance !== null &&
+        overcomeDistance < travelDir.wallDistance
+      ) {
+        travelDirs2.push({
+          ...travelDir,
+          travelDistance: overcomeDistance,
         })
       } else if (travelDir.wallDistance !== Infinity) {
         travelDirs2.push({
@@ -148,7 +167,7 @@ export class IJumpAutorouter extends GeneralizedAstarAutorouter {
       // console.log({ travelDir, travelDistance })
     }
 
-    console.log(travelDirs2)
+    // console.log(travelDirs2)
 
     return travelDirs2
       .map((dir) => ({
@@ -169,6 +188,7 @@ export class IJumpAutorouter extends GeneralizedAstarAutorouter {
       .map((dir) => ({
         x: node.x + dir.dx * dir.travelDistance,
         y: node.y + dir.dy * dir.travelDistance,
+        obstacleHit: dir.obstacle,
       }))
   }
 }

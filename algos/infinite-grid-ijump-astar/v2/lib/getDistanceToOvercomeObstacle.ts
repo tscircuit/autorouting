@@ -1,6 +1,6 @@
 import type { Obstacle } from "autorouting-dataset"
 import Debug from "debug"
-import type { PointWithWallDistance } from "./types"
+import type { Direction, PointWithWallDistance } from "./types"
 import type { ObstacleList } from "./ObstacleList"
 
 const debug = Debug(
@@ -19,8 +19,8 @@ export function getDistanceToOvercomeObstacle({
   MAX_CONJOINED_OBSTACLES = 20,
 }: {
   node: { x: number; y: number }
-  travelDir: PointWithWallDistance
-  wallDir: PointWithWallDistance
+  travelDir: Direction & { wallDistance: number }
+  wallDir: Direction & { wallDistance: number }
   obstacle: Obstacle
   obstacles: ObstacleList
   OBSTACLE_MARGIN: number
@@ -29,15 +29,15 @@ export function getDistanceToOvercomeObstacle({
   obstaclesInRow: number
 }): number {
   let distToOvercomeObstacle: number
-  if (travelDir.x === 0) {
-    if (travelDir.y > 0) {
+  if (travelDir.dx === 0) {
+    if (travelDir.dy > 0) {
       distToOvercomeObstacle = obstacle.center.y + obstacle.height / 2 - node.y
     } else {
       distToOvercomeObstacle =
         node.y - (obstacle.center.y - obstacle.height / 2)
     }
   } else {
-    if (travelDir.x > 0) {
+    if (travelDir.dx > 0) {
       distToOvercomeObstacle = obstacle.center.x + obstacle.width / 2 - node.x
     } else {
       distToOvercomeObstacle = node.x - (obstacle.center.x - obstacle.width / 2)
@@ -51,11 +51,11 @@ export function getDistanceToOvercomeObstacle({
   ) {
     const obstacleAtEnd = obstacles.getObstacleAt(
       node.x +
-        travelDir.x * distToOvercomeObstacle +
-        wallDir.x * (wallDir.distance + 0.001),
+        travelDir.dx * distToOvercomeObstacle +
+        wallDir.dx * (wallDir.wallDistance + 0.001),
       node.y +
-        travelDir.y * distToOvercomeObstacle +
-        wallDir.y * (wallDir.distance + 0.001),
+        travelDir.dy * distToOvercomeObstacle +
+        wallDir.dy * (wallDir.wallDistance + 0.001),
     )
     if (obstacleAtEnd === obstacle) {
       return distToOvercomeObstacle
@@ -73,7 +73,7 @@ export function getDistanceToOvercomeObstacle({
       // Said another way: The path could be blocked if the next conjoined
       // obstacle is bigger and is extending in the same direction as the path
       // https://github.com/tscircuit/autorouting-dataset/issues/31
-      const extendingAlongXAxis = travelDir.y === 0
+      const extendingAlongXAxis = travelDir.dy === 0
       const o1OrthoDim = extendingAlongXAxis ? obstacle.height : obstacle.width
       const o2OrthoDim = extendingAlongXAxis
         ? obstacleAtEnd.height
@@ -86,8 +86,8 @@ export function getDistanceToOvercomeObstacle({
 
       const endObstacleDistToOvercome = getDistanceToOvercomeObstacle({
         node: {
-          x: node.x + travelDir.x * distToOvercomeObstacle,
-          y: node.y + travelDir.y * distToOvercomeObstacle,
+          x: node.x + travelDir.dx * distToOvercomeObstacle,
+          y: node.y + travelDir.dy * distToOvercomeObstacle,
         },
         travelDir: travelDir,
         wallDir: wallDir,
