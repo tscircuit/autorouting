@@ -30,6 +30,7 @@ export async function runBenchmark(
 ): Promise<BenchmarkResult[]> {
   const {
     solver,
+    solverName,
     verbose = false,
     sampleCount = 100,
     problemType,
@@ -127,6 +128,7 @@ export async function runBenchmark(
   }
 
   if (verbose) {
+    console.log(`${solverName} benchmark results:`)
     console.table(
       results.map((result) => ({
         "Problem Type": result.problemType,

@@ -6,7 +6,7 @@ export const builtinSolvers: any = {
   "infgrid-astar": async () =>
     (await import("../../../algos/infinite-grid-astar/index")).autoroute,
   "infgrid-ijump-astar": async () =>
-    (await import("../../../algos/infinite-grid-ijump-astar/v1")).autoroute,
+    (await import("../../../algos/infinite-grid-ijump-astar/v2")).autoroute,
   "jump-point-grid": async () =>
     (await import("../../../algos/jump-point-grid/index")).autoroute,
 }
