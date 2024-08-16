@@ -66,10 +66,10 @@ export class IJumpAutorouter extends GeneralizedAstarAutorouter {
     )
 
     const dirs = [
-      { x: 0, y: this.GRID_STEP, distance: distances.top },
-      { x: this.GRID_STEP, y: 0, distance: distances.right },
-      { x: 0, y: -this.GRID_STEP, distance: distances.bottom },
-      { x: -this.GRID_STEP, y: 0, distance: distances.left },
+      { x: 0, y: 1, distance: distances.top },
+      { x: 1, y: 0, distance: distances.right },
+      { x: 0, y: -1, distance: distances.bottom },
+      { x: -1, y: 0, distance: distances.left },
     ]
 
     return dirs
