@@ -1,7 +1,12 @@
 import type { AnySoupElement } from "@tscircuit/soup"
 import type { SolutionWithDebugInfo } from "autorouting-dataset/lib/solver-utils/ProblemSolver"
 import { IJumpAutorouter } from "./lib/IJumpAutorouter"
-import { getSimpleRouteJson } from "autorouting-dataset/lib/solver-utils/getSimpleRouteJson"
+import {
+  getSimpleRouteJson,
+  markObstaclesAsConnected,
+  isPointInsideObstacle,
+  getObstaclesFromSoup,
+} from "autorouting-dataset/lib/solver-utils/getSimpleRouteJson"
 
 export function autoroute(soup: AnySoupElement[]): SolutionWithDebugInfo {
   const input = getSimpleRouteJson(soup)
@@ -19,4 +24,10 @@ export function autoroute(soup: AnySoupElement[]): SolutionWithDebugInfo {
   }
 }
 
-export { IJumpAutorouter, getSimpleRouteJson }
+export {
+  IJumpAutorouter,
+  getSimpleRouteJson,
+  markObstaclesAsConnected,
+  isPointInsideObstacle,
+  getObstaclesFromSoup,
+}

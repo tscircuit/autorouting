@@ -1,8 +1,8 @@
 {
   "name": "@tscircuit/infgrid-ijump-astar",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "scripts": {
-    "build": "tsup ./v2/index.ts"
+    "build": "tsup-node ./v2/index.ts"
   },
   "main": "./dist/index.js",
   "files": [
