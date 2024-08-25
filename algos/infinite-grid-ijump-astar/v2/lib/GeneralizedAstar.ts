@@ -1,5 +1,5 @@
 import type { AnySoupElement, PCBSMTPad } from "@tscircuit/soup"
-import { QuadtreeObstacleList } from "./QuadtreeObstacleList"
+// import { QuadtreeObstacleList } from "./QuadtreeObstacleList"
 import type { Node, Point, PointWithObstacleHit } from "./types"
 import { manDist, nodeName } from "./util"
 
