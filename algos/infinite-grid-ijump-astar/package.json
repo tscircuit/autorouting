@@ -1,13 +1,13 @@
 {
   "name": "@tscircuit/infgrid-ijump-astar",
-  "version": "0.0.4",
+  "type": "module",
+  "version": "0.0.5",
   "scripts": {
-    "build": "tsup-node ./v2/index.ts"
+    "build": "cd ../../ && bun run build:infgrid-ijump-astar && cd ../.."
   },
   "main": "./dist/index.js",
   "files": [
     "dist",
     "v2"
-  ],
-  "types": "./v2/index.ts"
+  ]
 }

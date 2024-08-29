@@ -1,4 +1,3 @@
-import type { SimpleRouteJson, SimplifiedPcbTrace } from "autorouting-dataset"
 import { GeneralizedAstarAutorouter } from "./GeneralizedAstar"
 import type {
   Direction,

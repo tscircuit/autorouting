@@ -1,4 +1,4 @@
-import type { Obstacle } from "autorouting-dataset"
+import type { Obstacle } from "autorouting-dataset/lib/types"
 
 export interface DirectionDistances {
   left: number
