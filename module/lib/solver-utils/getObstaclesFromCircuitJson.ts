@@ -1,5 +1,6 @@
 import type { AnySoupElement } from "@tscircuit/soup"
 import type { Obstacle } from "../types"
+import { getObstaclesFromRoute } from "./getObstaclesFromRoute"
 
 export const getObstaclesFromCircuitJson = (soup: AnySoupElement[]) => {
   const obstacles: Obstacle[] = []
@@ -80,6 +81,9 @@ export const getObstaclesFromCircuitJson = (soup: AnySoupElement[]) => {
           connectedTo: [],
         })
       }
+    } else if (element.type === "pcb_trace") {
+      const traceObstacles = getObstaclesFromRoute(element.route, element.source_trace_id!)
+      obstacles.push(...traceObstacles)
     }
   }
   return obstacles
