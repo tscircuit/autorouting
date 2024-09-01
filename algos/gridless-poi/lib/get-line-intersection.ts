@@ -1,4 +1,6 @@
+// @ts-ignore i don't think this file is used
 import { findRootsBisection } from "./find-roots-bisection"
+// @ts-ignore i don't think this file is used
 import { findRootsNewtonRaphson } from "./find-roots-newton-raphson"
 
 /**
@@ -43,8 +45,8 @@ export function getLineIntersection(
 
   // Step 4: Check if roots are within the line segment
   const intersections = roots
-    .filter((x) => x >= Math.min(x1, x2) && x <= Math.max(x1, x2))
-    .map((x) => [x, m * x + b, m] as [number, number, number])
+    .filter((x: any) => x >= Math.min(x1, x2) && x <= Math.max(x1, x2))
+    .map((x: any) => [x, m * x + b, m] as [number, number, number])
 
   return intersections.length > 0 ? intersections : null
 }

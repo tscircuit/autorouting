@@ -9,6 +9,12 @@ export type SimplifiedPcbTrace = {
     layer: string
   }>
 }
+
+export interface Point {
+  x: number
+  y: number
+}
+
 export type Obstacle = {
   // TODO include ovals
   type: "rect" // NOTE: most datasets do not contain ovals

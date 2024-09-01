@@ -10,7 +10,7 @@ import type {
   SimpleRouteJson,
   SimplifiedPcbTrace,
 } from "autorouting-dataset"
-import { getObstaclesFromRoute } from "./getObstaclesFromRoute"
+import { getObstaclesFromRoute } from "autorouting-dataset/lib/solver-utils/getObstaclesFromRoute"
 import { ObstacleList } from "./ObstacleList"
 
 const debug = Debug("autorouting-dataset:astar")
