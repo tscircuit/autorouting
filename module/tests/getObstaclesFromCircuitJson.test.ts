@@ -6,6 +6,7 @@ test("pcb_trace becomes an obstacle correctly", () => {
   const soupWithTrace: AnySoupElement[] = [
     {
       type: "pcb_trace",
+      pcb_trace_id: "trace1",
       source_trace_id: "trace1",
       route: [
         { x: 0, y: 0, route_type: "wire", width: 0.1, layer: "top" },
