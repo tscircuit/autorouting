@@ -1,4 +1,5 @@
-import type { Obstacle, Point } from "../types"
+type Obstacle = any
+type Point = any
 
 export function computeOptimalPoints(
   obstacle: Obstacle,

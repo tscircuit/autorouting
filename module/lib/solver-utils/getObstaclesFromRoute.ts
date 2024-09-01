@@ -1,5 +1,9 @@
 import type { Obstacle } from "autorouting-dataset/lib/types"
-import type { Point } from "./types"
+
+interface Point {
+  x: number
+  y: number
+}
 
 export const getObstaclesFromRoute = (
   route: Point[],

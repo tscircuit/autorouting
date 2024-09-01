@@ -1,4 +1,3 @@
-import fetch from "node-fetch"
 import type { ProblemSolver } from "./ProblemSolver"
 import type { AnySoupElement } from "@tscircuit/soup"
 import { getSimpleRouteJson } from "./getSimpleRouteJson"

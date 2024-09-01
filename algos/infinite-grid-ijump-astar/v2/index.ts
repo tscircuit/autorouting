@@ -5,8 +5,8 @@ import {
   getSimpleRouteJson,
   markObstaclesAsConnected,
   isPointInsideObstacle,
-  getObstaclesFromSoup,
 } from "autorouting-dataset/lib/solver-utils/getSimpleRouteJson"
+import { getObstaclesFromCircuitJson } from "autorouting-dataset/lib/solver-utils/getObstaclesFromCircuitJson"
 
 export function autoroute(soup: AnySoupElement[]): SolutionWithDebugInfo {
   const input = getSimpleRouteJson(soup)
@@ -24,10 +24,12 @@ export function autoroute(soup: AnySoupElement[]): SolutionWithDebugInfo {
   }
 }
 
+export const getObstaclesFromSoup = getObstaclesFromCircuitJson
+
 export {
   IJumpAutorouter,
   getSimpleRouteJson,
   markObstaclesAsConnected,
   isPointInsideObstacle,
-  getObstaclesFromSoup,
+  getObstaclesFromCircuitJson,
 }

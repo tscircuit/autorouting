@@ -2,6 +2,7 @@ import type { AnySoupElement } from "@tscircuit/soup"
 import type { SimpleRouteJson } from "./SimpleRouteJson"
 import { su } from "@tscircuit/soup-util"
 import type { Obstacle } from "../types"
+import { getObstaclesFromCircuitJson } from "./getObstaclesFromCircuitJson"
 
 export const getSimpleRouteJson = (soup: AnySoupElement[]): SimpleRouteJson => {
   const routeJson: SimpleRouteJson = {} as any
@@ -9,7 +10,7 @@ export const getSimpleRouteJson = (soup: AnySoupElement[]): SimpleRouteJson => {
   routeJson.layerCount = 1
 
   // Derive obstacles from pcb_smtpad, pcb_hole, and pcb_plated_hole
-  routeJson.obstacles = getObstaclesFromSoup(soup)
+  routeJson.obstacles = getObstaclesFromCircuitJson(soup)
 
   // Derive connections using source_traces, source_ports, source_nets
   routeJson.connections = []
@@ -80,90 +81,6 @@ export const markObstaclesAsConnected = (
       }
     }
   }
-}
-
-export const getObstaclesFromSoup = (soup: AnySoupElement[]) => {
-  const obstacles: Obstacle[] = []
-  for (const element of soup) {
-    if (element.type === "pcb_smtpad") {
-      if (element.shape === "circle") {
-        obstacles.push({
-          // @ts-ignore
-          type: "oval",
-          center: {
-            x: element.x,
-            y: element.y,
-          },
-          width: element.radius * 2,
-          height: element.radius * 2,
-          connectedTo: [],
-        })
-      } else if (element.shape === "rect") {
-        obstacles.push({
-          type: "rect",
-          center: {
-            x: element.x,
-            y: element.y,
-          },
-          width: element.width,
-          height: element.height,
-          connectedTo: [],
-        })
-      }
-    } else if (element.type === "pcb_hole") {
-      if (element.hole_shape === "oval") {
-        obstacles.push({
-          // @ts-ignore
-          type: "oval",
-          center: {
-            x: element.x,
-            y: element.y,
-          },
-          width: element.hole_width,
-          height: element.hole_height,
-          connectedTo: [],
-        })
-      } else if (element.hole_shape === "square") {
-        obstacles.push({
-          type: "rect",
-          center: {
-            x: element.x,
-            y: element.y,
-          },
-          width: element.hole_diameter,
-          height: element.hole_diameter,
-          connectedTo: [],
-        })
-      }
-    } else if (element.type === "pcb_plated_hole") {
-      if (element.shape === "circle") {
-        obstacles.push({
-          // @ts-ignore
-          type: "oval",
-          center: {
-            x: element.x,
-            y: element.y,
-          },
-          width: element.outer_diameter,
-          height: element.outer_diameter,
-          connectedTo: [],
-        })
-      } else if (element.shape === "oval" || element.shape === "pill") {
-        obstacles.push({
-          // @ts-ignore
-          type: "oval",
-          center: {
-            x: element.x,
-            y: element.y,
-          },
-          width: element.outer_width,
-          height: element.outer_height,
-          connectedTo: [],
-        })
-      }
-    }
-  }
-  return obstacles
 }
 
 // Helper function to check if a point is inside an obstacle
