@@ -17,7 +17,7 @@
     "@tscircuit/builder": "1.9.5",
     "@tscircuit/pcb-viewer": "1.4.5",
     "@tscircuit/props": "^0.0.26",
-    "@tscircuit/soup": "^0.0.39",
+    "@tscircuit/soup": "^0.0.66",
     "@tscircuit/soup-util": "^0.0.13",
     "@types/bun": "latest",
     "@types/d3-delaunay": "^6.0.4",
