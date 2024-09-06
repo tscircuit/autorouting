@@ -1,4 +1,4 @@
-import type { AnySoupElement } from "@tscircuit/soup"
+import type { AnySoupElement, PCBTrace } from "@tscircuit/soup"
 import { buildPcbTraceElements } from "@tscircuit/builder"
 import { su } from "@tscircuit/soup-util"
 import { mm } from "@tscircuit/mm"
@@ -35,7 +35,7 @@ export const tscircuitBuiltinSolver = (soup: AnySoupElement[]) => {
       },
       ctx,
     )
-    newElements.push(pcb_trace, ...pcb_errors, ...pcb_vias)
+    newElements.push(pcb_trace as PCBTrace, ...pcb_errors, ...pcb_vias)
   }
   return newElements
 }
