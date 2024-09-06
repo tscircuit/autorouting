@@ -30,7 +30,33 @@ export const getObstaclesFromCircuitJson = (soup: AnySoupElement[]) => {
           connectedTo: [],
         })
       }
-    } else if (element.type === "pcb_hole") {
+    } else if (element.type === "pcb_keepout") {
+      if (element.shape === "circle") {
+        obstacles.push({
+          // @ts-ignore
+          type: "oval",
+          center: {
+            x: element.center.x,
+            y: element.center.y,
+          },
+          width: element.radius * 2,
+          height: element.radius * 2,
+          connectedTo: [],
+        })
+      } else if (element.shape === "rect") {
+        obstacles.push({
+          type: "rect",
+          center: {
+            x: element.x,
+            y: element.y,
+          },
+          width: element.width,
+          height: element.height,
+          connectedTo: [],
+        })
+      }
+    }
+     else if (element.type === "pcb_hole") {
       if (element.hole_shape === "oval") {
         obstacles.push({
           // @ts-ignore
