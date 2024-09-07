@@ -55,8 +55,7 @@ export const getObstaclesFromCircuitJson = (soup: AnySoupElement[]) => {
           connectedTo: [],
         })
       }
-    }
-     else if (element.type === "pcb_hole") {
+    } else if (element.type === "pcb_hole") {
       if (element.hole_shape === "oval") {
         obstacles.push({
           // @ts-ignore
@@ -70,6 +69,17 @@ export const getObstaclesFromCircuitJson = (soup: AnySoupElement[]) => {
           connectedTo: [],
         })
       } else if (element.hole_shape === "square") {
+        obstacles.push({
+          type: "rect",
+          center: {
+            x: element.x,
+            y: element.y,
+          },
+          width: element.hole_diameter,
+          height: element.hole_diameter,
+          connectedTo: [],
+        })
+      } else if (element.hole_shape === "round") {
         obstacles.push({
           type: "rect",
           center: {
@@ -108,7 +118,10 @@ export const getObstaclesFromCircuitJson = (soup: AnySoupElement[]) => {
         })
       }
     } else if (element.type === "pcb_trace") {
-      const traceObstacles = getObstaclesFromRoute(element.route, element.source_trace_id!)
+      const traceObstacles = getObstaclesFromRoute(
+        element.route,
+        element.source_trace_id!,
+      )
       obstacles.push(...traceObstacles)
     }
   }
