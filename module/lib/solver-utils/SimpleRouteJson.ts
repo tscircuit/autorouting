@@ -2,7 +2,7 @@ import type { Obstacle } from "../types"
 
 export interface SimpleRouteConnection {
   name: string
-  pointsToConnect: Array<{ x: number; y: number }>
+  pointsToConnect: Array<{ x: number; y: number; layer: string }>
 }
 
 export interface SimpleRouteJson {

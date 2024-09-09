@@ -15,9 +15,13 @@ import { ObstacleList } from "./ObstacleList"
 
 const debug = Debug("autorouting-dataset:astar")
 
+export interface PointWithLayer extends Point {
+  layer: string
+}
+
 export type ConnectionSolveResult =
   | { solved: false; connectionName: string }
-  | { solved: true; connectionName: string; route: Point[] }
+  | { solved: true; connectionName: string; route: PointWithLayer[] }
 
 export class GeneralizedAstarAutorouter {
   openSet: Node[] = []
@@ -185,10 +189,15 @@ export class GeneralizedAstarAutorouter {
       const { solved, current } = this.solveOneStep()
 
       if (solved) {
-        const route: Point[] = []
+        const route: PointWithLayer[] = []
         let node: Node | null = current
         while (node) {
-          route.unshift({ x: node.x, y: node.y })
+          route.unshift({
+            x: node.x,
+            y: node.y,
+            // TODO: this layer should be included as part of the node
+            layer: pointsToConnect[0].layer,
+          })
           node = node.parent
         }
 
@@ -221,10 +230,15 @@ export class GeneralizedAstarAutorouter {
     const obstaclesFromTraces: Obstacle[] = []
     this.debugTraceCount = 0
     for (const connection of this.input.connections) {
+      const dominantLayer = connection.pointsToConnect[0].layer ?? "top"
       this.debugTraceCount += 1
       this.obstacles = new ObstacleList(
         this.allObstacles
           .filter((obstacle) => !obstacle.connectedTo.includes(connection.name))
+          // TODO obstacles on different layers should be filtered inside
+          // the algorithm, not for the entire connection, this is a hack in
+          // relation to https://github.com/tscircuit/tscircuit/issues/432
+          .filter((obstacle) => obstacle.layers.includes(dominantLayer))
           .concat(obstaclesFromTraces),
       )
       const result = this.solveConnection(connection)
@@ -237,7 +251,14 @@ export class GeneralizedAstarAutorouter {
       if (result.solved) {
         solutions.push(result)
         obstaclesFromTraces.push(
-          ...getObstaclesFromRoute(result.route, connection.name),
+          ...getObstaclesFromRoute(
+            result.route.map((p) => ({
+              x: p.x,
+              y: p.y,
+              layer: dominantLayer,
+            })),
+            connection.name,
+          ),
         )
       }
     }
@@ -259,7 +280,7 @@ export class GeneralizedAstarAutorouter {
             x: point.x,
             y: point.y,
             width: 0.1, // TODO use configurable width
-            layer: "top", // Default layer, adjust as needed
+            layer: point.layer,
           })),
         },
       ]

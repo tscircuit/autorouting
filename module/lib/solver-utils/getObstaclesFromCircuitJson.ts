@@ -2,6 +2,8 @@ import type { AnySoupElement } from "@tscircuit/soup"
 import type { Obstacle } from "../types"
 import { getObstaclesFromRoute } from "./getObstaclesFromRoute"
 
+const EVERY_LAYER = ["top", "inner1", "inner2", "bottom"]
+
 export const getObstaclesFromCircuitJson = (soup: AnySoupElement[]) => {
   const obstacles: Obstacle[] = []
   for (const element of soup) {
@@ -10,6 +12,7 @@ export const getObstaclesFromCircuitJson = (soup: AnySoupElement[]) => {
         obstacles.push({
           // @ts-ignore
           type: "oval",
+          layers: [element.layer],
           center: {
             x: element.x,
             y: element.y,
@@ -21,6 +24,7 @@ export const getObstaclesFromCircuitJson = (soup: AnySoupElement[]) => {
       } else if (element.shape === "rect") {
         obstacles.push({
           type: "rect",
+          layers: [element.layer],
           center: {
             x: element.x,
             y: element.y,
@@ -35,6 +39,7 @@ export const getObstaclesFromCircuitJson = (soup: AnySoupElement[]) => {
         obstacles.push({
           // @ts-ignore
           type: "oval",
+          layers: element.layers,
           center: {
             x: element.center.x,
             y: element.center.y,
@@ -46,9 +51,10 @@ export const getObstaclesFromCircuitJson = (soup: AnySoupElement[]) => {
       } else if (element.shape === "rect") {
         obstacles.push({
           type: "rect",
+          layers: element.layers,
           center: {
-            x: element.x,
-            y: element.y,
+            x: element.center.x,
+            y: element.center.y,
           },
           width: element.width,
           height: element.height,
@@ -71,6 +77,7 @@ export const getObstaclesFromCircuitJson = (soup: AnySoupElement[]) => {
       } else if (element.hole_shape === "square") {
         obstacles.push({
           type: "rect",
+          layers: EVERY_LAYER,
           center: {
             x: element.x,
             y: element.y,
@@ -82,6 +89,7 @@ export const getObstaclesFromCircuitJson = (soup: AnySoupElement[]) => {
       } else if (element.hole_shape === "round") {
         obstacles.push({
           type: "rect",
+          layers: EVERY_LAYER,
           center: {
             x: element.x,
             y: element.y,
@@ -96,6 +104,7 @@ export const getObstaclesFromCircuitJson = (soup: AnySoupElement[]) => {
         obstacles.push({
           // @ts-ignore
           type: "oval",
+          layers: EVERY_LAYER,
           center: {
             x: element.x,
             y: element.y,
@@ -108,6 +117,7 @@ export const getObstaclesFromCircuitJson = (soup: AnySoupElement[]) => {
         obstacles.push({
           // @ts-ignore
           type: "oval",
+          layers: EVERY_LAYER,
           center: {
             x: element.x,
             y: element.y,
@@ -119,7 +129,11 @@ export const getObstaclesFromCircuitJson = (soup: AnySoupElement[]) => {
       }
     } else if (element.type === "pcb_trace") {
       const traceObstacles = getObstaclesFromRoute(
-        element.route,
+        element.route.map((rp) => ({
+          x: rp.x,
+          y: rp.y,
+          layer: "layer" in rp ? rp.layer : rp.from_layer,
+        })),
         element.source_trace_id!,
       )
       obstacles.push(...traceObstacles)

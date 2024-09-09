@@ -26,12 +26,14 @@ test("pcb_trace becomes an obstacle correctly", () => {
     center: { x: 5, y: 0 },
     width: 10,
     height: 0.1,
+    layers: ["top"],
     connectedTo: ["trace1"],
   })
 
   // Check the second obstacle (vertical trace)
   expect(obstacles[1]).toEqual({
     type: "rect",
+    layers: ["top"],
     center: { x: 10, y: 5 },
     width: 0.1,
     height: 10,
