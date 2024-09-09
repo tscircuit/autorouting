@@ -15,9 +15,13 @@ import { ObstacleList } from "./ObstacleList"
 
 const debug = Debug("autorouting-dataset:astar")
 
+export interface PointWithLayer extends Point {
+  layer: string
+}
+
 export type ConnectionSolveResult =
   | { solved: false; connectionName: string }
-  | { solved: true; connectionName: string; route: Point[] }
+  | { solved: true; connectionName: string; route: PointWithLayer[] }
 
 export class GeneralizedAstarAutorouter {
   openSet: Node[] = []
@@ -185,10 +189,15 @@ export class GeneralizedAstarAutorouter {
       const { solved, current } = this.solveOneStep()
 
       if (solved) {
-        const route: Point[] = []
+        const route: PointWithLayer[] = []
         let node: Node | null = current
         while (node) {
-          route.unshift({ x: node.x, y: node.y })
+          route.unshift({
+            x: node.x,
+            y: node.y,
+            // TODO: this layer should be included as part of the node
+            layer: pointsToConnect[0].layer,
+          })
           node = node.parent
         }
 
@@ -271,7 +280,7 @@ export class GeneralizedAstarAutorouter {
             x: point.x,
             y: point.y,
             width: 0.1, // TODO use configurable width
-            layer: "top", // Default layer, adjust as needed
+            layer: point.layer,
           })),
         },
       ]

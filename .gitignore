@@ -186,3 +186,6 @@ static-server
 .yalc
 yalc.lock
 .vercel
+*.diff.png
+
+test.json
