@@ -237,7 +237,14 @@ export class GeneralizedAstarAutorouter {
       if (result.solved) {
         solutions.push(result)
         obstaclesFromTraces.push(
-          ...getObstaclesFromRoute(result.route, connection.name),
+          ...getObstaclesFromRoute(
+            result.route.map((p) => ({
+              x: p.x,
+              y: p.y,
+              layer: connection.pointsToConnect[0].layer,
+            })),
+            connection.name,
+          ),
         )
       }
     }

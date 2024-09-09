@@ -30,6 +30,7 @@ export const getSimpleRouteJson = (soup: AnySoupElement[]): SimpleRouteJson => {
           return {
             x: pcb_port.x,
             y: pcb_port.y,
+            layer: pcb_port.layers?.[0] ?? "top",
           }
         }),
       }
