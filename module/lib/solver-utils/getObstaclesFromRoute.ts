@@ -3,6 +3,7 @@ import type { Obstacle } from "autorouting-dataset/lib/types"
 interface Point {
   x: number
   y: number
+  layer: string
 }
 
 export const getObstaclesFromRoute = (
@@ -24,6 +25,7 @@ export const getObstaclesFromRoute = (
 
     const obstacle: Obstacle = {
       type: "rect",
+      layers: [start.layer],
       center: {
         x: (start.x + end.x) / 2,
         y: (start.y + end.y) / 2,
