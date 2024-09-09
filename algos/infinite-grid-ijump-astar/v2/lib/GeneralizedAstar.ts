@@ -221,10 +221,15 @@ export class GeneralizedAstarAutorouter {
     const obstaclesFromTraces: Obstacle[] = []
     this.debugTraceCount = 0
     for (const connection of this.input.connections) {
+      const dominantLayer = connection.pointsToConnect[0].layer ?? "top"
       this.debugTraceCount += 1
       this.obstacles = new ObstacleList(
         this.allObstacles
           .filter((obstacle) => !obstacle.connectedTo.includes(connection.name))
+          // TODO obstacles on different layers should be filtered inside
+          // the algorithm, not for the entire connection, this is a hack in
+          // relation to https://github.com/tscircuit/tscircuit/issues/432
+          .filter((obstacle) => obstacle.layers.includes(dominantLayer))
           .concat(obstaclesFromTraces),
       )
       const result = this.solveConnection(connection)
@@ -241,7 +246,7 @@ export class GeneralizedAstarAutorouter {
             result.route.map((p) => ({
               x: p.x,
               y: p.y,
-              layer: connection.pointsToConnect[0].layer,
+              layer: dominantLayer,
             })),
             connection.name,
           ),
