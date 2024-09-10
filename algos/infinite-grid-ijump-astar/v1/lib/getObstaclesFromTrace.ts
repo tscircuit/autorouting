@@ -5,6 +5,9 @@ import type {
 
 const isCloseTo = (a: number, b: number) => Math.abs(a - b) < 0.0001
 
+/**
+ * @deprecated use getObstaclesFromRoute instead
+ */
 export const getObstaclesFromTrace = (
   trace: SimplifiedPcbTrace,
   source_trace_id: string,
