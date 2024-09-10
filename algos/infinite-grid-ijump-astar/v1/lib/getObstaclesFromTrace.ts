@@ -3,6 +3,8 @@ import type {
   SimplifiedPcbTrace,
 } from "autorouting-dataset/lib/types"
 
+const isCloseTo = (a: number, b: number) => Math.abs(a - b) < 0.0001
+
 export const getObstaclesFromTrace = (
   trace: SimplifiedPcbTrace,
   source_trace_id: string,
@@ -11,12 +13,12 @@ export const getObstaclesFromTrace = (
   for (let i = 0; i < trace.route.length - 1; i++) {
     const [start, end] = [trace.route[i], trace.route[i + 1]]
 
-    const isHorz = start.y === end.y
-    const isVert = start.x === end.x
+    const isHorz = isCloseTo(start.y, end.y)
+    const isVert = isCloseTo(start.x, end.x)
 
     if (!isHorz && !isVert) {
       throw new Error(
-        `getObstaclesFromTrace only supports horizontal and vertical traces (not diagonals) atm`,
+        `getObstaclesFromTrace currently only supports horizontal and vertical traces (not diagonals)- contributions welcome! Conflicting trace: ${trace.pcb_trace_id}, start: (${start.x}, ${start.y}), end: (${end.x}, ${end.y})`,
       )
     }
 
