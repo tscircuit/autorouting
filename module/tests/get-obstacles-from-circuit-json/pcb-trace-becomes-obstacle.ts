@@ -1,5 +1,5 @@
 import { test, expect } from "bun:test"
-import { getObstaclesFromCircuitJson } from "../lib/solver-utils/getObstaclesFromCircuitJson"
+import { getObstaclesFromCircuitJson } from "../../lib/solver-utils/getObstaclesFromCircuitJson"
 import type { AnySoupElement } from "@tscircuit/soup"
 
 test("pcb_trace becomes an obstacle correctly", () => {
