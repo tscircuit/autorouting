@@ -348,8 +348,6 @@ test("ijump-astar: multilayer trace", () => {
 
   const traces = autorouter.solveAndMapToTraces()
 
-  Bun.write("test.json", JSON.stringify(soup.concat(traces)))
-
   expect(circuitJsonToPcbSvg(soup.concat(traces))).toMatchSvgSnapshot(
     import.meta.path,
   )

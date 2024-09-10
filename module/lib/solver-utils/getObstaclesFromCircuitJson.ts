@@ -137,6 +137,18 @@ export const getObstaclesFromCircuitJson = (soup: AnySoupElement[]) => {
         element.source_trace_id!,
       )
       obstacles.push(...traceObstacles)
+    } else if (element.type === "pcb_via") {
+      obstacles.push({
+        type: "rect",
+        layers: element.layers,
+        center: {
+          x: element.x,
+          y: element.y,
+        },
+        connectedTo: [], // TODO we can associate source_ports with this via
+        width: element.outer_diameter,
+        height: element.outer_diameter,
+      })
     }
   }
   return obstacles
