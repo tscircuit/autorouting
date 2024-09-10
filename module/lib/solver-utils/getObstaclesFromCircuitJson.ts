@@ -19,7 +19,7 @@ export const getObstaclesFromCircuitJson = (soup: AnySoupElement[]) => {
           },
           width: element.radius * 2,
           height: element.radius * 2,
-          connectedTo: [],
+          connectedTo: [element.pcb_smtpad_id],
         })
       } else if (element.shape === "rect") {
         obstacles.push({
@@ -31,7 +31,7 @@ export const getObstaclesFromCircuitJson = (soup: AnySoupElement[]) => {
           },
           width: element.width,
           height: element.height,
-          connectedTo: [],
+          connectedTo: [element.pcb_smtpad_id],
         })
       }
     } else if (element.type === "pcb_keepout") {
@@ -111,7 +111,7 @@ export const getObstaclesFromCircuitJson = (soup: AnySoupElement[]) => {
           },
           width: element.outer_diameter,
           height: element.outer_diameter,
-          connectedTo: [],
+          connectedTo: [element.pcb_plated_hole_id],
         })
       } else if (element.shape === "oval" || element.shape === "pill") {
         obstacles.push({
@@ -124,7 +124,7 @@ export const getObstaclesFromCircuitJson = (soup: AnySoupElement[]) => {
           },
           width: element.outer_width,
           height: element.outer_height,
-          connectedTo: [],
+          connectedTo: [element.pcb_plated_hole_id],
         })
       }
     } else if (element.type === "pcb_trace") {
