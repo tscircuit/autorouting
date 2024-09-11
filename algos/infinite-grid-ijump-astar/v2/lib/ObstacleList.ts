@@ -92,6 +92,7 @@ export class ObstacleList {
   getOrthoDirectionCollisionInfo(
     point: Point,
     dir: Direction,
+    { margin = 0 }: { margin?: number } = {},
   ): DirectionWithCollisionInfo {
     const { x, y } = point
     const { dx, dy } = dir
@@ -99,29 +100,32 @@ export class ObstacleList {
     let collisionObstacle: ObstacleWithEdges | null = null
 
     for (const obstacle of this.obstacles) {
-      const { left, right, top, bottom } = obstacle
+      const leftMargin = obstacle.left - margin
+      const rightMargin = obstacle.right + margin
+      const topMargin = obstacle.top + margin
+      const bottomMargin = obstacle.bottom - margin
 
       let distance: number | null = null
 
       if (dx === 1 && dy === 0) {
         // Right
-        if (y >= bottom && y <= top && x < left) {
-          distance = left - x
+        if (y > bottomMargin && y < topMargin && x < obstacle.left) {
+          distance = obstacle.left - x
         }
       } else if (dx === -1 && dy === 0) {
         // Left
-        if (y >= bottom && y <= top && x > right) {
-          distance = x - right
+        if (y > bottomMargin && y < topMargin && x > obstacle.right) {
+          distance = x - obstacle.right
         }
       } else if (dx === 0 && dy === 1) {
         // Up
-        if (x >= left && x <= right && y < bottom) {
-          distance = bottom - y
+        if (x > leftMargin && x < rightMargin && y < obstacle.bottom) {
+          distance = obstacle.bottom - y
         }
       } else if (dx === 0 && dy === -1) {
         // Down
-        if (x >= left && x <= right && y > top) {
-          distance = y - top
+        if (x > leftMargin && x < rightMargin && y > obstacle.top) {
+          distance = y - obstacle.top
         }
       }
 

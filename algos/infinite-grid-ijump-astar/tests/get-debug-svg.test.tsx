@@ -30,7 +30,7 @@ test("ijump-astar: intersection with margin", () => {
 
   const traces = autorouter.solveAndMapToTraces()
 
-  expect(getDebugSvg(inputCircuitJson, autorouter)).toMatchSvgSnapshot(
+  expect(getDebugSvg({ inputCircuitJson, autorouter })).toMatchSvgSnapshot(
     import.meta.path,
   )
 })

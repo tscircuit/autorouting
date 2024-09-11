@@ -53,7 +53,11 @@ export class IJumpAutorouter extends GeneralizedAstarAutorouter {
         }
         return true
       })
-      .map((dir) => obstacles.getOrthoDirectionCollisionInfo(node, dir))
+      .map((dir) =>
+        obstacles.getOrthoDirectionCollisionInfo(node, dir, {
+          margin: this.OBSTACLE_MARGIN,
+        }),
+      )
       // Filter out directions that are too close to the wall
       .filter((dir) => dir.wallDistance >= this.OBSTACLE_MARGIN)
 
@@ -77,7 +81,7 @@ export class IJumpAutorouter extends GeneralizedAstarAutorouter {
           wallDir: { ...forwardDir, wallDistance: this.OBSTACLE_MARGIN },
           obstacle: node.obstacleHit,
           obstacles,
-          OBSTACLE_MARGIN: 0.15,
+          OBSTACLE_MARGIN: this.OBSTACLE_MARGIN,
           SHOULD_DETECT_CONJOINED_OBSTACLES: true,
         })
       }
