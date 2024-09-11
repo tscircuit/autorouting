@@ -16,6 +16,7 @@
     "@biomejs/biome": "^1.8.3",
     "@timohausmann/quadtree-ts": "^2.2.2",
     "@tscircuit/builder": "1.11.2",
+    "@tscircuit/core": "^0.0.54",
     "@tscircuit/pcb-viewer": "1.4.5",
     "@tscircuit/props": "^0.0.26",
     "@tscircuit/soup": "^0.0.68",

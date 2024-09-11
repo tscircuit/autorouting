@@ -249,7 +249,6 @@ export class GeneralizedAstarAutorouter {
       }
 
       if (result.solved) {
-        solutions.push(result)
         obstaclesFromTraces.push(
           ...getObstaclesFromRoute(
             result.route.map((p) => ({
