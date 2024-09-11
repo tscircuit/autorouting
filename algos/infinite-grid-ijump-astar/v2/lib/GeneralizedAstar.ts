@@ -26,6 +26,7 @@ export type ConnectionSolveResult =
 export class GeneralizedAstarAutorouter {
   openSet: Node[] = []
   closedSet: Set<string> = new Set()
+  debug = false
 
   debugSolutions?: Record<string, AnySoupElement[]>
   debugMessage: string | null = null
@@ -57,6 +58,7 @@ export class GeneralizedAstarAutorouter {
     GRID_STEP?: number
     OBSTACLE_MARGIN?: number
     MAX_ITERATIONS?: number
+    debug?: boolean
   }) {
     this.input = opts.input
     this.allObstacles = opts.input.obstacles
@@ -65,6 +67,10 @@ export class GeneralizedAstarAutorouter {
     this.GRID_STEP = opts.GRID_STEP ?? 0.1
     this.OBSTACLE_MARGIN = opts.OBSTACLE_MARGIN ?? 0.15
     this.MAX_ITERATIONS = opts.MAX_ITERATIONS ?? 100
+    this.debug = opts.debug ?? debug.enabled
+    if (this.debug) {
+      debug.enabled = true
+    }
 
     if (debug.enabled) {
       this.debugSolutions = {}
