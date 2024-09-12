@@ -34,11 +34,6 @@ export class IJumpMultiMarginAutorouter extends GeneralizedAstarAutorouter {
       enterCost: 0,
       travelCostFactor: 1,
     },
-    // {
-    //   margin: 0.25,
-    //   enterCost: 5,
-    //   travelCostFactor: 1.5,
-    // },
     {
       margin: 0.15,
       enterCost: 10,
