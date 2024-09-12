@@ -13,7 +13,7 @@ import { getDistanceToOvercomeObstacle } from "./getDistanceToOvercomeObstacle"
 import { distance } from "@tscircuit/soup"
 
 export class IJumpMultiMarginAutorouter extends GeneralizedAstarAutorouter {
-  MAX_ITERATIONS: number = 200
+  MAX_ITERATIONS: number = 500
 
   /**
    * For a multi-margin autorouter, we penalize traveling close to the wall
@@ -21,6 +21,8 @@ export class IJumpMultiMarginAutorouter extends GeneralizedAstarAutorouter {
    * The best way to compute cost is to multiple the travelMargin cost factor by
    * the distance traveled by along the wall and add the enterMargin cost factor
    * whenever we enter a new margin
+   *
+   * MUST BE ORDERED FROM HIGHEST MARGIN TO LOWEST (TODO sort in constructor)
    */
   marginsWithCosts: Array<{
     margin: number
@@ -32,17 +34,21 @@ export class IJumpMultiMarginAutorouter extends GeneralizedAstarAutorouter {
       enterCost: 0,
       travelCostFactor: 1,
     },
-    {
-      margin: 0.3,
-      enterCost: 5,
-      travelCostFactor: 1.5,
-    },
+    // {
+    //   margin: 0.25,
+    //   enterCost: 5,
+    //   travelCostFactor: 1.5,
+    // },
     {
       margin: 0.15,
-      enterCost: 20,
+      enterCost: 10,
       travelCostFactor: 2,
     },
   ]
+
+  get largestMargin() {
+    return this.marginsWithCosts[0].margin
+  }
 
   computeG(current: Node, neighbor: Point): number {
     return (
@@ -92,7 +98,7 @@ export class IJumpMultiMarginAutorouter extends GeneralizedAstarAutorouter {
       })
       .map((dir) =>
         obstacles.getOrthoDirectionCollisionInfo(node, dir, {
-          margin: this.OBSTACLE_MARGIN, // TODO use largest margin
+          margin: this.OBSTACLE_MARGIN,
         }),
       )
       // Filter out directions that are too close to the wall
@@ -150,12 +156,37 @@ export class IJumpMultiMarginAutorouter extends GeneralizedAstarAutorouter {
       ) {
         for (const { margin, enterCost, travelCostFactor } of this
           .marginsWithCosts) {
+          if (
+            overcomeDistance - this.OBSTACLE_MARGIN + margin * 2 <
+            travelDir.wallDistance
+          ) {
+            travelDirs2.push({
+              ...travelDir,
+              travelDistance: overcomeDistance - this.OBSTACLE_MARGIN + margin,
+              enterMarginCost: enterCost,
+              travelMarginCostFactor: travelCostFactor,
+            })
+          }
+        }
+        if (travelDir.wallDistance === Infinity) {
           travelDirs2.push({
             ...travelDir,
-            travelDistance: overcomeDistance - this.OBSTACLE_MARGIN + margin,
-            enterMarginCost: enterCost,
-            travelMarginCostFactor: travelCostFactor,
+            travelDistance: goalDistAlongTravelDir,
+            enterMarginCost: 0,
+            travelMarginCostFactor: 1,
           })
+        } else if (travelDir.wallDistance > this.largestMargin) {
+          for (const { margin, enterCost, travelCostFactor } of this
+            .marginsWithCosts) {
+            if (travelDir.wallDistance > this.largestMargin + margin) {
+              travelDirs2.push({
+                ...travelDir,
+                travelDistance: travelDir.wallDistance - margin,
+                enterMarginCost: enterCost,
+                travelMarginCostFactor: travelCostFactor,
+              })
+            }
+          }
         }
       } else if (travelDir.wallDistance !== Infinity) {
         for (const { margin, enterCost, travelCostFactor } of this

@@ -7,6 +7,7 @@ import {
   isPointInsideObstacle,
 } from "autorouting-dataset/lib/solver-utils/getSimpleRouteJson"
 import { getObstaclesFromCircuitJson } from "autorouting-dataset/lib/solver-utils/getObstaclesFromCircuitJson"
+import { IJumpMultiMarginAutorouter } from "./lib/IJumpMultiMarginAutorouter"
 
 export function autoroute(soup: AnySoupElement[]): SolutionWithDebugInfo {
   const input = getSimpleRouteJson(soup)
@@ -24,10 +25,29 @@ export function autoroute(soup: AnySoupElement[]): SolutionWithDebugInfo {
   }
 }
 
+export function autorouteMultiMargin(
+  soup: AnySoupElement[],
+): SolutionWithDebugInfo {
+  const input = getSimpleRouteJson(soup)
+
+  const autorouter = new IJumpMultiMarginAutorouter({
+    input,
+  })
+
+  const solution = autorouter.solveAndMapToTraces()
+
+  return {
+    solution,
+    debugSolutions: autorouter.debugSolutions,
+    debugMessage: autorouter.debugMessage,
+  }
+}
+
 export const getObstaclesFromSoup = getObstaclesFromCircuitJson
 
 export {
   IJumpAutorouter,
+  IJumpMultiMarginAutorouter,
   getSimpleRouteJson,
   markObstaclesAsConnected,
   isPointInsideObstacle,
