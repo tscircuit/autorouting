@@ -191,12 +191,14 @@ export class IJumpMultiMarginAutorouter extends GeneralizedAstarAutorouter {
       } else if (travelDir.wallDistance !== Infinity) {
         for (const { margin, enterCost, travelCostFactor } of this
           .marginsWithCosts) {
-          travelDirs2.push({
-            ...travelDir,
-            travelDistance: travelDir.wallDistance - margin,
-            enterMarginCost: enterCost,
-            travelMarginCostFactor: travelCostFactor,
-          })
+          if (travelDir.wallDistance > margin) {
+            travelDirs2.push({
+              ...travelDir,
+              travelDistance: travelDir.wallDistance - margin,
+              enterMarginCost: enterCost,
+              travelMarginCostFactor: travelCostFactor,
+            })
+          }
         }
       }
     }

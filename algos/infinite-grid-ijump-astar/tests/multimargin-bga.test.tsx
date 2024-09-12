@@ -24,15 +24,13 @@ const OneByOnePad = (props: { name: string; pcbX?: number; pcbY?: number }) => (
   </chip>
 )
 
-test("multimargin-ijump-astar simple", () => {
+test("multimargin-ijump-astar: bga9", () => {
   const circuit = new Circuit()
 
   circuit.add(
     <board width="10mm" height="2mm" routingDisabled>
-      <OneByOnePad name="U1" pcbX={-3} />
-      <OneByOnePad name="U2" pcbX={3} />
-      <OneByOnePad name="U_obstacle" pcbX={0} pcbY={0} />
-      <trace from=".U1 > .pin1" to=".U2 > .pin1" />
+      <chip name="U1" footprint="bga9" />
+      <trace from=".U1 .pin1" to=".U1 .pin9" />
     </board>,
   )
 
@@ -50,6 +48,6 @@ test("multimargin-ijump-astar simple", () => {
   expect(solution).toHaveLength(1)
 
   expect(
-    getDebugSvg({ inputCircuitJson, autorouter, solution }),
+    getDebugSvg({ inputCircuitJson, autorouter, solution, rowHeight: 5 }),
   ).toMatchSvgSnapshot(import.meta.path)
 })
