@@ -7,6 +7,7 @@ import { transformPCBElements } from "@tscircuit/soup-util"
 import { translate } from "transformation-matrix"
 import type { AnySoupElement } from "@tscircuit/soup"
 import { getDebugSvg } from "./fixtures/get-debug-svg"
+import { IJumpMultiMarginAutorouter } from "../v2/lib/IJumpMultiMarginAutorouter"
 
 const OneByOnePad = (props: { name: string; pcbX?: number; pcbY?: number }) => (
   <chip name={props.name} pcbX={props.pcbX} pcbY={props.pcbY}>
@@ -39,7 +40,7 @@ test("ijump-astar: intersection with margin", () => {
 
   const input = getSimpleRouteJson(inputCircuitJson)
 
-  const autorouter = new IJumpAutorouter({
+  const autorouter = new IJumpMultiMarginAutorouter({
     input,
     debug: true,
   })

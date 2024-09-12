@@ -28,6 +28,12 @@ export interface Point {
 
 export interface PointWithObstacleHit extends Point {
   obstacleHit?: Obstacle | null
+
+  /**
+   * Used in multi-margin autorouter to penalize traveling close to the wall
+   */
+  travelMarginCostFactor?: number
+  enterMarginCost?: number
 }
 
 export interface PointWithWallDistance extends Point {
@@ -46,4 +52,10 @@ export interface Node extends Point {
   nodesInPath: number
   obstacleHit?: Obstacle
   parent: Node | null
+
+  /**
+   * Used in multi-margin autorouter to penalize traveling close to the wall
+   */
+  travelMarginCostFactor?: number
+  enterMarginCost?: number
 }
