@@ -1,12 +1,12 @@
 import type { AnySoupElement } from "@tscircuit/soup"
 import type { SolutionWithDebugInfo } from "autorouting-dataset/lib/solver-utils/ProblemSolver"
 import { getSimpleRouteJson } from "autorouting-dataset/lib/solver-utils/getSimpleRouteJson"
-import { IJumpMultiLayer } from "./IJumpMultiLayer"
+import { MultilayerIjump } from "./MultilayerIjump"
 
 export function autoroute(soup: AnySoupElement[]): SolutionWithDebugInfo {
   const input = getSimpleRouteJson(soup)
 
-  const autorouter = new IJumpMultiLayer({
+  const autorouter = new MultilayerIjump({
     input,
     layerCount: 2,
   })

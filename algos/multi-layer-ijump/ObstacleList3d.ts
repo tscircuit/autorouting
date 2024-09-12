@@ -6,7 +6,7 @@ import type {
   DirectionDistances3d,
   DirectionWithCollisionInfo3d,
   ObstacleWithEdges3d,
-  Point3d,
+  Point,
 } from "./types"
 import { getLayerIndex } from "./util"
 import { ObstacleList } from "algos/infinite-grid-ijump-astar/v2/lib/ObstacleList"
@@ -104,7 +104,7 @@ export class ObstacleList3d extends ObstacleList {
   }
 
   getOrthoDirectionCollisionInfo(
-    point: Point3d,
+    point: Point,
     dir: Direction3d,
     { margin = 0 }: { margin?: number } = {},
   ): DirectionWithCollisionInfo3d {

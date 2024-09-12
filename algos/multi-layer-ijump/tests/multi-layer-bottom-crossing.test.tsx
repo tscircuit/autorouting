@@ -8,7 +8,12 @@ import type { AnySoupElement } from "@tscircuit/soup"
 import { getDebugSvg } from "../../infinite-grid-ijump-astar/tests/fixtures/get-debug-svg"
 import { MultilayerIjump } from "../MultilayerIjump"
 
-const OneByOnePad = (props: { name: string; pcbX?: number; pcbY?: number }) => (
+const OneByOnePad = (props: {
+  name: string
+  pcbX?: number
+  pcbY?: number
+  layer: string
+}) => (
   <chip name={props.name} pcbX={props.pcbX} pcbY={props.pcbY}>
     <footprint>
       <smtpad
@@ -17,6 +22,7 @@ const OneByOnePad = (props: { name: string; pcbX?: number; pcbY?: number }) => (
         shape="rect"
         width="1mm"
         height="1mm"
+        layer={props.layer as any}
         portHints={["pin1"]}
       />
     </footprint>
@@ -28,10 +34,13 @@ test("multimargin-ijump-astar simple", () => {
 
   circuit.add(
     <board width="10mm" height="2mm" routingDisabled>
-      <OneByOnePad name="U1" pcbX={-3} />
-      <OneByOnePad name="U2" pcbX={3} />
-      <OneByOnePad name="U_obstacle" pcbX={0} pcbY={0} />
+      <OneByOnePad name="U1" pcbX={-3} layer="top" />
+      <OneByOnePad name="U2" pcbX={3} layer="bottom" />
+      <OneByOnePad name="U3" pcbY={3} layer="top" />
+      <OneByOnePad name="U4" pcbY={-3} layer="bottom" />
+      <OneByOnePad name="U_obstacle" pcbX={0} layer="top" />
       <trace from=".U1 > .pin1" to=".U2 > .pin1" />
+      <trace from=".U3 > .pin1" to=".U4 > .pin1" />
     </board>,
   )
 
@@ -48,8 +57,15 @@ test("multimargin-ijump-astar simple", () => {
   const solution = autorouter.solveAndMapToTraces()
 
   expect(
-    getDebugSvg({ inputCircuitJson, autorouter, solution }),
+    getDebugSvg({
+      inputCircuitJson,
+      autorouter,
+      solution,
+      rowHeight: 12,
+      colWidth: 15,
+      colCount: 8,
+    }),
   ).toMatchSvgSnapshot(import.meta.path)
 
-  expect(solution).toHaveLength(1)
+  expect(solution).toHaveLength(2)
 })

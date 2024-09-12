@@ -1,13 +1,12 @@
 import { getSimpleRouteJson } from "autorouting-dataset"
 import { test, expect } from "bun:test"
 import { circuitJsonToPcbSvg } from "circuit-to-svg"
-import { IJumpAutorouter } from "../v2"
 import { Circuit } from "@tscircuit/core"
 import { transformPCBElements } from "@tscircuit/soup-util"
 import { translate } from "transformation-matrix"
 import type { AnySoupElement } from "@tscircuit/soup"
 import { getDebugSvg } from "../../infinite-grid-ijump-astar/tests/fixtures/get-debug-svg"
-import { IJumpMultiLayer } from "../IJumpMultiLayer"
+import { MultilayerIjump } from "../MultilayerIjump"
 
 const OneByOnePad = (props: {
   name: string
@@ -46,7 +45,7 @@ test("multimargin-ijump-astar simple", () => {
 
   const input = getSimpleRouteJson(inputCircuitJson)
 
-  const autorouter = new IJumpMultiLayer({
+  const autorouter = new MultilayerIjump({
     input,
     layerCount: 2,
     debug: true,

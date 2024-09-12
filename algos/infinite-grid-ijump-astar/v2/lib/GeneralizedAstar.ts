@@ -311,7 +311,7 @@ export class GeneralizedAstarAutorouter {
             result.route.map((p) => ({
               x: p.x,
               y: p.y,
-              layer: dominantLayer,
+              layer: p.layer ?? dominantLayer,
             })),
             connection.name,
           ),
@@ -362,7 +362,7 @@ export class GeneralizedAstarAutorouter {
               ({
                 type: "pcb_smtpad",
                 pcb_component_id: "",
-                layer: "top",
+                layer: obstacle.layers[0],
                 width: obstacle.width,
                 shape: "rect",
                 x: obstacle.center.x,
