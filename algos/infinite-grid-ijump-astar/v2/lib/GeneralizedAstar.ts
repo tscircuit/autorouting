@@ -37,7 +37,7 @@ export class GeneralizedAstarAutorouter {
   obstacles?: ObstacleList
   allObstacles: Obstacle[]
   startNode?: Node
-  goalPoint?: Point
+  goalPoint?: Point & { l: number }
   GRID_STEP: number
   OBSTACLE_MARGIN: number
   MAX_ITERATIONS: number
@@ -66,6 +66,8 @@ export class GeneralizedAstarAutorouter {
     this.allObstacles = opts.input.obstacles
     this.startNode = opts.startNode
     this.goalPoint = opts.goalPoint
+      ? ({ l: 0, ...opts.goalPoint } as any)
+      : undefined
     this.GRID_STEP = opts.GRID_STEP ?? 0.1
     this.OBSTACLE_MARGIN = opts.OBSTACLE_MARGIN ?? 0.15
     this.MAX_ITERATIONS = opts.MAX_ITERATIONS ?? 100
@@ -208,7 +210,10 @@ export class GeneralizedAstarAutorouter {
     this.iterations = 0
     this.closedSet = new Set()
     this.startNode = this.getStartNode(connection)
-    this.goalPoint = pointsToConnect[pointsToConnect.length - 1]
+    this.goalPoint = {
+      ...pointsToConnect[pointsToConnect.length - 1],
+      l: this.layerToIndex(pointsToConnect[pointsToConnect.length - 1].layer),
+    }
     this.openSet = [this.startNode]
 
     while (this.iterations < this.MAX_ITERATIONS) {
@@ -224,9 +229,7 @@ export class GeneralizedAstarAutorouter {
             y: node.y,
             // TODO: this layer should be included as part of the node
             layer:
-              l !== undefined
-                ? this.indexToLayer(node.l)
-                : pointsToConnect[0].layer,
+              l !== undefined ? this.indexToLayer(l) : pointsToConnect[0].layer,
           })
           node = node.parent
         }

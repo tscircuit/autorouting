@@ -292,36 +292,6 @@ export class IJumpMultiLayer extends GeneralizedAstarAutorouter {
       }
     }
 
-    // for (const travelDir of travelDirs2) {
-    //   let travelDistance: number
-
-    //   // For layer changes, the travel distance is always 1
-    //   if (travelDir.dl !== 0) {
-    //     travelDistance = 1
-    //   } else {
-    //     travelDistance = travelDir.wallDistance - this.largestMargin
-    //   }
-
-    //   if (travelDistance <= 0) continue
-
-    //   // Check for obstacles at the target position
-    //   const targetX = node.x + travelDir.dx * travelDistance
-    //   const targetY = node.y + travelDir.dy * travelDistance
-    //   const targetL = node.l + travelDir.dl
-
-    //   if (obstacles.isObstacleAt(targetX, targetY, targetL)) continue
-
-    //   // Add the neighbor with appropriate costs
-    //   travelDirs2.push({
-    //     ...travelDir,
-    //     travelDistance,
-    //     enterMarginCost: 0,
-    //     travelMarginCostFactor: 1,
-    //   })
-    // }
-
-    console.log(this.iterations, { travelDirs2 })
-
     return travelDirs3.map((dir) => ({
       x: node.x + dir.dx * dir.travelDistance,
       y: node.y + dir.dy * dir.travelDistance,
