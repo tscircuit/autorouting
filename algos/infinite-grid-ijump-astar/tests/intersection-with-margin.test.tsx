@@ -8,14 +8,30 @@ import { translate } from "transformation-matrix"
 import type { AnySoupElement } from "@tscircuit/soup"
 import { getDebugSvg } from "./fixtures/get-debug-svg"
 
+const OneByOnePad = (props: { name: string; pcbX?: number; pcbY?: number }) => (
+  <chip name={props.name} pcbX={props.pcbX} pcbY={props.pcbY}>
+    <footprint>
+      <smtpad
+        pcbX={0}
+        pcbY={0}
+        shape="rect"
+        width="1mm"
+        height="1mm"
+        portHints={["pin1"]}
+      />
+    </footprint>
+  </chip>
+)
+
 test("ijump-astar: intersection with margin", () => {
   const circuit = new Circuit()
 
   circuit.add(
     <board width="10mm" height="2mm" routingDisabled>
-      <resistor name="R1" resistance="1k" footprint="0402" pcbX={-3} />
-      <resistor name="R2" resistance="1k" footprint="0402" pcbX={3} />
-      <trace from=".R1 > .pin1" to=".R2 > .pin1" />
+      <OneByOnePad name="U1" pcbX={-3} />
+      <OneByOnePad name="U2" pcbX={3} />
+      <OneByOnePad name="U_obstacle" pcbX={0} pcbY={-0.51} />
+      <trace from=".U1 > .pin1" to=".U2 > .pin1" />
     </board>,
   )
 
@@ -28,9 +44,11 @@ test("ijump-astar: intersection with margin", () => {
     debug: true,
   })
 
-  const traces = autorouter.solveAndMapToTraces()
+  const solution = autorouter.solveAndMapToTraces()
 
-  expect(getDebugSvg(inputCircuitJson, autorouter)).toMatchSvgSnapshot(
-    import.meta.path,
-  )
+  expect(solution).toHaveLength(1)
+
+  expect(
+    getDebugSvg({ inputCircuitJson, autorouter, solution }),
+  ).toMatchSvgSnapshot(import.meta.path)
 })
