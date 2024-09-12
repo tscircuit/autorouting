@@ -8,13 +8,29 @@ import type {
   DirectionWithCollisionInfo,
 } from "algos/infinite-grid-ijump-astar/v2/lib/types"
 import {
-  dirFromAToB,
   distAlongDir,
   manDist,
 } from "algos/infinite-grid-ijump-astar/v2/lib/util"
+import type {
+  Direction3d,
+  DirectionWithCollisionInfo3d,
+  Node3d,
+  Point3dWithObstacleHit,
+} from "./types"
+import { dirFromAToB, getLayerIndex, indexToLayer } from "./util"
+import type {
+  SimpleRouteConnection,
+  SimpleRouteJson,
+} from "autorouting-dataset/lib/solver-utils/SimpleRouteJson"
+import { ObstacleList3d } from "./ObstacleList3d"
+import type { Obstacle } from "autorouting-dataset/lib/types"
 
 export class IJumpMultiLayer extends GeneralizedAstarAutorouter {
   MAX_ITERATIONS: number = 20
+  VIA_COST: number = 10 // Define the cost for changing layers
+  allowLayerChange: boolean = true // Flag to allow layer changes
+  layerCount: number
+  obstacles: ObstacleList3d
 
   /**
    * For a multi-margin autorouter, we penalize traveling close to the wall
@@ -46,60 +62,136 @@ export class IJumpMultiLayer extends GeneralizedAstarAutorouter {
     return this.marginsWithCosts[0].margin
   }
 
-  computeG(current: Node, neighbor: Point): number {
-    return (
-      current.g +
-      manDist(current, neighbor) * (current.travelMarginCostFactor ?? 1) +
-      ((neighbor as any).enterMarginCost ?? 0)
+  constructor(opts: {
+    input: SimpleRouteJson
+    startNode?: Node
+    goalPoint?: Point
+    GRID_STEP?: number
+    OBSTACLE_MARGIN?: number
+    MAX_ITERATIONS?: number
+    layerCount?: number
+    isRemovePathLoopsEnabled?: boolean
+    debug?: boolean
+  }) {
+    super(opts)
+    this.layerCount = opts.layerCount ?? 2
+
+    // obstacle lists are created when solving currently
+    this.obstacles = null as any // new ObstacleList3d(this.layerCount, this.allObstacles)
+  }
+
+  createObstacleList({
+    dominantLayer,
+    connection,
+    obstaclesFromTraces,
+  }: {
+    dominantLayer?: string
+    connection: SimpleRouteConnection
+    obstaclesFromTraces: Obstacle[]
+  }): ObstacleList3d {
+    return new ObstacleList3d(
+      this.layerCount,
+      this.allObstacles
+        .filter((obstacle) => !obstacle.connectedTo.includes(connection.name))
+        .concat(obstaclesFromTraces ?? []),
     )
   }
 
-  getNeighbors(node: Node): Array<PointWithObstacleHit> {
+  computeG(current: Node3d, neighbor: Node3d): number {
+    let cost =
+      current.g +
+      manDist(current, neighbor) * (current.travelMarginCostFactor ?? 1) +
+      (neighbor.enterMarginCost ?? 0)
+    if (neighbor.l ?? -1 !== current.l ?? -1) {
+      cost += this.VIA_COST
+    }
+    return cost
+  }
+
+  computeH(node: Node3d): number {
+    const dx = Math.abs(node.x - this.goalPoint!.x)
+    const dy = Math.abs(node.y - this.goalPoint!.y)
+    const dl = Math.abs(node.l - (this.goalPoint as any).l)
+    return dx + dy + dl * this.VIA_COST
+  }
+
+  getStartNode(connection: SimpleRouteConnection): Node3d {
+    return {
+      ...super.getStartNode(connection),
+      l: this.layerToIndex(connection.pointsToConnect[0].layer),
+    } as any
+  }
+
+  layerToIndex(layer: string): number {
+    return getLayerIndex(this.layerCount, layer)
+  }
+  indexToLayer(index: number): string {
+    return indexToLayer(this.layerCount, index)
+  }
+
+  getNeighbors(node: Node3d): Array<Point3dWithObstacleHit> {
     const obstacles = this.obstacles!
-    const goalPoint = this.goalPoint!
+    const goalPoint: Node3d = this.goalPoint! as any
 
     /**
      * This is considered "forward" if we were to continue from the parent,
      * through the current node.
      */
-    let forwardDir: Direction3
+    let forwardDir: Direction3d
     if (!node.parent) {
-      forwardDir = { ...dirFromAToB(node, goalPoint), dl: 0 }
+      forwardDir = dirFromAToB(node, goalPoint)
     } else {
-      forwardDir = { ...dirFromAToB(node.parent, node), dl: 0 }
+      forwardDir = dirFromAToB(node.parent, node)
     }
 
     /**
-     * Get the 2-3 next directions (excluding backwards direction), and
+     * Get the possible next directions (excluding backwards direction), and
      * excluding the forward direction if we just ran into a wall
      */
-    const travelDirs1 = [
-      { dx: 0, dy: 1 },
-      { dx: 1, dy: 0 },
-      { dx: 0, dy: -1 },
-      { dx: -1, dy: 0 },
-      { dx: 0, dy: 0, dl: 1 },
+    const travelDirs1: Array<Direction3d> = [
+      { dx: 0, dy: 1, dl: 0 },
+      { dx: 1, dy: 0, dl: 0 },
+      { dx: 0, dy: -1, dl: 0 },
+      { dx: -1, dy: 0, dl: 0 },
     ]
+
+    if (this.allowLayerChange) {
+      // travelDirs1.push({ dx: 0, dy: 0, dl: 1 })
+      // travelDirs1.push({ dx: 0, dy: 0, dl: -1 })
+    }
+
+    const travelDirs2 = travelDirs1
       .filter((dir) => {
         // If we have a parent, don't go backwards towards the parent
-        if (dir.dx === forwardDir.dx * -1 && dir.dy === forwardDir.dy * -1) {
+        if (
+          dir.dx === forwardDir.dx * -1 &&
+          dir.dy === forwardDir.dy * -1 &&
+          dir.dl === forwardDir.dl * -1
+        ) {
           return false
         } else if (
           dir.dx === forwardDir.dx &&
           dir.dy === forwardDir.dy &&
+          dir.dl === forwardDir.dl &&
           node.parent?.obstacleHit
         ) {
           return false
         }
         return true
       })
-      .map((dir) =>
-        obstacles.getOrthoDirectionCollisionInfo(node, dir, {
-          margin: this.OBSTACLE_MARGIN,
-        }),
-      )
+      .map((dir) => {
+        const collisionInfo = obstacles.getOrthoDirectionCollisionInfo(
+          node,
+          dir,
+          {
+            margin: this.OBSTACLE_MARGIN,
+          },
+        )
+
+        return collisionInfo
+      })
       // Filter out directions that are too close to the wall
-      .filter((dir) => dir.wallDistance >= this.OBSTACLE_MARGIN)
+      .filter((dir) => !(dir.wallDistance <= this.OBSTACLE_MARGIN))
 
     /**
      * Figure out how far to travel. There are a couple reasons we would stop
@@ -109,14 +201,14 @@ export class IJumpMultiLayer extends GeneralizedAstarAutorouter {
      * - We hit a wall
      * - We passed the goal along the travel direction
      */
-    const travelDirs2: Array<
-      DirectionWithCollisionInfo & {
+    const travelDirs3: Array<
+      DirectionWithCollisionInfo3d & {
         travelDistance: number
         travelMarginCostFactor: number
         enterMarginCost: number
       }
     > = []
-    for (const travelDir of travelDirs1) {
+    for (const travelDir of travelDirs2) {
       let overcomeDistance: number | null = null
       if (node?.obstacleHit) {
         overcomeDistance = getDistanceToOvercomeObstacle({
@@ -141,7 +233,7 @@ export class IJumpMultiLayer extends GeneralizedAstarAutorouter {
         goalDistAlongTravelDir > 0 &&
         isGoalInTravelDir
       ) {
-        travelDirs2.push({
+        travelDirs3.push({
           ...travelDir,
           travelDistance: goalDistAlongTravelDir,
           enterMarginCost: 0,
@@ -157,7 +249,7 @@ export class IJumpMultiLayer extends GeneralizedAstarAutorouter {
             overcomeDistance - this.OBSTACLE_MARGIN + margin * 2 <
             travelDir.wallDistance
           ) {
-            travelDirs2.push({
+            travelDirs3.push({
               ...travelDir,
               travelDistance: overcomeDistance - this.OBSTACLE_MARGIN + margin,
               enterMarginCost: enterCost,
@@ -166,7 +258,7 @@ export class IJumpMultiLayer extends GeneralizedAstarAutorouter {
           }
         }
         if (travelDir.wallDistance === Infinity) {
-          travelDirs2.push({
+          travelDirs3.push({
             ...travelDir,
             travelDistance: goalDistAlongTravelDir,
             enterMarginCost: 0,
@@ -176,7 +268,7 @@ export class IJumpMultiLayer extends GeneralizedAstarAutorouter {
           for (const { margin, enterCost, travelCostFactor } of this
             .marginsWithCosts) {
             if (travelDir.wallDistance > this.largestMargin + margin) {
-              travelDirs2.push({
+              travelDirs3.push({
                 ...travelDir,
                 travelDistance: travelDir.wallDistance - margin,
                 enterMarginCost: enterCost,
@@ -189,7 +281,7 @@ export class IJumpMultiLayer extends GeneralizedAstarAutorouter {
         for (const { margin, enterCost, travelCostFactor } of this
           .marginsWithCosts) {
           if (travelDir.wallDistance > margin) {
-            travelDirs2.push({
+            travelDirs3.push({
               ...travelDir,
               travelDistance: travelDir.wallDistance - margin,
               enterMarginCost: enterCost,
@@ -200,24 +292,43 @@ export class IJumpMultiLayer extends GeneralizedAstarAutorouter {
       }
     }
 
-    return (
-      travelDirs2
-        // If an obstacle fails this check, we messed up computing neighbors
-        // Currently this happens when we overcome obstacles and there's a
-        // different obstacle in the travel direction
-        .filter((dir) => {
-          return !obstacles.isObstacleAt(
-            node.x + dir.dx * dir.travelDistance,
-            node.y + dir.dy * dir.travelDistance,
-          )
-        })
-        .map((dir) => ({
-          x: node.x + dir.dx * dir.travelDistance,
-          y: node.y + dir.dy * dir.travelDistance,
-          obstacleHit: dir.obstacle,
-          travelMarginCostFactor: dir.travelMarginCostFactor,
-          enterMarginCost: dir.enterMarginCost,
-        }))
-    )
+    // for (const travelDir of travelDirs2) {
+    //   let travelDistance: number
+
+    //   // For layer changes, the travel distance is always 1
+    //   if (travelDir.dl !== 0) {
+    //     travelDistance = 1
+    //   } else {
+    //     travelDistance = travelDir.wallDistance - this.largestMargin
+    //   }
+
+    //   if (travelDistance <= 0) continue
+
+    //   // Check for obstacles at the target position
+    //   const targetX = node.x + travelDir.dx * travelDistance
+    //   const targetY = node.y + travelDir.dy * travelDistance
+    //   const targetL = node.l + travelDir.dl
+
+    //   if (obstacles.isObstacleAt(targetX, targetY, targetL)) continue
+
+    //   // Add the neighbor with appropriate costs
+    //   travelDirs2.push({
+    //     ...travelDir,
+    //     travelDistance,
+    //     enterMarginCost: 0,
+    //     travelMarginCostFactor: 1,
+    //   })
+    // }
+
+    console.log(this.iterations, { travelDirs2 })
+
+    return travelDirs3.map((dir) => ({
+      x: node.x + dir.dx * dir.travelDistance,
+      y: node.y + dir.dy * dir.travelDistance,
+      l: node.l + dir.dl,
+      obstacleHit: dir.obstacle,
+      travelMarginCostFactor: dir.travelMarginCostFactor,
+      enterMarginCost: dir.enterMarginCost,
+    }))
   }
 }

@@ -1,3 +1,6 @@
+import type { Node } from "algos/infinite-grid-ijump-astar/v2/lib/types"
+import type { Obstacle } from "autorouting-dataset/lib/types"
+
 export type Direction3d = {
   dx: number
   dy: number
@@ -8,14 +11,40 @@ export type Direction3d = {
   dl: number
 }
 
-export interface Direction {
-  dx: number
-  dy: number
-  dl: number // Added for layer movement
-}
-
-export interface Point {
+export interface Point3d {
   x: number
   y: number
   l: number // Layer
+}
+
+export interface Point3dWithObstacleHit extends Point3d {
+  obstacleHit?: Obstacle | null
+}
+
+export interface Node3d extends Node {
+  l: number
+  parent: Node3d | null
+}
+
+export interface Obstacle3d extends Obstacle {
+  l: number
+}
+
+export interface ObstacleWithEdges3d extends Obstacle3d {
+  top: number
+  bottom: number
+  left: number
+  right: number
+}
+
+export interface DirectionWithCollisionInfo3d extends Direction3d {
+  wallDistance: number
+  obstacle: Obstacle | null
+}
+
+export interface DirectionDistances3d {
+  left: number
+  top: number
+  bottom: number
+  right: number
 }

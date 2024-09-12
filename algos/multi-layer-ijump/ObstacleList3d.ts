@@ -2,29 +2,37 @@
 
 import type { Obstacle, ObstacleWithEdges } from "autorouting-dataset"
 import type {
-  Direction,
-  DirectionDistances,
-  DirectionWithCollisionInfo,
-  Point,
+  Direction3d,
+  DirectionDistances3d,
+  DirectionWithCollisionInfo3d,
+  ObstacleWithEdges3d,
+  Point3d,
 } from "./types"
+import { getLayerIndex } from "./util"
+import { ObstacleList } from "algos/infinite-grid-ijump-astar/v2/lib/ObstacleList"
 
 /**
  * A list of obstacles with functions for fast lookups, this default implementation
  * has no optimizations, you should override this class to implement faster lookups
  */
-export class ObstacleList3d {
-  protected obstacles: ObstacleWithEdges[]
-  protected GRID_STEP = 0.1
+export class ObstacleList3d extends ObstacleList {
+  obstacles: ObstacleWithEdges3d[]
+  GRID_STEP = 0.1
+  layerCount: number
 
-  constructor(obstacles: Array<Obstacle>) {
-    this.obstacles = obstacles.map((obstacle) => ({
-      ...obstacle,
-      left: obstacle.center.x - obstacle.width / 2,
-      right: obstacle.center.x + obstacle.width / 2,
-      top: obstacle.center.y + obstacle.height / 2,
-      bottom: obstacle.center.y - obstacle.height / 2,
-      l: obstacle.center.l, // Include layer information
-    }))
+  constructor(layerCount: number, obstacles: Array<Obstacle>) {
+    super([])
+    this.layerCount = layerCount
+    this.obstacles = obstacles.flatMap((obstacle) =>
+      obstacle.layers.map((layer) => ({
+        ...obstacle,
+        left: obstacle.center.x - obstacle.width / 2,
+        right: obstacle.center.x + obstacle.width / 2,
+        top: obstacle.center.y + obstacle.height / 2,
+        bottom: obstacle.center.y - obstacle.height / 2,
+        l: getLayerIndex(layerCount, layer),
+      })),
+    )
   }
 
   getObstacleAt(x: number, y: number, l: number, m?: number): Obstacle | null {
@@ -49,13 +57,13 @@ export class ObstacleList3d {
     return this.getObstacleAt(x, y, l, m) !== null
   }
 
-  getDirectionDistancesToNearestObstacle(
+  getDirectionDistancesToNearestObstacle3d(
     x: number,
     y: number,
     l: number,
-  ): DirectionDistances {
+  ): DirectionDistances3d {
     const { GRID_STEP } = this
-    const result: DirectionDistances = {
+    const result: DirectionDistances3d = {
       left: Infinity,
       top: Infinity,
       bottom: Infinity,
@@ -96,10 +104,10 @@ export class ObstacleList3d {
   }
 
   getOrthoDirectionCollisionInfo(
-    point: Point,
-    dir: Direction,
+    point: Point3d,
+    dir: Direction3d,
     { margin = 0 }: { margin?: number } = {},
-  ): DirectionWithCollisionInfo {
+  ): DirectionWithCollisionInfo3d {
     const { x, y, l } = point
     const { dx, dy, dl } = dir
     let minDistance = Infinity
