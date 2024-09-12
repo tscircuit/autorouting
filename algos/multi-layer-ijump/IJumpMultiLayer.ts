@@ -27,8 +27,8 @@ import { ObstacleList3d } from "./ObstacleList3d"
 import type { Obstacle } from "autorouting-dataset/lib/types"
 
 export class IJumpMultiLayer extends GeneralizedAstarAutorouter {
-  MAX_ITERATIONS: number = 20
-  VIA_COST: number = 1 // Define the cost for changing layers
+  MAX_ITERATIONS: number = 200
+  VIA_COST: number = 4 // Define the cost for changing layers
   VIA_DIAMETER: number = 0.5
   allowLayerChange: boolean = true // Flag to allow layer changes
   layerCount: number
@@ -234,6 +234,21 @@ export class IJumpMultiLayer extends GeneralizedAstarAutorouter {
         travelDir.dx === 0 && travelDir.dy === 0 && travelDir.dl === 1
       const isUpVia =
         travelDir.dx === 0 && travelDir.dy === 0 && travelDir.dl === -1
+      if (isDownVia || isUpVia) {
+        const hasSpaceForVia = [node.l, node.l + travelDir.dl].every(
+          (l) =>
+            obstacles.getObstaclesOverlappingRegion({
+              minX: node.x - this.VIA_DIAMETER / 2 - this.OBSTACLE_MARGIN,
+              minY: node.y - this.VIA_DIAMETER / 2 - this.OBSTACLE_MARGIN,
+              maxX: node.x + this.VIA_DIAMETER / 2 + this.OBSTACLE_MARGIN,
+              maxY: node.y + this.VIA_DIAMETER / 2 + this.OBSTACLE_MARGIN,
+              l,
+            }).length === 0,
+        )
+        if (!hasSpaceForVia) {
+          continue
+        }
+      }
       if (isDownVia) {
         if (node.l < this.layerCount - 1) {
           travelDirs3.push({
