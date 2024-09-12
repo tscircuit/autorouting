@@ -10,6 +10,7 @@ import type {
 import {
   distAlongDir,
   manDist,
+  nodeName,
 } from "algos/infinite-grid-ijump-astar/v2/lib/util"
 import type {
   Direction3d,
@@ -27,7 +28,7 @@ import type { Obstacle } from "autorouting-dataset/lib/types"
 
 export class IJumpMultiLayer extends GeneralizedAstarAutorouter {
   MAX_ITERATIONS: number = 20
-  VIA_COST: number = 10 // Define the cost for changing layers
+  VIA_COST: number = 0 // Define the cost for changing layers
   allowLayerChange: boolean = true // Flag to allow layer changes
   layerCount: number
   obstacles: ObstacleList3d
@@ -131,6 +132,10 @@ export class IJumpMultiLayer extends GeneralizedAstarAutorouter {
     return indexToLayer(this.layerCount, index)
   }
 
+  getNodeName(node: Node3d): string {
+    return `${nodeName(node, this.GRID_STEP)}-${node.l ?? 0}`
+  }
+
   getNeighbors(node: Node3d): Array<Point3dWithObstacleHit> {
     const obstacles = this.obstacles!
     const goalPoint: Node3d = this.goalPoint! as any
@@ -157,9 +162,22 @@ export class IJumpMultiLayer extends GeneralizedAstarAutorouter {
       { dx: -1, dy: 0, dl: 0 },
     ]
 
-    if (this.allowLayerChange) {
-      // travelDirs1.push({ dx: 0, dy: 0, dl: 1 })
-      // travelDirs1.push({ dx: 0, dy: 0, dl: -1 })
+    const isFarEnoughFromGoalToChangeLayer =
+      manDist(node, this.goalPoint!) > this.GRID_STEP
+    const isFarEnoughFromStartToChangeLayer =
+      manDist(node, this.startNode!) > this.GRID_STEP
+
+    if (
+      this.allowLayerChange &&
+      isFarEnoughFromGoalToChangeLayer &&
+      isFarEnoughFromStartToChangeLayer
+    ) {
+      if (node.l < this.layerCount - 1) {
+        travelDirs1.push({ dx: 0, dy: 0, dl: 1 })
+      }
+      if (node.l > 0) {
+        travelDirs1.push({ dx: 0, dy: 0, dl: -1 })
+      }
     }
 
     const travelDirs2 = travelDirs1
@@ -193,7 +211,7 @@ export class IJumpMultiLayer extends GeneralizedAstarAutorouter {
         return collisionInfo
       })
       // Filter out directions that are too close to the wall
-      .filter((dir) => !(dir.wallDistance <= this.OBSTACLE_MARGIN))
+      .filter((dir) => !(dir.wallDistance < this.OBSTACLE_MARGIN))
 
     /**
      * Figure out how far to travel. There are a couple reasons we would stop
@@ -211,6 +229,33 @@ export class IJumpMultiLayer extends GeneralizedAstarAutorouter {
       }
     > = []
     for (const travelDir of travelDirs2) {
+      const isDownVia =
+        travelDir.dx === 0 && travelDir.dy === 0 && travelDir.dl === 1
+      const isUpVia =
+        travelDir.dx === 0 && travelDir.dy === 0 && travelDir.dl === -1
+      if (isDownVia) {
+        if (node.l < this.layerCount - 1) {
+          travelDirs3.push({
+            ...travelDir,
+            travelDistance: 0,
+            enterMarginCost: 0,
+            travelMarginCostFactor: 1,
+          })
+        }
+        continue
+      }
+      if (isUpVia) {
+        if (node.l > 0) {
+          travelDirs3.push({
+            ...travelDir,
+            travelDistance: 0,
+            enterMarginCost: 0,
+            travelMarginCostFactor: 1,
+          })
+        }
+        continue
+      }
+
       let overcomeDistance: number | null = null
       if (node?.obstacleHit) {
         overcomeDistance = getDistanceToOvercomeObstacle({

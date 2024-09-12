@@ -58,4 +58,9 @@ export interface Node extends Point {
    */
   travelMarginCostFactor?: number
   enterMarginCost?: number
+
+  /**
+   * Layer index, not needed for single-layer autorouters
+   */
+  l?: number
 }

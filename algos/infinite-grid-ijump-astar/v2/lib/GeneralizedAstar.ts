@@ -113,6 +113,10 @@ export class GeneralizedAstarAutorouter {
     return manDist(node, this.goalPoint!)
   }
 
+  getNodeName(node: Point): string {
+    return nodeName(node, this.GRID_STEP)
+  }
+
   solveOneStep(): {
     solved: boolean
     current: Node
@@ -123,7 +127,7 @@ export class GeneralizedAstarAutorouter {
     openSet.sort((a, b) => a.f - b.f)
 
     const current = openSet.shift()!
-    const goalDist = manDist(current, goalPoint!)
+    const goalDist = this.computeH(current)
     if (goalDist <= GRID_STEP * 2) {
       return {
         solved: true,
@@ -132,11 +136,11 @@ export class GeneralizedAstarAutorouter {
       }
     }
 
-    this.closedSet.add(nodeName(current))
+    this.closedSet.add(this.getNodeName(current))
 
     let newNeighbors: Node[] = []
     for (const neighbor of this.getNeighbors(current)) {
-      if (closedSet.has(nodeName(neighbor))) continue
+      if (closedSet.has(this.getNodeName(neighbor))) continue
 
       const tentativeG = this.computeG(current, neighbor)
 
@@ -391,7 +395,7 @@ export class GeneralizedAstarAutorouter {
       type: "pcb_fabrication_note_text",
       font: "tscircuit2024",
       font_size: 0.25,
-      text: "X",
+      text: "X" + (current.l !== undefined ? current.l : ""),
       pcb_component_id: "",
       layer: "top",
       anchor_position: {
