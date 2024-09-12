@@ -12,6 +12,8 @@ export const builtinSolvers: any = {
       .autorouteMultiMargin,
   "jump-point-grid": async () =>
     (await import("../../../algos/jump-point-grid/index")).autoroute,
+  "multilayer-ijump": async () =>
+    (await import("../../../algos/multi-layer-ijump/index")).autoroute,
 }
 export const getBuiltinAvailableSolver = async (solverName: string) => {
   return builtinSolvers[solverName]()

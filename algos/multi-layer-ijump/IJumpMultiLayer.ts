@@ -28,7 +28,8 @@ import type { Obstacle } from "autorouting-dataset/lib/types"
 
 export class IJumpMultiLayer extends GeneralizedAstarAutorouter {
   MAX_ITERATIONS: number = 20
-  VIA_COST: number = 0 // Define the cost for changing layers
+  VIA_COST: number = 1 // Define the cost for changing layers
+  VIA_DIAMETER: number = 0.5
   allowLayerChange: boolean = true // Flag to allow layer changes
   layerCount: number
   obstacles: ObstacleList3d
@@ -163,9 +164,9 @@ export class IJumpMultiLayer extends GeneralizedAstarAutorouter {
     ]
 
     const isFarEnoughFromGoalToChangeLayer =
-      manDist(node, this.goalPoint!) > this.GRID_STEP
+      manDist(node, this.goalPoint!) > this.VIA_DIAMETER + this.OBSTACLE_MARGIN
     const isFarEnoughFromStartToChangeLayer =
-      manDist(node, this.startNode!) > this.GRID_STEP
+      manDist(node, this.startNode!) > this.VIA_DIAMETER + this.OBSTACLE_MARGIN
 
     if (
       this.allowLayerChange &&
