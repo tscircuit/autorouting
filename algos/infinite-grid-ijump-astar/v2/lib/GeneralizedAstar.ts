@@ -12,6 +12,7 @@ import type {
 } from "autorouting-dataset"
 import { getObstaclesFromRoute } from "autorouting-dataset/lib/solver-utils/getObstaclesFromRoute"
 import { ObstacleList } from "./ObstacleList"
+import { removePathLoops } from "autorouting-dataset/lib/solver-postprocessing/remove-path-loops"
 
 const debug = Debug("autorouting-dataset:astar")
 
@@ -40,7 +41,7 @@ export class GeneralizedAstarAutorouter {
   GRID_STEP: number
   OBSTACLE_MARGIN: number
   MAX_ITERATIONS: number
-
+  isRemovePathLoopsEnabled: boolean
   /**
    * Setting this greater than 1 makes the algorithm find suboptimal paths and
    * act more greedy, but at greatly improves performance.
@@ -58,6 +59,7 @@ export class GeneralizedAstarAutorouter {
     GRID_STEP?: number
     OBSTACLE_MARGIN?: number
     MAX_ITERATIONS?: number
+    isRemovePathLoopsEnabled?: boolean
     debug?: boolean
   }) {
     this.input = opts.input
@@ -68,6 +70,7 @@ export class GeneralizedAstarAutorouter {
     this.OBSTACLE_MARGIN = opts.OBSTACLE_MARGIN ?? 0.15
     this.MAX_ITERATIONS = opts.MAX_ITERATIONS ?? 100
     this.debug = opts.debug ?? debug.enabled
+    this.isRemovePathLoopsEnabled = opts.isRemovePathLoopsEnabled ?? false
     if (this.debug) {
       debug.enabled = true
     }
@@ -197,7 +200,7 @@ export class GeneralizedAstarAutorouter {
       const { solved, current } = this.solveOneStep()
 
       if (solved) {
-        const route: PointWithLayer[] = []
+        let route: PointWithLayer[] = []
         let node: Node | null = current
         while (node) {
           route.unshift({
@@ -211,6 +214,10 @@ export class GeneralizedAstarAutorouter {
 
         if (debug.enabled) {
           this.debugMessage += `t${this.debugTraceCount}: ${this.iterations} iterations\n`
+        }
+
+        if (this.isRemovePathLoopsEnabled) {
+          route = removePathLoops(route)
         }
 
         return { solved: true, route, connectionName: connection.name }
