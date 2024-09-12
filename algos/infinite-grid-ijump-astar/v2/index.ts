@@ -32,6 +32,7 @@ export function autorouteMultiMargin(
 
   const autorouter = new IJumpMultiMarginAutorouter({
     input,
+    isRemovePathLoopsEnabled: true,
   })
 
   const solution = autorouter.solveAndMapToTraces()

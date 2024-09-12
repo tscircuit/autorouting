@@ -64,11 +64,11 @@ function findIntersection(
   if (segment1.start.x === segment1.end.x) {
     const x = segment1.start.x
     const y = segment2.start.y
-    intersectionPoint = { x, y }
+    intersectionPoint = { ...segment1.start, x, y }
   } else {
     const x = segment2.start.x
     const y = segment1.start.y
-    intersectionPoint = { x, y }
+    intersectionPoint = { ...segment1.start, x, y }
   }
 
   // Check if intersection point is within both segments
