@@ -149,6 +149,8 @@ export class GeneralizedAstarAutorouter {
           manDistFromParent: manDist(current, neighbor), // redundant compute...
           nodesInPath: current.nodesInPath + 1,
           parent: current,
+          enterMarginCost: neighbor.enterMarginCost,
+          travelMarginCostFactor: neighbor.travelMarginCostFactor,
         }
 
         openSet.push(neighborNode)
