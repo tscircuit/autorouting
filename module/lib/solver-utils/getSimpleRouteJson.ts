@@ -4,10 +4,13 @@ import { su } from "@tscircuit/soup-util"
 import type { Obstacle } from "../types"
 import { getObstaclesFromCircuitJson } from "./getObstaclesFromCircuitJson"
 
-export const getSimpleRouteJson = (soup: AnySoupElement[]): SimpleRouteJson => {
+export const getSimpleRouteJson = (
+  soup: AnySoupElement[],
+  opts: { layerCount?: number } = {},
+): SimpleRouteJson => {
   const routeJson: SimpleRouteJson = {} as any
 
-  routeJson.layerCount = 1
+  routeJson.layerCount = opts.layerCount ?? 1
 
   // Derive obstacles from pcb_smtpad, pcb_hole, and pcb_plated_hole
   routeJson.obstacles = getObstaclesFromCircuitJson(soup)

@@ -4,11 +4,10 @@ import { getSimpleRouteJson } from "autorouting-dataset/lib/solver-utils/getSimp
 import { MultilayerIjump } from "./MultilayerIjump"
 
 export function autoroute(soup: AnySoupElement[]): SolutionWithDebugInfo {
-  const input = getSimpleRouteJson(soup)
+  const input = getSimpleRouteJson(soup, { layerCount: 2 })
 
   const autorouter = new MultilayerIjump({
     input,
-    layerCount: 2,
   })
 
   const solution = autorouter.solveAndMapToTraces()

@@ -1,3 +1,4 @@
+import type { LayerRef } from "@tscircuit/soup"
 import type { Point3d, Direction3d } from "./types"
 
 export function dirFromAToB(nodeA: Point3d, nodeB: Point3d): Direction3d {
@@ -11,43 +12,34 @@ export function manDist(a: Point3d, b: Point3d): number {
   return Math.abs(a.x - b.x) + Math.abs(a.y - b.y) + Math.abs(a.l - b.l)
 }
 
+export const LAYER_COUNT_INDEX_MAP: Record<number, string[]> = {
+  1: ["top"],
+  2: ["top", "bottom"],
+  4: ["top", "inner1", "inner2", "bottom"],
+}
+
+export const getLayerNamesForLayerCount = (layerCount: number): string[] => {
+  return LAYER_COUNT_INDEX_MAP[layerCount]
+}
+
 export function getLayerIndex(layerCount: number, layer: string): number {
-  if (layerCount === 1) return 0
-  if (layerCount === 2) {
-    if (layer === "top") return 0
-    if (layer === "bottom") return 1
+  const layerArray = LAYER_COUNT_INDEX_MAP[layerCount]
+  const index = layerArray.indexOf(layer)
+  if (index === -1) {
     throw new Error(
-      `Invalid layer for getLayerIndex (for layerCount === 2): "${layer}"`,
+      `Invalid layer for getLayerIndex (for layerCount === ${layerCount}): "${layer}"`,
     )
   }
-  if (layerCount === 4) {
-    const layerIndex = { top: 0, inner1: 1, inner2: 2, bottom: 3 }[layer]
-    if (!layerIndex)
-      throw new Error(
-        `Invalid layer for getLayerIndex (for layerCount === 4): "${layer}"`,
-      )
-    return layerIndex
-  }
-  throw new Error(`Unsupported layer count for getLayerIndex: ${layerCount}`)
+  return index
 }
 
 export function indexToLayer(layerCount: number, index: number): string {
-  if (layerCount === 1) return "top"
-  if (layerCount === 2) {
-    if (index === 0) return "top"
-    if (index === 1) return "bottom"
+  const layerArray = LAYER_COUNT_INDEX_MAP[layerCount]
+  const layer = layerArray[index]
+  if (!layer) {
     throw new Error(
-      `Bad index provided to indexToLayer: ${index} for layerCount: ${layerCount}`,
+      `Invalid index for indexToLayer (for layerCount === ${layerCount}): "${index}"`,
     )
   }
-  if (layerCount === 4) {
-    if (index === 0) return "top"
-    if (index === 1) return "inner1"
-    if (index === 2) return "inner2"
-    if (index === 3) return "bottom"
-    throw new Error(
-      `Bad index provided to indexToLayer: ${index} for layerCount: ${layerCount}`,
-    )
-  }
-  throw new Error(`Unsupported layer count for indexToLayer: ${layerCount}`)
+  return layer
 }

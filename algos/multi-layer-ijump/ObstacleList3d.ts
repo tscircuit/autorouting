@@ -8,7 +8,7 @@ import type {
   ObstacleWithEdges3d,
   Point3d,
 } from "./types"
-import { getLayerIndex } from "./util"
+import { getLayerIndex, getLayerNamesForLayerCount } from "./util"
 import { ObstacleList } from "algos/infinite-grid-ijump-astar/v2/lib/ObstacleList"
 
 /**
@@ -23,15 +23,18 @@ export class ObstacleList3d extends ObstacleList {
   constructor(layerCount: number, obstacles: Array<Obstacle>) {
     super([])
     this.layerCount = layerCount
+    const availableLayers = getLayerNamesForLayerCount(layerCount)
     this.obstacles = obstacles.flatMap((obstacle) =>
-      obstacle.layers.map((layer) => ({
-        ...obstacle,
-        left: obstacle.center.x - obstacle.width / 2,
-        right: obstacle.center.x + obstacle.width / 2,
-        top: obstacle.center.y + obstacle.height / 2,
-        bottom: obstacle.center.y - obstacle.height / 2,
-        l: getLayerIndex(layerCount, layer),
-      })),
+      obstacle.layers
+        .filter((layer) => availableLayers.includes(layer))
+        .map((layer) => ({
+          ...obstacle,
+          left: obstacle.center.x - obstacle.width / 2,
+          right: obstacle.center.x + obstacle.width / 2,
+          top: obstacle.center.y + obstacle.height / 2,
+          bottom: obstacle.center.y - obstacle.height / 2,
+          l: getLayerIndex(layerCount, layer),
+        })),
     )
   }
 

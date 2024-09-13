@@ -78,12 +78,11 @@ export class MultilayerIjump extends GeneralizedAstarAutorouter {
     OBSTACLE_MARGIN?: number
     MAX_ITERATIONS?: number
     VIA_COST?: number
-    layerCount?: number
     isRemovePathLoopsEnabled?: boolean
     debug?: boolean
   }) {
     super(opts)
-    this.layerCount = opts.layerCount ?? 2
+    this.layerCount = opts.input.layerCount ?? 2
     this.VIA_COST = opts.VIA_COST ?? this.VIA_COST
 
     // obstacle lists are created when solving currently
