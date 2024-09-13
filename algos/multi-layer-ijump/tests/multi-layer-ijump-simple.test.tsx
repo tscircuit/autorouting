@@ -43,11 +43,10 @@ test("multimargin-ijump-astar simple", () => {
 
   const inputCircuitJson = circuit.getCircuitJson()
 
-  const input = getSimpleRouteJson(inputCircuitJson)
+  const input = getSimpleRouteJson(inputCircuitJson, { layerCount: 2 })
 
   const autorouter = new MultilayerIjump({
     input,
-    layerCount: 2,
     VIA_COST: 1,
     debug: true,
   })
