@@ -46,6 +46,9 @@ export function autorouteMultiMargin(
 
 export const getObstaclesFromSoup = getObstaclesFromCircuitJson
 
+export { autoroute as autorouteMultiLayer } from "../../multi-layer-ijump"
+export { MultilayerIjump } from "../../multi-layer-ijump/MultilayerIjump"
+
 export {
   IJumpAutorouter,
   IJumpMultiMarginAutorouter,
