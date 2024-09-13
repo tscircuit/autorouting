@@ -37,7 +37,7 @@ export class GeneralizedAstarAutorouter {
   obstacles?: ObstacleList
   allObstacles: Obstacle[]
   startNode?: Node
-  goalPoint?: Point
+  goalPoint?: Point & { l: number }
   GRID_STEP: number
   OBSTACLE_MARGIN: number
   MAX_ITERATIONS: number
@@ -66,6 +66,8 @@ export class GeneralizedAstarAutorouter {
     this.allObstacles = opts.input.obstacles
     this.startNode = opts.startNode
     this.goalPoint = opts.goalPoint
+      ? ({ l: 0, ...opts.goalPoint } as any)
+      : undefined
     this.GRID_STEP = opts.GRID_STEP ?? 0.1
     this.OBSTACLE_MARGIN = opts.OBSTACLE_MARGIN ?? 0.15
     this.MAX_ITERATIONS = opts.MAX_ITERATIONS ?? 100
@@ -107,6 +109,14 @@ export class GeneralizedAstarAutorouter {
     return current.g + manDist(current, neighbor)
   }
 
+  computeH(node: Point): number {
+    return manDist(node, this.goalPoint!)
+  }
+
+  getNodeName(node: Point): string {
+    return nodeName(node, this.GRID_STEP)
+  }
+
   solveOneStep(): {
     solved: boolean
     current: Node
@@ -117,7 +127,7 @@ export class GeneralizedAstarAutorouter {
     openSet.sort((a, b) => a.f - b.f)
 
     const current = openSet.shift()!
-    const goalDist = manDist(current, goalPoint!)
+    const goalDist = this.computeH(current)
     if (goalDist <= GRID_STEP * 2) {
       return {
         solved: true,
@@ -126,11 +136,11 @@ export class GeneralizedAstarAutorouter {
       }
     }
 
-    this.closedSet.add(nodeName(current))
+    this.closedSet.add(this.getNodeName(current))
 
     let newNeighbors: Node[] = []
     for (const neighbor of this.getNeighbors(current)) {
-      if (closedSet.has(nodeName(neighbor))) continue
+      if (closedSet.has(this.getNodeName(neighbor))) continue
 
       const tentativeG = this.computeG(current, neighbor)
 
@@ -139,7 +149,7 @@ export class GeneralizedAstarAutorouter {
       )
 
       if (!existingNeighbor || tentativeG < existingNeighbor.g) {
-        const h = manDist(neighbor, this.goalPoint!)
+        const h = this.computeH(neighbor)
 
         const f = tentativeG + h * this.GREEDY_MULTIPLIER
 
@@ -173,6 +183,26 @@ export class GeneralizedAstarAutorouter {
     }
   }
 
+  getStartNode(connection: SimpleRouteConnection): Node {
+    return {
+      x: connection.pointsToConnect[0].x,
+      y: connection.pointsToConnect[0].y,
+      manDistFromParent: 0,
+      f: 0,
+      g: 0,
+      h: 0,
+      nodesInPath: 0,
+      parent: null,
+    }
+  }
+
+  layerToIndex(layer: string): number {
+    return 0
+  }
+  indexToLayer(index: number): string {
+    return "top"
+  }
+
   solveConnection(connection: SimpleRouteConnection): ConnectionSolveResult {
     const { pointsToConnect } = connection
     if (pointsToConnect.length > 2) {
@@ -183,17 +213,11 @@ export class GeneralizedAstarAutorouter {
 
     this.iterations = 0
     this.closedSet = new Set()
-    this.startNode = {
-      x: pointsToConnect[0].x,
-      y: pointsToConnect[0].y,
-      manDistFromParent: 0,
-      f: 0,
-      g: 0,
-      h: 0,
-      nodesInPath: 0,
-      parent: null,
+    this.startNode = this.getStartNode(connection)
+    this.goalPoint = {
+      ...pointsToConnect[pointsToConnect.length - 1],
+      l: this.layerToIndex(pointsToConnect[pointsToConnect.length - 1].layer),
     }
-    this.goalPoint = pointsToConnect[pointsToConnect.length - 1]
     this.openSet = [this.startNode]
 
     while (this.iterations < this.MAX_ITERATIONS) {
@@ -203,11 +227,13 @@ export class GeneralizedAstarAutorouter {
         let route: PointWithLayer[] = []
         let node: Node | null = current
         while (node) {
+          const l: number | undefined = (node as any).l
           route.unshift({
             x: node.x,
             y: node.y,
             // TODO: this layer should be included as part of the node
-            layer: pointsToConnect[0].layer,
+            layer:
+              l !== undefined ? this.indexToLayer(l) : pointsToConnect[0].layer,
           })
           node = node.parent
         }
@@ -235,6 +261,26 @@ export class GeneralizedAstarAutorouter {
     return { solved: false, connectionName: connection.name }
   }
 
+  createObstacleList({
+    dominantLayer,
+    connection,
+    obstaclesFromTraces,
+  }: {
+    dominantLayer?: string
+    connection: SimpleRouteConnection
+    obstaclesFromTraces: Obstacle[]
+  }): ObstacleList {
+    return new ObstacleList(
+      this.allObstacles
+        .filter((obstacle) => !obstacle.connectedTo.includes(connection.name))
+        // TODO obstacles on different layers should be filtered inside
+        // the algorithm, not for the entire connection, this is a hack in
+        // relation to https://github.com/tscircuit/tscircuit/issues/432
+        .filter((obstacle) => obstacle.layers.includes(dominantLayer as any))
+        .concat(obstaclesFromTraces ?? []),
+    )
+  }
+
   /**
    * By default, this will solve the connections in the order they are given,
    * and add obstacles for each successfully solved connection. Override this
@@ -247,15 +293,11 @@ export class GeneralizedAstarAutorouter {
     for (const connection of this.input.connections) {
       const dominantLayer = connection.pointsToConnect[0].layer ?? "top"
       this.debugTraceCount += 1
-      this.obstacles = new ObstacleList(
-        this.allObstacles
-          .filter((obstacle) => !obstacle.connectedTo.includes(connection.name))
-          // TODO obstacles on different layers should be filtered inside
-          // the algorithm, not for the entire connection, this is a hack in
-          // relation to https://github.com/tscircuit/tscircuit/issues/432
-          .filter((obstacle) => obstacle.layers.includes(dominantLayer))
-          .concat(obstaclesFromTraces),
-      )
+      this.obstacles = this.createObstacleList({
+        dominantLayer,
+        connection,
+        obstaclesFromTraces,
+      })
       const result = this.solveConnection(connection)
       solutions.push(result)
 
@@ -269,7 +311,7 @@ export class GeneralizedAstarAutorouter {
             result.route.map((p) => ({
               x: p.x,
               y: p.y,
-              layer: dominantLayer,
+              layer: p.layer ?? dominantLayer,
             })),
             connection.name,
           ),
@@ -320,7 +362,7 @@ export class GeneralizedAstarAutorouter {
               ({
                 type: "pcb_smtpad",
                 pcb_component_id: "",
-                layer: "top",
+                layer: obstacle.layers[0],
                 width: obstacle.width,
                 shape: "rect",
                 x: obstacle.center.x,
@@ -353,7 +395,7 @@ export class GeneralizedAstarAutorouter {
       type: "pcb_fabrication_note_text",
       font: "tscircuit2024",
       font_size: 0.25,
-      text: "X",
+      text: "X" + (current.l !== undefined ? current.l : ""),
       pcb_component_id: "",
       layer: "top",
       anchor_position: {

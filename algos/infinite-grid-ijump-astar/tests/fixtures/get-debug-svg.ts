@@ -15,11 +15,15 @@ export const getDebugSvg = ({
   autorouter,
   solution,
   rowHeight = 2.5,
+  colWidth = 0,
+  colCount = 1,
 }: {
   inputCircuitJson: AnySoupElement[]
   autorouter: GeneralizedAstarAutorouter
   solution?: AnySoupElement[] | SimplifiedPcbTrace[]
   rowHeight?: number
+  colWidth?: number
+  colCount?: number
 }) => {
   const debugSolutions = Object.entries(autorouter.debugSolutions!).map(
     ([debugSolutionName, solutionCircuitJson]) => ({
@@ -29,6 +33,16 @@ export const getDebugSvg = ({
   )
 
   const aggCircuitJson: AnySoupElement[] = []
+
+  const getTranslationForIndex = (i: number) => {
+    if (colCount && colWidth) {
+      return translate(
+        colWidth * (i % colCount),
+        -rowHeight * Math.floor(i / colCount),
+      )
+    }
+    return translate(0, -rowHeight * i)
+  }
 
   for (let i = 0; i < debugSolutions.length; i++) {
     const { debugSolutionName, solutionCircuitJson } = debugSolutions[i]
@@ -47,7 +61,7 @@ export const getDebugSvg = ({
           }),
         ),
       ),
-      translate(0, -rowHeight * i),
+      getTranslationForIndex(i),
     )
     aggCircuitJson.push(...translatedCircuitJson)
   }
@@ -58,7 +72,7 @@ export const getDebugSvg = ({
   aggCircuitJson.push(
     ...transformPCBElements(
       finalCircuitJson,
-      translate(0, -rowHeight * debugSolutions.length),
+      getTranslationForIndex(debugSolutions.length),
     ),
   )
 
