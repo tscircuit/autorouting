@@ -1,6 +1,6 @@
 import type { Obstacle } from "autorouting-dataset/lib/types"
 
-interface Point {
+interface PointWithLayer {
   x: number
   y: number
   layer: string
@@ -9,12 +9,14 @@ interface Point {
 const isCloseTo = (a: number, b: number) => Math.abs(a - b) < 0.0001
 
 export const getObstaclesFromRoute = (
-  route: Point[],
+  route: PointWithLayer[],
   source_trace_id: string,
+  { viaDiameter = 0.5 }: { viaDiameter?: number } = {},
 ): Obstacle[] => {
   const obstacles: Obstacle[] = []
   for (let i = 0; i < route.length - 1; i++) {
     const [start, end] = [route[i], route[i + 1]]
+    const prev = i - 1 >= 0 ? route[i - 1] : null
 
     const isHorz = isCloseTo(start.y, end.y)
     const isVert = isCloseTo(start.x, end.x)
@@ -38,6 +40,21 @@ export const getObstaclesFromRoute = (
     }
 
     obstacles.push(obstacle)
+
+    if (prev && prev.layer === start.layer && start.layer !== end.layer) {
+      const via: Obstacle = {
+        type: "rect",
+        layers: [start.layer, end.layer],
+        center: {
+          x: start.x,
+          y: start.y,
+        },
+        connectedTo: [source_trace_id],
+        width: viaDiameter,
+        height: viaDiameter,
+      }
+      obstacles.push(via)
+    }
   }
   return obstacles
 }
