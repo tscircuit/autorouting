@@ -247,8 +247,6 @@ export class GeneralizedAstarAutorouter {
           route = removePathLoops(route)
         }
 
-        route = addViasWhenLayerChanges(route)
-
         return { solved: true, route, connectionName: connection.name }
       }
 

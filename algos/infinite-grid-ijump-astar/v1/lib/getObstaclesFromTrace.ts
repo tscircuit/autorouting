@@ -27,7 +27,8 @@ export const getObstaclesFromTrace = (
 
     const obstacle: Obstacle = {
       type: "rect",
-      layers: [start.layer],
+      layers:
+        "layer" in start ? [start.layer] : [start.from_layer, start.to_layer],
       center: {
         x: (start.x + end.x) / 2,
         y: (start.y + end.y) / 2,
