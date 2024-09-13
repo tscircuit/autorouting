@@ -34,6 +34,12 @@ export class MultilayerIjump extends GeneralizedAstarAutorouter {
   layerCount: number
   obstacles: ObstacleList3d
 
+  // TODO we need to travel far enough away from the goal so that we're not
+  // hitting a pad, which means we need to know the bounds of the goal
+  // The simplest way to do this is to change SimpleJsonInput to include a
+  // goalViaMargin, set this.goalViaMargin then add that value here
+  defaultGoalViaMargin = 0.5
+
   /**
    * For a multi-margin autorouter, we penalize traveling close to the wall
    *
@@ -137,9 +143,63 @@ export class MultilayerIjump extends GeneralizedAstarAutorouter {
     return `${nodeName(node, this.GRID_STEP)}-${node.l ?? 0}`
   }
 
+  hasSpaceForVia(layers: number[], point: Point) {
+    return layers.every(
+      (l) =>
+        this.obstacles.getObstaclesOverlappingRegion({
+          minX: point.x - this.VIA_DIAMETER / 2 - this.OBSTACLE_MARGIN,
+          minY: point.y - this.VIA_DIAMETER / 2 - this.OBSTACLE_MARGIN,
+          maxX: point.x + this.VIA_DIAMETER / 2 + this.OBSTACLE_MARGIN,
+          maxY: point.y + this.VIA_DIAMETER / 2 + this.OBSTACLE_MARGIN,
+          l,
+        }).length === 0,
+    )
+  }
+
+  getNeighborsSurroundingGoal(node: Node3d): Array<Point3dWithObstacleHit> {
+    const obstacles = this.obstacles!
+    const goalPoint: Node3d = this.goalPoint! as any
+
+    const neighbors: Array<Point3dWithObstacleHit> = []
+
+    const travelDirs: Array<Direction3d> = [
+      { dx: 1, dy: 0, dl: 0 },
+      { dx: -1, dy: 0, dl: 0 },
+      { dx: 0, dy: 1, dl: 0 },
+      { dx: 0, dy: -1, dl: 0 },
+    ]
+
+    const travelDistance =
+      this.VIA_DIAMETER + this.OBSTACLE_MARGIN + this.defaultGoalViaMargin
+
+    for (const dir of travelDirs) {
+      const candidateNeighbor = {
+        x: node.x + dir.dx * travelDistance,
+        y: node.y + dir.dy * travelDistance,
+        l: node.l + dir.dl,
+        obstacleHit: null,
+      }
+      if (!this.hasSpaceForVia([node.l, goalPoint.l], candidateNeighbor)) {
+        continue
+      }
+
+      neighbors.push(candidateNeighbor)
+    }
+
+    return neighbors
+  }
+
   getNeighbors(node: Node3d): Array<Point3dWithObstacleHit> {
     const obstacles = this.obstacles!
     const goalPoint: Node3d = this.goalPoint! as any
+
+    const goalDistIgnoringLayer = manDist(node, goalPoint)
+
+    // Edgecase: If we're on top of the goal but we're on the wrong layer, we
+    // should add points around the goal point to try to via up
+    if (goalDistIgnoringLayer <= this.OBSTACLE_MARGIN) {
+      return this.getNeighborsSurroundingGoal(node)
+    }
 
     /**
      * This is considered "forward" if we were to continue from the parent,
@@ -164,7 +224,7 @@ export class MultilayerIjump extends GeneralizedAstarAutorouter {
     ]
 
     const isFarEnoughFromGoalToChangeLayer =
-      manDist(node, this.goalPoint!) > this.VIA_DIAMETER + this.OBSTACLE_MARGIN
+      goalDistIgnoringLayer > this.VIA_DIAMETER + this.OBSTACLE_MARGIN
     const isFarEnoughFromStartToChangeLayer =
       manDist(node, this.startNode!) > this.VIA_DIAMETER + this.OBSTACLE_MARGIN
 
@@ -296,9 +356,21 @@ export class MultilayerIjump extends GeneralizedAstarAutorouter {
         goalDistAlongTravelDir > 0 &&
         isGoalInTravelDir
       ) {
+        const isGoalOnSameLayer = node.l === goalPoint.l
+
+        let stopShortDistance = 0
+        if (
+          !isGoalOnSameLayer &&
+          Math.abs(goalDistAlongTravelDir - goalDistIgnoringLayer) <
+            this.GRID_STEP
+        ) {
+          stopShortDistance =
+            this.VIA_DIAMETER + this.OBSTACLE_MARGIN + this.defaultGoalViaMargin
+        }
+
         travelDirs3.push({
           ...travelDir,
-          travelDistance: goalDistAlongTravelDir,
+          travelDistance: goalDistAlongTravelDir - stopShortDistance,
           enterMarginCost: 0,
           travelMarginCostFactor: 1,
         })
