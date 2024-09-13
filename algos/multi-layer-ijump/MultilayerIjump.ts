@@ -27,7 +27,7 @@ import { ObstacleList3d } from "./ObstacleList3d"
 import type { Obstacle } from "autorouting-dataset/lib/types"
 
 export class MultilayerIjump extends GeneralizedAstarAutorouter {
-  MAX_ITERATIONS: number = 200
+  MAX_ITERATIONS: number = 1000
   VIA_COST: number = 4 // Define the cost for changing layers
   VIA_DIAMETER: number = 0.5
   allowLayerChange: boolean = true // Flag to allow layer changes
