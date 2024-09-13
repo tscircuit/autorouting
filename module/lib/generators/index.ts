@@ -1,4 +1,5 @@
 import { getDistantSingleTraceProblemGenerator } from "./distant-single-trace"
+import { getKeyboardGenerator } from "./keyboards"
 import { getSingleTraceProblemGenerator } from "./single-trace"
 import { getSingleTraceMultilayerProblemGenerator } from "./single-trace-multilayer"
 import { getTracesProblemGenerator } from "./traces"
@@ -15,6 +16,8 @@ export const getDatasetGenerator = (
     return getDistantSingleTraceProblemGenerator()
   } else if (problemType === "single-trace-multilayer") {
     return getSingleTraceMultilayerProblemGenerator()
+  } else if (problemType === "keyboards") {
+    return getKeyboardGenerator()
   }
   throw new Error(
     `Generator for "${problemType}" not found, may not be implemented`,

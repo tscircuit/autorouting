@@ -5,6 +5,7 @@ export type ProblemType =
   | "traces"
   | "distant-single-trace"
   | "single-trace-multilayer"
+  | "keyboards"
 
 export type ProblemGenerator = {
   getExample: (params: { seed: number }) => Promise<AnySoupElement[]>
