@@ -136,7 +136,6 @@ export const getObstaclesFromCircuitJson = (soup: AnySoupElement[]) => {
         })),
         element.source_trace_id!,
       )
-      console.log(traceObstacles)
       obstacles.push(...traceObstacles)
     } else if (element.type === "pcb_via") {
       obstacles.push({
