@@ -1,28 +1,37 @@
-interface Point {
+import type { Point } from "../types"
+
+interface PointWithLayer {
   x: number
   y: number
+  layer: string
 }
 
-export function removePathLoops<T extends Point>(path: T[]): T[] {
+export function removePathLoops<T extends PointWithLayer>(path: T[]): T[] {
   if (path.length < 4) return path // No loops possible with less than 4 points
 
-  const result: Point[] = [path[0]]
+  const result: PointWithLayer[] = [path[0]]
 
   for (let i = 1; i < path.length; i++) {
     const currentSegment = { start: path[i - 1], end: path[i] }
 
     let intersectionFound = false
-    let intersectionPoint: Point | null = null
+    let intersectionPoint: PointWithLayer | null = null
     let intersectionIndex = -1
 
     // Check for intersections with all previous segments
     for (let j = 0; j < result.length - 1; j++) {
       const previousSegment = { start: result[j], end: result[j + 1] }
+      if (previousSegment.start.layer !== currentSegment.start.layer) {
+        continue
+      }
       const intersection = findIntersection(previousSegment, currentSegment)
 
       if (intersection) {
         intersectionFound = true
-        intersectionPoint = intersection
+        intersectionPoint = {
+          ...intersection,
+          layer: previousSegment.start.layer,
+        }
         intersectionIndex = j
         break
       }
