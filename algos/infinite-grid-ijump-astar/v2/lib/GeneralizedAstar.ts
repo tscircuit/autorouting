@@ -1,4 +1,4 @@
-import type { AnySoupElement, PCBSMTPad } from "@tscircuit/soup"
+import type { AnySoupElement, LayerRef, PCBSMTPad } from "@tscircuit/soup"
 // import { QuadtreeObstacleList } from "./QuadtreeObstacleList"
 import type { Node, Point, PointWithObstacleHit } from "./types"
 import { manDist, nodeName } from "./util"
@@ -13,6 +13,7 @@ import type {
 import { getObstaclesFromRoute } from "autorouting-dataset/lib/solver-utils/getObstaclesFromRoute"
 import { ObstacleList } from "./ObstacleList"
 import { removePathLoops } from "autorouting-dataset/lib/solver-postprocessing/remove-path-loops"
+import { addViasWhenLayerChanges } from "autorouting-dataset/lib/solver-postprocessing/add-vias-when-layer-changes"
 
 const debug = Debug("autorouting-dataset:astar")
 
@@ -325,19 +326,21 @@ export class GeneralizedAstarAutorouter {
   solveAndMapToTraces(): SimplifiedPcbTrace[] {
     const solutions = this.solve()
 
-    return solutions.flatMap((solution) => {
+    return solutions.flatMap((solution): SimplifiedPcbTrace[] => {
       if (!solution.solved) return []
       return [
         {
-          type: "pcb_trace",
+          type: "pcb_trace" as const,
           pcb_trace_id: `pcb_trace_for_${solution.connectionName}`,
-          route: solution.route.map((point) => ({
-            route_type: "wire",
-            x: point.x,
-            y: point.y,
-            width: 0.1, // TODO use configurable width
-            layer: point.layer,
-          })),
+          route: addViasWhenLayerChanges(
+            solution.route.map((point) => ({
+              route_type: "wire" as const,
+              x: point.x,
+              y: point.y,
+              width: 0.1, // TODO use configurable width
+              layer: point.layer as LayerRef,
+            })),
+          ),
         },
       ]
     })
