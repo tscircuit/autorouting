@@ -34,6 +34,8 @@ export class MultilayerIjump extends GeneralizedAstarAutorouter {
   layerCount: number
   obstacles: ObstacleList3d
 
+  GOAL_RUSH_FACTOR: number = 1.1
+
   // TODO we need to travel far enough away from the goal so that we're not
   // hitting a pad, which means we need to know the bounds of the goal
   // The simplest way to do this is to change SimpleJsonInput to include a
@@ -53,18 +55,7 @@ export class MultilayerIjump extends GeneralizedAstarAutorouter {
     margin: number
     enterCost: number
     travelCostFactor: number
-  }> = [
-    {
-      margin: 1,
-      enterCost: 0,
-      travelCostFactor: 1,
-    },
-    {
-      margin: 0.15,
-      enterCost: 10,
-      travelCostFactor: 2,
-    },
-  ]
+  }>
 
   get largestMargin() {
     return this.marginsWithCosts[0].margin
@@ -87,6 +78,19 @@ export class MultilayerIjump extends GeneralizedAstarAutorouter {
 
     // obstacle lists are created when solving currently
     this.obstacles = null as any // new ObstacleList3d(this.layerCount, this.allObstacles)
+
+    this.marginsWithCosts = [
+      {
+        margin: 1,
+        enterCost: 0,
+        travelCostFactor: 1,
+      },
+      {
+        margin: this.OBSTACLE_MARGIN,
+        enterCost: 10,
+        travelCostFactor: 2,
+      },
+    ]
   }
 
   createObstacleList({
@@ -121,7 +125,7 @@ export class MultilayerIjump extends GeneralizedAstarAutorouter {
     const dx = Math.abs(node.x - this.goalPoint!.x)
     const dy = Math.abs(node.y - this.goalPoint!.y)
     const dl = Math.abs(node.l - (this.goalPoint as any).l)
-    return dx + dy + dl * this.VIA_COST
+    return (dx + dy) ** this.GOAL_RUSH_FACTOR + dl * this.VIA_COST
   }
 
   getStartNode(connection: SimpleRouteConnection): Node3d {

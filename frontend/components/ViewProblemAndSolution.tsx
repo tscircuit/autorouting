@@ -142,7 +142,9 @@ export default () => {
                 </div>
               )}
             </div>
-            <a href={`/problem/${selectedProblemType}/${seed}.solution.json`}>
+            <a
+              href={`/problem/${selectedProblemType}/${seed}.solution.json?solver=${window.SOLVER_NAME}`}
+            >
               download (json)
             </a>
             <div style={{ flexGrow: 1 }} />

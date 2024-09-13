@@ -6,6 +6,7 @@ import { isValidSolution } from "./is-valid-solution"
 import kleur from "kleur"
 import { last } from "lodash"
 import { normalizeSolution } from "../solver-utils/normalize-solution"
+import fs from "fs"
 
 interface BenchmarkOptions {
   solver: ProblemSolver
@@ -15,6 +16,7 @@ interface BenchmarkOptions {
   problemType?: ProblemType | "all"
   sampleSeed?: number
   noSkipping?: boolean
+  outputFile?: string
 }
 
 interface BenchmarkResult {
@@ -25,6 +27,21 @@ interface BenchmarkResult {
   failedSamples: number
 }
 
+const fromEnv = <T extends string | number | undefined>(
+  key: string,
+  defaultValue?: T,
+): T => {
+  const value = process.env[key]
+  if (!value) {
+    if (defaultValue !== undefined) return defaultValue
+    throw new Error(`Environment variable ${key} is not set`)
+  }
+  if (typeof defaultValue === "number") {
+    return parseInt(value) as T
+  }
+  return value as T
+}
+
 export async function runBenchmark(
   options: BenchmarkOptions,
 ): Promise<BenchmarkResult[]> {
@@ -32,10 +49,11 @@ export async function runBenchmark(
     solver,
     solverName,
     verbose = false,
-    sampleCount = 100,
-    problemType,
-    sampleSeed = 0,
+    sampleCount = fromEnv("SAMPLE_COUNT", 100),
+    problemType = fromEnv("PROBLEM_TYPE", "all"),
+    sampleSeed = fromEnv("SAMPLE_SEED", 0),
     noSkipping = false,
+    outputFile = fromEnv("OUTPUT_FILE", ""),
   } = options
 
   const problemTypes: ProblemType[] =
@@ -137,6 +155,10 @@ export async function runBenchmark(
         "Average Time": `${result.averageTime.toFixed(2)}ms`,
       })),
     )
+  }
+
+  if (outputFile) {
+    fs.writeFileSync(outputFile, JSON.stringify(results, null, 2))
   }
 
   return results

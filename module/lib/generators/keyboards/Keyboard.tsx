@@ -54,7 +54,13 @@ export const Keyboard = ({
   return (
     <board width="120mm" height="80mm" routingDisabled>
       {keyPositions.map(({ keyNum, x, y }) => (
-        <Key name={`K${keyNum}`} keyNum={keyNum} pcbX={x} pcbY={y} />
+        <Key
+          key={`K${keyNum}`}
+          name={`K${keyNum}`}
+          keyNum={keyNum}
+          pcbX={x}
+          pcbY={y}
+        />
       ))}
       <chip name="U1" pcbX={15} footprint="dip24_w0.7in_h1.3in" />
       {keyPositions.map(({ keyNum, row, col }) => (

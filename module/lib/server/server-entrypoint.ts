@@ -35,15 +35,23 @@ export const serverEntrypoint = async (
   // If the url is /problem/single-trace/1/simple-grid, then set the solver
   // to the solver with the name "simple-grid"
   if (req.url!.includes("/problem/")) {
-    const [, , , , overrideSolverName] = req.url!.split("/")
+    const [, , , , overrideSolverNameInUrl] = req.url!.split("/")
     if (
-      overrideSolverName &&
-      AVAILABLE_SOLVERS.includes(overrideSolverName) &&
-      ctx.solverName !== overrideSolverName
+      overrideSolverNameInUrl &&
+      AVAILABLE_SOLVERS.includes(overrideSolverNameInUrl) &&
+      ctx.solverName !== overrideSolverNameInUrl
     ) {
-      ctx.solverName = overrideSolverName
-      solver = (await getBuiltinAvailableSolver(overrideSolverName))!
+      ctx.solverName = overrideSolverNameInUrl
+      solver = (await getBuiltinAvailableSolver(overrideSolverNameInUrl))!
     }
+  }
+
+  // Check if "?solver=..." is in the url parameters, if so set it to overrideSolverName
+  const urlParams = new URLSearchParams(req.url!.split("?")[1])
+  const solverParam = urlParams.get("solver")
+  if (solverParam && AVAILABLE_SOLVERS.includes(solverParam)) {
+    ctx.solverName = solverParam
+    solver = (await getBuiltinAvailableSolver(solverParam))!
   }
 
   if (req.url!.endsWith("/solve")) {
@@ -120,7 +128,7 @@ export const serverEntrypoint = async (
     res.writeHead(200, { "Content-Type": "application/json" })
     if (req.url!.includes(".solution.json")) {
       res.writeHead(200, {
-        "content-disposition": `attachment; filename=${problemType}${seed}.solution.json`,
+        "content-disposition": `attachment; filename=${problemType}${seed}-${ctx.solverName}.solution.json`,
       })
       res.end(JSON.stringify(solutionSoup, null, 2))
     } else {
