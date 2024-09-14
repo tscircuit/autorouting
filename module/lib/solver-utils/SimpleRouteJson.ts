@@ -4,6 +4,7 @@ export interface PointWithLayer {
   x: number
   y: number
   layer: string
+  pcb_port_id?: string
 }
 
 export interface SimpleRouteConnection {

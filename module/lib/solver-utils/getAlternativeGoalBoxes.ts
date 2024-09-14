@@ -8,6 +8,7 @@ import {
 import {
   type ConnectivityMap,
   getFullConnectivityMapFromCircuitJson,
+  PcbConnectivityMap,
 } from "circuit-json-to-connectivity-map"
 import type { ConnectionWithGoalAlternatives } from "./ConnectionWithAlternatives"
 
@@ -18,49 +19,53 @@ import type { ConnectionWithGoalAlternatives } from "./ConnectionWithAlternative
  * These can then be analyzed to find potentially shorter routes
  */
 export function getAlternativeGoalBoxes(params: {
-  soup: AnySoupElement[]
-  connMap: ConnectivityMap
+  pcbConnMap: PcbConnectivityMap
   goalElementId: string
 }): Obstacle[] {
-  const { soup, connMap, goalElementId } = params
-  const goalNet = connMap.getNetConnectedToId(goalElementId)
-  if (!goalNet) return []
+  const { pcbConnMap, goalElementId } = params
 
-  const goalElements: AnySoupElement[] = []
-  for (const elm of soup) {
-    const elmId = (elm as any)[`${elm.type}_id`]
-    const elmNet = connMap.getNetConnectedToId(elmId)
-    if (elmNet === goalNet) {
-      goalElements.push(elm)
-    }
+  if (!goalElementId.startsWith("pcb_port_")) {
+    throw new Error(
+      `Currently alternative goal boxes must have a goal id with prefix "pcb_port_" (got ${goalElementId})`,
+    )
   }
 
-  return getObstaclesFromCircuitJson(goalElements)
+  const goalTraces = pcbConnMap.getAllTracesConnectedToPort(goalElementId)
+
+  return getObstaclesFromCircuitJson(goalTraces)
 }
 // export const getAlternativeGoalBoxesForEachPoint = (para
 export const getConnectionWithAlternativeGoalBoxes = (params: {
   connection: SimpleRouteConnection
   soup: AnySoupElement[]
-  connMap?: ConnectivityMap
 }): ConnectionWithGoalAlternatives => {
-  let { connection, soup, connMap } = params
-  if (!connMap) {
-    connMap = getFullConnectivityMapFromCircuitJson(soup)
-  }
+  let { connection, soup } = params
 
   if (connection.pointsToConnect.length !== 2) {
     throw new Error(
       `Connection must have exactly 2 points for alternative goal boxes (got ${connection.pointsToConnect.length})`,
     )
   }
+  const pcbConnMap = new PcbConnectivityMap(soup)
 
   const [a, b] = connection.pointsToConnect
 
-  // const goalBoxesA = getAlternativeGoalBoxes({
-  //   soup,
-  //   connMap,
-  //   goalElementId:
-  // })
+  if (!a.pcb_port_id || !b.pcb_port_id) {
+    throw new Error(
+      `Connection points must have pcb_port_id for alternative goal box calculation (got ${a.pcb_port_id} and ${b.pcb_port_id})`,
+    )
+  }
+
+  const goalBoxesA = getAlternativeGoalBoxes({
+    goalElementId: a.pcb_port_id,
+    pcbConnMap,
+  })
+  const goalBoxesB = getAlternativeGoalBoxes({
+    goalElementId: b.pcb_port_id,
+    pcbConnMap,
+  })
+
+  // Find new points to connect based on the alternative goal boxes
 
   throw new Error("Not implemented")
 }
