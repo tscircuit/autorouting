@@ -6,7 +6,7 @@ import frontendJs from "../../../frontend-dist/assets/index.js" with {
 }
 import { getScriptContent } from "./get-script-content"
 import { getDatasetGenerator } from "../generators"
-import type { AnySoupElement } from "@tscircuit/soup"
+import type { AnySoupElement, LayerRef } from "@tscircuit/soup"
 import type { AppContext } from "./app-context"
 import type { IncomingMessage, ServerResponse } from "node:http"
 import {
@@ -21,6 +21,8 @@ import getRawBody from "raw-body"
 import { getBuiltinAvailableSolver } from "./get-builtin-available-solver"
 import { AVAILABLE_SOLVERS } from "./available-solvers"
 import { normalizeSolution } from "../solver-utils/normalize-solution.js"
+import { addViasWhenLayerChanges } from "../solver-postprocessing/add-vias-when-layer-changes.js"
+import { addViasForPcbTraceRoutes } from "../solver-postprocessing/add-vias-for-pcb-trace-routes.js"
 
 export const serverEntrypoint = async (
   req: IncomingMessage,
@@ -114,6 +116,8 @@ export const serverEntrypoint = async (
       solutionComputeTime = endTime - startTime
 
       solutionSoup = solverResult.solution.concat(problemSoup) as any
+
+      addViasForPcbTraceRoutes(solutionSoup as any)
     } catch (e: any) {
       userMessage = `Error running solver: ${e.message}\n\n${e.stack}`
     }
