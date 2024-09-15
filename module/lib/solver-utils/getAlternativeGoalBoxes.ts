@@ -34,24 +34,28 @@ export function getAlternativeGoalBoxes(params: {
 
   const goalTraces = pcbConnMap.getAllTracesConnectedToPort(goalElementId)
 
-  return getObstaclesFromCircuitJson(goalTraces)
+  return getObstaclesFromCircuitJson(goalTraces).map((obs) => ({
+    ...obs,
+    connectedTo: [goalElementId],
+  }))
 }
 
 export const getConnectionWithAlternativeGoalBoxes = (params: {
   connection: SimpleRouteConnection
-  soup: AnySoupElement[]
+  pcbConnMap: PcbConnectivityMap
 }): ConnectionWithGoalAlternatives => {
-  let { connection, soup } = params
+  let { connection, pcbConnMap } = params
 
   if (connection.pointsToConnect.length !== 2) {
     throw new Error(
       `Connection must have exactly 2 points for alternative goal boxes (got ${connection.pointsToConnect.length})`,
     )
   }
-  const pcbConnMap = new PcbConnectivityMap(soup)
 
   const [a, b] = connection.pointsToConnect
 
+  // TODO fix only one of them needs to have a pcb port id defined, or even
+  // neither of them and we return an empty goal box array
   if (!a.pcb_port_id || !b.pcb_port_id) {
     throw new Error(
       `Connection points must have pcb_port_id for alternative goal box calculation (got ${a.pcb_port_id} and ${b.pcb_port_id})`,
@@ -61,11 +65,38 @@ export const getConnectionWithAlternativeGoalBoxes = (params: {
   const goalBoxesA = getAlternativeGoalBoxes({
     goalElementId: a.pcb_port_id,
     pcbConnMap,
-  })
+  }).concat([
+    {
+      center: a,
+      width: 0.01,
+      height: 0.01,
+      connectedTo: [a.pcb_port_id],
+      layers: [a.layer],
+      type: "rect",
+    },
+  ])
   const goalBoxesB = getAlternativeGoalBoxes({
     goalElementId: b.pcb_port_id,
     pcbConnMap,
-  })
+  }).concat([
+    {
+      center: b,
+      width: 0.01,
+      height: 0.01,
+      connectedTo: [b.pcb_port_id],
+      layers: [b.layer],
+      type: "rect",
+    },
+  ])
+
+  if (goalBoxesA.length === 1 && goalBoxesB.length === 1) {
+    return {
+      ...connection,
+      startPoint: a,
+      endPoint: b,
+      goalBoxes: [],
+    }
+  }
 
   // Find new points to connect based on the alternative goal boxes
   const nearestPoints = findNearestPointsBetweenBoxSets(goalBoxesA, goalBoxesB)
@@ -73,14 +104,15 @@ export const getConnectionWithAlternativeGoalBoxes = (params: {
   let startPoint: PointWithLayer
   let endPoint: PointWithLayer
   let goalBoxes: Obstacle[]
+
   if (goalBoxesA.length >= goalBoxesB.length) {
-    startPoint = { ...nearestPoints.pointA, layer: a.layer }
-    endPoint = { ...nearestPoints.pointB, layer: b.layer }
-    goalBoxes = goalBoxesB
-  } else {
-    startPoint = { ...nearestPoints.pointB, layer: b.layer }
-    endPoint = { ...nearestPoints.pointA, layer: a.layer }
+    startPoint = { ...b, ...nearestPoints.pointB }
+    endPoint = { ...a, ...nearestPoints.pointA }
     goalBoxes = goalBoxesA
+  } else {
+    startPoint = { ...a, ...nearestPoints.pointA }
+    endPoint = { ...b, ...nearestPoints.pointB }
+    goalBoxes = goalBoxesB
   }
 
   return {

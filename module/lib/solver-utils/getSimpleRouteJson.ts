@@ -1,25 +1,36 @@
 import type { AnySoupElement } from "@tscircuit/soup"
-import type { SimpleRouteJson } from "./SimpleRouteJson"
+import type { SimpleRouteConnection, SimpleRouteJson } from "./SimpleRouteJson"
 import { su } from "@tscircuit/soup-util"
 import type { Obstacle } from "../types"
 import { getObstaclesFromCircuitJson } from "./getObstaclesFromCircuitJson"
+import { getConnectionWithAlternativeGoalBoxes } from "./getAlternativeGoalBoxes"
+import type { ConnectionWithGoalAlternatives } from "./ConnectionWithAlternatives"
+import {
+  ConnectivityMap,
+  getFullConnectivityMapFromCircuitJson,
+  PcbConnectivityMap,
+} from "circuit-json-to-connectivity-map"
 
 export const getSimpleRouteJson = (
   soup: AnySoupElement[],
-  opts: { layerCount?: number } = {},
+  opts: {
+    layerCount?: number
+    optimizeWithGoalBoxes?: boolean
+    connMap?: ConnectivityMap
+  } = {},
 ): SimpleRouteJson => {
   const routeJson: SimpleRouteJson = {} as any
 
   routeJson.layerCount = opts.layerCount ?? 1
 
   // Derive obstacles from pcb_smtpad, pcb_hole, and pcb_plated_hole
-  routeJson.obstacles = getObstaclesFromCircuitJson(soup)
+  routeJson.obstacles = getObstaclesFromCircuitJson(soup, opts.connMap)
 
   // Derive connections using source_traces, source_ports, source_nets
   routeJson.connections = []
   for (const element of soup) {
     if (element.type === "source_trace") {
-      const connection = {
+      let connection: ConnectionWithGoalAlternatives | SimpleRouteConnection = {
         name: element.source_trace_id,
         pointsToConnect: element.connected_source_port_ids.map((portId) => {
           const pcb_port = su(soup).pcb_port.getWhere({
@@ -34,9 +45,19 @@ export const getSimpleRouteJson = (
             x: pcb_port.x,
             y: pcb_port.y,
             layer: pcb_port.layers?.[0] ?? "top",
+            pcb_port_id: pcb_port.pcb_port_id,
           }
         }),
       }
+
+      if (opts.optimizeWithGoalBoxes) {
+        const pcbConnMap = new PcbConnectivityMap(soup)
+        connection = getConnectionWithAlternativeGoalBoxes({
+          connection,
+          pcbConnMap,
+        })
+      }
+
       routeJson.connections.push(connection)
 
       // Check if any points are inside obstacles

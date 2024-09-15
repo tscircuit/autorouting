@@ -6,6 +6,15 @@ import { AVAILABLE_SOLVERS } from "../module/lib/server/available-solvers"
 import Path from "node:path"
 import fs from "node:fs/promises"
 
+const SLOW_OR_OLD_SOLVERS: Array<(typeof AVAILABLE_SOLVERS)[number]> = [
+  "infgrid-astar",
+  "jump-point-grid",
+]
+
+const solversForBuild = AVAILABLE_SOLVERS.filter(
+  (solver) => !SLOW_OR_OLD_SOLVERS.includes(solver),
+)
+
 // 1. Run the server
 const devServer = await startDevServer({
   solver: autoroute,
@@ -28,7 +37,7 @@ const downloadAndSave = async (path: string) => {
 }
 
 // Download all the relevant urls
-const sampleCount = 25
+const sampleCount = 10
 
 await downloadAndSave(`/available-datasets.json`)
 await downloadAndSave(`/index.html`)
