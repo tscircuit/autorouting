@@ -7,6 +7,7 @@ import { translate } from "transformation-matrix"
 import type { AnySoupElement } from "@tscircuit/soup"
 import { getDebugSvg } from "../../infinite-grid-ijump-astar/tests/fixtures/get-debug-svg"
 import { MultilayerIjump } from "../MultilayerIjump"
+import { getFullConnectivityMapFromCircuitJson } from "circuit-json-to-connectivity-map"
 
 test("multimargin-ijump-astar simple", () => {
   const circuit = new Circuit()
@@ -47,16 +48,27 @@ test("multimargin-ijump-astar simple", () => {
 
   const inputCircuitJson = circuit.getCircuitJson()
 
-  const input = getSimpleRouteJson(inputCircuitJson, { layerCount: 2 })
+  const connMap = getFullConnectivityMapFromCircuitJson(inputCircuitJson)
+
+  const input = getSimpleRouteJson(inputCircuitJson, {
+    layerCount: 2,
+    connMap,
+    optimizeWithGoalBoxes: true,
+  })
 
   const autorouter = new MultilayerIjump({
     input,
+    connMap,
+    optimizeWithGoalBoxes: true,
     debug: true,
   })
 
   const solution = autorouter.solveAndMapToTraces()
 
   expect(
-    circuitJsonToPcbSvg(inputCircuitJson.concat(solution as any)),
+    circuitJsonToPcbSvg(
+      inputCircuitJson, //.concat(solution as any),
+      // .map((a) => (a.type === "pcb_smtpad" ? { ...a, layer: "bottom" } : a)),
+    ),
   ).toMatchSvgSnapshot(import.meta.path)
 })

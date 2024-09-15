@@ -1,4 +1,7 @@
-import { GeneralizedAstarAutorouter } from "algos/infinite-grid-ijump-astar/v2/lib/GeneralizedAstar"
+import {
+  GeneralizedAstarAutorouter,
+  type ConnectionSolveResult,
+} from "algos/infinite-grid-ijump-astar/v2/lib/GeneralizedAstar"
 import { getDistanceToOvercomeObstacle } from "algos/infinite-grid-ijump-astar/v2/lib/getDistanceToOvercomeObstacle"
 import type {
   Direction,
@@ -25,6 +28,17 @@ import type {
 } from "autorouting-dataset/lib/solver-utils/SimpleRouteJson"
 import { ObstacleList3d } from "./ObstacleList3d"
 import type { Obstacle } from "autorouting-dataset/lib/types"
+import {
+  PcbConnectivityMap,
+  type ConnectivityMap,
+} from "circuit-json-to-connectivity-map"
+import type { ConnectionWithGoalAlternatives } from "autorouting-dataset/lib/solver-utils/ConnectionWithAlternatives"
+import { nanoid } from "nanoid"
+import type { LayerRef, PCBTrace } from "@tscircuit/soup"
+import {
+  getAlternativeGoalBoxes,
+  getConnectionWithAlternativeGoalBoxes,
+} from "autorouting-dataset/lib/solver-utils/getAlternativeGoalBoxes"
 
 export class MultilayerIjump extends GeneralizedAstarAutorouter {
   MAX_ITERATIONS: number = 200
@@ -33,6 +47,18 @@ export class MultilayerIjump extends GeneralizedAstarAutorouter {
   allowLayerChange: boolean = true // Flag to allow layer changes
   layerCount: number
   obstacles: ObstacleList3d
+  optimizeWithGoalBoxes: boolean
+  /**
+   * Use this to convert ids into "net ids", obstacles will have a net id in
+   * their connectedTo array most of the time
+   */
+  connMap: ConnectivityMap | undefined
+
+  /**
+   * Use this to track what traces have been connected to a net while routing,
+   * this is required for generating alternative goal boxes while routing
+   */
+  pcbConnMap: PcbConnectivityMap
 
   GOAL_RUSH_FACTOR: number = 1.1
 
@@ -70,12 +96,17 @@ export class MultilayerIjump extends GeneralizedAstarAutorouter {
     MAX_ITERATIONS?: number
     VIA_COST?: number
     isRemovePathLoopsEnabled?: boolean
+    connMap?: ConnectivityMap
+    pcbConnMap?: PcbConnectivityMap
+    optimizeWithGoalBoxes?: boolean
     debug?: boolean
   }) {
     super(opts)
     this.layerCount = opts.input.layerCount ?? 2
     this.VIA_COST = opts.VIA_COST ?? this.VIA_COST
-
+    this.connMap = opts.connMap
+    this.pcbConnMap = opts.pcbConnMap ?? new PcbConnectivityMap()
+    this.optimizeWithGoalBoxes = opts.optimizeWithGoalBoxes ?? false
     // obstacle lists are created when solving currently
     this.obstacles = null as any // new ObstacleList3d(this.layerCount, this.allObstacles)
 
@@ -93,6 +124,52 @@ export class MultilayerIjump extends GeneralizedAstarAutorouter {
     ]
   }
 
+  preprocessConnectionBeforeSolving(
+    connection: SimpleRouteConnection,
+  ): ConnectionWithGoalAlternatives {
+    if (!this.optimizeWithGoalBoxes) return connection as any
+    return getConnectionWithAlternativeGoalBoxes({
+      connection,
+      pcbConnMap: this.pcbConnMap!,
+    })
+  }
+
+  /**
+   * Add solved traces to pcbConnMap
+   */
+  postprocessConnectionSolveResult(
+    connection: SimpleRouteConnection,
+    result: ConnectionSolveResult,
+  ): ConnectionSolveResult {
+    if (!result.solved) return result
+
+    // Add the trace to the pcbConnMap
+    if (this.optimizeWithGoalBoxes) {
+      const traceRoute = result.route.map(
+        (rp) =>
+          ({
+            x: rp.x,
+            y: rp.y,
+            route_type: "wire",
+            layer: rp.layer as LayerRef,
+            width: 0.1,
+          }) as Extract<PCBTrace["route"][number], { route_type: "wire" }>,
+      )
+      traceRoute[0].start_pcb_port_id =
+        connection.pointsToConnect[0].pcb_port_id
+      traceRoute[traceRoute.length - 1].end_pcb_port_id =
+        connection.pointsToConnect[1].pcb_port_id
+
+      this.pcbConnMap.addTrace({
+        type: "pcb_trace",
+        pcb_trace_id: `postprocess_trace_${nanoid(8)}`,
+        route: traceRoute,
+      })
+    }
+
+    return result
+  }
+
   createObstacleList({
     dominantLayer,
     connection,
@@ -102,10 +179,20 @@ export class MultilayerIjump extends GeneralizedAstarAutorouter {
     connection: SimpleRouteConnection
     obstaclesFromTraces: Obstacle[]
   }): ObstacleList3d {
+    const bestConnectionId = this.connMap
+      ? this.connMap.getNetConnectedToId(connection.name)
+      : connection.name
+
+    if (!bestConnectionId) {
+      throw new Error(
+        `The connection.name "${connection.name}" wasn't present in the full connectivity map`,
+      )
+    }
+
     return new ObstacleList3d(
       this.layerCount,
       this.allObstacles
-        .filter((obstacle) => !obstacle.connectedTo.includes(connection.name))
+        .filter((obstacle) => !obstacle.connectedTo.includes(bestConnectionId))
         .concat(obstaclesFromTraces ?? []),
     )
   }

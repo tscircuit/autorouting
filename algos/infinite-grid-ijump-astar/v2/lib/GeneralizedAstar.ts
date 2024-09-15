@@ -204,6 +204,21 @@ export class GeneralizedAstarAutorouter {
     return "top"
   }
 
+  /**
+   * Add a preprocessing step before solving a connection to do adjust points
+   * based on previous iterations. For example, if a previous connection solved
+   * for a trace on the same net, you may want to preprocess the connection to
+   * solve for an easier start and end point
+   *
+   * The simplest way to do this is to run getConnectionWithAlternativeGoalBoxes
+   * with any pcb_traces created by previous iterations
+   */
+  preprocessConnectionBeforeSolving(
+    connection: SimpleRouteConnection,
+  ): SimpleRouteConnection {
+    return connection
+  }
+
   solveConnection(connection: SimpleRouteConnection): ConnectionSolveResult {
     const { pointsToConnect } = connection
     if (pointsToConnect.length > 2) {
@@ -211,6 +226,7 @@ export class GeneralizedAstarAutorouter {
         "GeneralizedAstarAutorouter doesn't currently support 2+ points in a connection",
       )
     }
+    connection = this.preprocessConnectionBeforeSolving(connection)
 
     this.iterations = 0
     this.closedSet = new Set()
@@ -283,6 +299,17 @@ export class GeneralizedAstarAutorouter {
   }
 
   /**
+   * Override this to implement smoothing strategies or incorporate new traces
+   * into a connectivity map
+   */
+  postprocessConnectionSolveResult(
+    connection: SimpleRouteConnection,
+    result: ConnectionSolveResult,
+  ): ConnectionSolveResult {
+    return result
+  }
+
+  /**
    * By default, this will solve the connections in the order they are given,
    * and add obstacles for each successfully solved connection. Override this
    * to implement "rip and replace" rerouting strategies.
@@ -299,7 +326,8 @@ export class GeneralizedAstarAutorouter {
         connection,
         obstaclesFromTraces,
       })
-      const result = this.solveConnection(connection)
+      let result = this.solveConnection(connection)
+      result = this.postprocessConnectionSolveResult(connection, result)
       solutions.push(result)
 
       if (debug.enabled) {
