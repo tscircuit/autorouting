@@ -36,6 +36,7 @@ test("multimargin-ijump-astar simple", () => {
     <board width="25mm" height="4mm" routingDisabled>
       {Array.from({ length: 10 }).map((_, i) => (
         <resistor
+          // @ts-ignore
           key={`R${i}`}
           name={`R${i}`}
           pcbX={i * 2 - 10}
