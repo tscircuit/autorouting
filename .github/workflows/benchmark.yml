@@ -18,30 +18,7 @@ jobs:
         run: bun install
 
       - name: Run benchmarks
-        run: |
-          mkdir -p benchmark-results
-          for dir in algos/*; do
-            if [ -d "$dir" ] && [ -f "$dir/benchmark.ts" ]; then
-              echo "Running benchmark for $(basename $dir)"
-              bun run "$dir/benchmark.ts" > "benchmark-results/$(basename $dir).json"
-            fi
-          done
-
-      - name: Generate benchmark report
-        run: |
-          echo "# Algorithm Benchmarks" > BENCHMARKS.md
-          echo "" >> BENCHMARKS.md
-          echo "Last updated: $(date -u)" >> BENCHMARKS.md
-          echo "" >> BENCHMARKS.md
-          for file in benchmark-results/*.json; do
-            algo=$(basename $file .json)
-            echo "## $algo" >> BENCHMARKS.md
-            echo "" >> BENCHMARKS.md
-            echo "| Problem Type | Samples Run | Completion | Average Time |" >> BENCHMARKS.md
-            echo "|--------------|-------------|------------|--------------|" >> BENCHMARKS.md
-            jq -r '.[] | "| \(.problemType) | \(.samplesRun) | \(.successfulSamples / .samplesRun * 100 | round)% | \(.averageTime | round(2))ms |"' $file >> BENCHMARKS.md
-            echo "" >> BENCHMARKS.md
-          done
+        run: bun run scripts/benchmark.ts
 
       - name: Commit benchmark results
         run: |

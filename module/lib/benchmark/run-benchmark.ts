@@ -67,7 +67,7 @@ export async function runBenchmark(
     if (verbose)
       console.log(
         kleur.yellow(
-          `\n================================================================================\nRunning benchmark for problem type: "${problemType}"\n================================================================================\n`,
+          `\n================================================================================\nRunning ${solverName} benchmark for problem type: "${problemType}"\n================================================================================\n`,
         ),
       )
 
@@ -75,6 +75,7 @@ export async function runBenchmark(
     let samplesRun = 0
     let successfulSamples = 0
     let totalTime = 0
+    const startTimeForProblem = performance.now()
     let failedSamples = 0
 
     let lastTenResults: boolean[] = []
@@ -87,11 +88,11 @@ export async function runBenchmark(
         const startTime = performance.now()
         const { solution } = await normalizeSolution(solver(soup))
         const endTime = performance.now()
+        const sampleTime = endTime - startTime
         const sampleCorrect = isValidSolution(soup, solution)
 
         if (sampleCorrect) {
           successfulSamples++
-          totalTime += endTime - startTime
         } else {
           failedSamples++
         }
@@ -101,7 +102,6 @@ export async function runBenchmark(
         lastTenResults.push(sampleCorrect)
         if (verbose && (i + 1) % 10 === 0) {
           console.log(
-            // use emojis for success/failure (emoji check and cross)
             kleur.gray(
               `${`${problemType}[${`${i + 1 - 10}-${i}`}]:`.padEnd(30, " ")} ${lastTenResults
                 .map((res) => (res ? kleur.green("✅") : kleur.red("❌")))
@@ -116,11 +116,30 @@ export async function runBenchmark(
         if (verbose) console.error(`Error in sample ${i + 1}:`, error)
       }
 
+      // Check if average time is over 500ms after 10 samples
+      if (
+        !noSkipping &&
+        samplesRun > 5 &&
+        (performance.now() - startTimeForProblem) / samplesRun > 500
+      ) {
+        if (verbose)
+          console.log(
+            `Skipping remaining samples for "${problemType}" due to high average solve time (${(totalTime / samplesRun).toFixed(2)}ms)`,
+          )
+        // Mark all remaining samples as failed
+        failedSamples += sampleCount - samplesRun
+        samplesRun = sampleCount
+        break
+      }
+
       if (!noSkipping && failedSamples >= 10 && samplesRun < 10) {
         if (verbose)
           console.log(
             `Skipping remaining samples for ${problemType} due to high failure rate`,
           )
+        // Mark all remaining samples as failed
+        failedSamples += sampleCount - samplesRun
+        samplesRun = sampleCount
         break
       }
     }
