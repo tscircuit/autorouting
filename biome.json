@@ -9,6 +9,7 @@
   },
   "files": {
     "ignore": [
+      "BENCHMARKS.md",
       "cosmos-export",
       "dist",
       "package.json",
