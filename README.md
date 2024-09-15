@@ -1,6 +1,6 @@
 # autorouting-dataset
 
-[view online](https://dataset.autorouting.com) &middot; [blog](https://blog.autorouting.com) &middot; [discord](https://tscircuit.com/community/join-redirect) &middot; [tscircuit](https://github.com/tscircuit/tscircuit)
+[view online](https://dataset.autorouting.com) &middot; [blog](https://blog.autorouting.com) &middot; [discord](https://tscircuit.com/community/join-redirect) &middot; [tscircuit](https://github.com/tscircuit/tscircuit) &middot; [benchmarks](./BENCHMARKS.md)
 
 A dataset of autorouting problems for benchmarking 🥇, plus a ton of utilities 🔨 including a viewer and testing server
 for developing new autorouting algorithms.
