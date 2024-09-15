@@ -67,7 +67,7 @@ test("multimargin-ijump-astar simple", () => {
 
   expect(
     circuitJsonToPcbSvg(
-      inputCircuitJson, //.concat(solution as any),
+      inputCircuitJson.concat(solution as any),
       // .map((a) => (a.type === "pcb_smtpad" ? { ...a, layer: "bottom" } : a)),
     ),
   ).toMatchSvgSnapshot(import.meta.path)
