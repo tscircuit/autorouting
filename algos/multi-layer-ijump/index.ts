@@ -8,7 +8,6 @@ export function autoroute(soup: AnySoupElement[]): SolutionWithDebugInfo {
   const connMap = getFullConnectivityMapFromCircuitJson(soup)
   const input = getSimpleRouteJson(soup, {
     layerCount: 2,
-    optimizeWithGoalBoxes: true,
     connMap,
   })
 
