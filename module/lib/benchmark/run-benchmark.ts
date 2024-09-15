@@ -19,7 +19,7 @@ interface BenchmarkOptions {
   outputFile?: string
 }
 
-interface BenchmarkResult {
+export interface BenchmarkResult {
   problemType: ProblemType | "all"
   samplesRun: number
   successfulSamples: number
@@ -93,6 +93,7 @@ export async function runBenchmark(
 
         if (sampleCorrect) {
           successfulSamples++
+          totalTime += endTime - startTime
         } else {
           failedSamples++
         }

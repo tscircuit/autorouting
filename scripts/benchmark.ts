@@ -1,11 +1,14 @@
 import type { SolutionWithDebugInfo } from "autorouting-dataset/lib/solver-utils/ProblemSolver"
-import { runBenchmark } from "../module/lib/benchmark/run-benchmark"
+import {
+  runBenchmark,
+  type BenchmarkResult,
+} from "../module/lib/benchmark/run-benchmark"
 import { builtinSolvers } from "../module/lib/server/get-builtin-available-solver"
 import fs from "fs"
 import path from "path"
 
 async function runAllBenchmarks() {
-  const results: Record<string, any> = {}
+  const results: Record<string, BenchmarkResult[]> = {}
 
   for (const [solverName, solverPromise] of Object.entries(builtinSolvers)) {
     console.log(`Running benchmark for ${solverName}...`)
@@ -16,7 +19,7 @@ async function runAllBenchmarks() {
       solver,
       solverName,
       verbose: true,
-      sampleCount: 10,
+      sampleCount: 100,
       problemType: "all",
     })
     results[solverName] = benchmarkResult
@@ -97,12 +100,6 @@ async function runAllBenchmarks() {
   let tableHeaderColumns = ["Solver", "Ranking"]
   let tableSeparatorColumns = ["------", "-------"]
 
-  for (const problemType of problemTypes) {
-    const abbr = abbreviateProblemType(problemType)
-    tableHeaderColumns.push(`${abbr}.a`, `${abbr}.t`)
-    tableSeparatorColumns.push("-------", "-------")
-  }
-
   tableHeaderColumns.push("Avg Correctness", "Avg Time/Sample")
   tableSeparatorColumns.push("---------------", "----------------")
 
@@ -116,16 +113,6 @@ async function runAllBenchmarks() {
   let rank = 1
   for (const solverData of solverDataArray) {
     let rowColumns = [solverData.solverName, rank.toString()]
-    for (const problemType of problemTypes) {
-      const data = solverData.problemData[problemType]
-      if (data) {
-        const accuracy = (data.accuracy * 100).toFixed(2) + "%"
-        const avgTime = data.averageTime.toFixed(2) + "ms"
-        rowColumns.push(accuracy, avgTime)
-      } else {
-        rowColumns.push("N/A", "N/A")
-      }
-    }
     const avgCorrectness =
       (solverData.averageCorrectness * 100).toFixed(2) + "%"
     const avgTimePerSample = solverData.averageTimePerSample.toFixed(2) + "ms"
