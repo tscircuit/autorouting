@@ -8,5 +8,6 @@ import type { PointWithLayer, SimpleRouteConnection } from "./SimpleRouteJson"
  */
 export interface ConnectionWithGoalAlternatives extends SimpleRouteConnection {
   startPoint: PointWithLayer
+  endPoint: PointWithLayer
   goalBoxes: Obstacle[]
 }
