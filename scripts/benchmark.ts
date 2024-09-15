@@ -16,16 +16,129 @@ async function runAllBenchmarks() {
       solver,
       solverName,
       verbose: true,
-      sampleCount: 100,
+      sampleCount: 10,
       problemType: "all",
     })
     results[solverName] = benchmarkResult
   }
 
+  // Collect all problem types
+  const problemTypesSet = new Set<string>()
+  for (const result of Object.values(results)) {
+    for (const problemResult of result) {
+      problemTypesSet.add(problemResult.problemType)
+    }
+  }
+  const problemTypes = Array.from(problemTypesSet)
+
+  function abbreviateProblemType(problemType: string): string {
+    return problemType.slice(0, 3).toLowerCase()
+  }
+
+  type SolverData = {
+    solverName: string
+    averageCorrectness: number
+    averageTimePerSample: number
+    problemData: Record<
+      string,
+      {
+        accuracy: number
+        averageTime: number
+      }
+    >
+  }
+
+  const solverDataArray: SolverData[] = []
+
+  for (const [solverName, result] of Object.entries(results)) {
+    const problemData: Record<
+      string,
+      { accuracy: number; averageTime: number }
+    > = {}
+    let totalSuccessfulSamples = 0
+    let totalSamplesRun = 0
+    let totalTime = 0
+    let totalSamplesForTime = 0 // total samples used in time calculation
+    for (const problemResult of result) {
+      const samplesRun = problemResult.samplesRun
+      const successfulSamples = problemResult.successfulSamples
+      const accuracy = successfulSamples / samplesRun
+      const averageTime = problemResult.averageTime // per sample
+
+      problemData[problemResult.problemType] = {
+        accuracy,
+        averageTime,
+      }
+
+      totalSuccessfulSamples += successfulSamples
+      totalSamplesRun += samplesRun
+      totalTime += averageTime * samplesRun
+      totalSamplesForTime += samplesRun
+    }
+    const averageCorrectness = totalSuccessfulSamples / totalSamplesRun
+    const averageTimePerSample = totalTime / totalSamplesForTime
+
+    solverDataArray.push({
+      solverName,
+      averageCorrectness,
+      averageTimePerSample,
+      problemData,
+    })
+  }
+
+  // Sort solvers by average correctness
+  solverDataArray.sort((a, b) => b.averageCorrectness - a.averageCorrectness)
+
   // Update BENCHMARKS.md
   let benchmarkContent = "# Algorithm Benchmarks\n\n"
   benchmarkContent += `Last updated: ${new Date().toUTCString()}\n\n`
 
+  // Generate table header
+  let tableHeaderColumns = ["Solver", "Ranking"]
+  let tableSeparatorColumns = ["------", "-------"]
+
+  for (const problemType of problemTypes) {
+    const abbr = abbreviateProblemType(problemType)
+    tableHeaderColumns.push(`${abbr}.a`, `${abbr}.t`)
+    tableSeparatorColumns.push("-------", "-------")
+  }
+
+  tableHeaderColumns.push("Avg Correctness", "Avg Time/Sample")
+  tableSeparatorColumns.push("---------------", "----------------")
+
+  let tableHeader = "| " + tableHeaderColumns.join(" | ") + " |\n"
+  let tableSeparator = "| " + tableSeparatorColumns.join(" | ") + " |\n"
+
+  benchmarkContent += tableHeader
+  benchmarkContent += tableSeparator
+
+  // Now, write table rows
+  let rank = 1
+  for (const solverData of solverDataArray) {
+    let rowColumns = [solverData.solverName, rank.toString()]
+    for (const problemType of problemTypes) {
+      const data = solverData.problemData[problemType]
+      if (data) {
+        const accuracy = (data.accuracy * 100).toFixed(2) + "%"
+        const avgTime = data.averageTime.toFixed(2) + "ms"
+        rowColumns.push(accuracy, avgTime)
+      } else {
+        rowColumns.push("N/A", "N/A")
+      }
+    }
+    const avgCorrectness =
+      (solverData.averageCorrectness * 100).toFixed(2) + "%"
+    const avgTimePerSample = solverData.averageTimePerSample.toFixed(2) + "ms"
+    rowColumns.push(avgCorrectness, avgTimePerSample)
+
+    let row = "| " + rowColumns.join(" | ") + " |\n"
+    benchmarkContent += row
+    rank++
+  }
+
+  benchmarkContent += "\n"
+
+  // Append detailed results per solver
   for (const [solverName, result] of Object.entries(results)) {
     benchmarkContent += `## ${solverName}\n\n`
     benchmarkContent +=
@@ -33,7 +146,10 @@ async function runAllBenchmarks() {
     benchmarkContent +=
       "|--------------|-------------|------------|--------------|\n"
     for (const problemResult of result) {
-      benchmarkContent += `| ${problemResult.problemType} | ${problemResult.samplesRun} | ${((problemResult.successfulSamples / problemResult.samplesRun) * 100).toFixed(2)}% | ${problemResult.averageTime.toFixed(2)}ms |\n`
+      benchmarkContent += `| ${problemResult.problemType} | ${problemResult.samplesRun} | ${(
+        (problemResult.successfulSamples / problemResult.samplesRun) *
+        100
+      ).toFixed(2)}% | ${problemResult.averageTime.toFixed(2)}ms |\n`
     }
     benchmarkContent += "\n"
   }
