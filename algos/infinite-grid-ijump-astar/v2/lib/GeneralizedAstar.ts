@@ -220,13 +220,14 @@ export class GeneralizedAstarAutorouter {
   }
 
   solveConnection(connection: SimpleRouteConnection): ConnectionSolveResult {
-    const { pointsToConnect } = connection
-    if (pointsToConnect.length > 2) {
+    if (connection.pointsToConnect.length > 2) {
       throw new Error(
         "GeneralizedAstarAutorouter doesn't currently support 2+ points in a connection",
       )
     }
     connection = this.preprocessConnectionBeforeSolving(connection)
+
+    const { pointsToConnect } = connection
 
     this.iterations = 0
     this.closedSet = new Set()

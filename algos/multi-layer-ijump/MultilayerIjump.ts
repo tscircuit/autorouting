@@ -41,7 +41,7 @@ import {
 } from "autorouting-dataset/lib/solver-utils/getAlternativeGoalBoxes"
 
 export class MultilayerIjump extends GeneralizedAstarAutorouter {
-  MAX_ITERATIONS: number = 200
+  MAX_ITERATIONS: number = 500
   VIA_COST: number = 4 // Define the cost for changing layers
   VIA_DIAMETER: number = 0.5
   allowLayerChange: boolean = true // Flag to allow layer changes

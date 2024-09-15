@@ -5,4 +5,5 @@ await runBenchmark({
   solver: autoroute,
   solverName: "multi-layer-ijump",
   verbose: true,
+  problemType: "keyboards",
 })
