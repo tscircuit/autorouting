@@ -8,27 +8,6 @@ import type { AnySoupElement } from "@tscircuit/soup"
 import { getDebugSvg } from "../../infinite-grid-ijump-astar/tests/fixtures/get-debug-svg"
 import { MultilayerIjump } from "../MultilayerIjump"
 
-const OneByOnePad = (props: {
-  name: string
-  pcbX?: number
-  pcbY?: number
-  layer: string
-}) => (
-  <chip name={props.name} pcbX={props.pcbX} pcbY={props.pcbY}>
-    <footprint>
-      <smtpad
-        pcbX={0}
-        pcbY={0}
-        shape="rect"
-        width="0.5mm"
-        height="0.5mm"
-        layer={props.layer as any}
-        portHints={["pin1"]}
-      />
-    </footprint>
-  </chip>
-)
-
 test("multimargin-ijump-astar simple", () => {
   const circuit = new Circuit()
 
