@@ -2,6 +2,7 @@ import type { AnySoupElement } from "@tscircuit/soup"
 import {
   getObstaclesFromCircuitJson,
   type Obstacle,
+  type PointWithLayer,
   type SimpleRouteConnection,
   type SimpleRouteJson,
 } from "autorouting-dataset"
@@ -11,6 +12,7 @@ import {
   PcbConnectivityMap,
 } from "circuit-json-to-connectivity-map"
 import type { ConnectionWithGoalAlternatives } from "./ConnectionWithAlternatives"
+import { findNearestPointsBetweenBoxSets } from "@tscircuit/math-utils/nearest-box"
 
 /**
  * Given an element id, returns a list of obstacles that are an
@@ -34,7 +36,7 @@ export function getAlternativeGoalBoxes(params: {
 
   return getObstaclesFromCircuitJson(goalTraces)
 }
-// export const getAlternativeGoalBoxesForEachPoint = (para
+
 export const getConnectionWithAlternativeGoalBoxes = (params: {
   connection: SimpleRouteConnection
   soup: AnySoupElement[]
@@ -66,6 +68,26 @@ export const getConnectionWithAlternativeGoalBoxes = (params: {
   })
 
   // Find new points to connect based on the alternative goal boxes
+  const nearestPoints = findNearestPointsBetweenBoxSets(goalBoxesA, goalBoxesB)
 
-  throw new Error("Not implemented")
+  let startPoint: PointWithLayer
+  let endPoint: PointWithLayer
+  let goalBoxes: Obstacle[]
+  if (goalBoxesA.length >= goalBoxesB.length) {
+    startPoint = { ...nearestPoints.pointA, layer: a.layer }
+    endPoint = { ...nearestPoints.pointB, layer: b.layer }
+    goalBoxes = goalBoxesB
+  } else {
+    startPoint = { ...nearestPoints.pointB, layer: b.layer }
+    endPoint = { ...nearestPoints.pointA, layer: a.layer }
+    goalBoxes = goalBoxesA
+  }
+
+  return {
+    startPoint,
+    endPoint,
+    goalBoxes,
+    name: connection.name,
+    pointsToConnect: [startPoint, endPoint],
+  }
 }

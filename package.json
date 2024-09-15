@@ -50,6 +50,7 @@
   "dependencies": {
     "@dagrejs/graphlib": "^2.2.3",
     "@tscircuit/checks": "0.0.26",
+    "@tscircuit/math-utils": "^0.0.3",
     "circuit-json-to-connectivity-map": "^0.0.12",
     "commander": "^12.1.0",
     "kleur": "^4.1.5",
