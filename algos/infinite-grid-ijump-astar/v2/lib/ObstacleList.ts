@@ -1,4 +1,4 @@
-import type { Obstacle, ObstacleWithEdges } from "autorouting-dataset"
+import type { Obstacle, ObstacleWithEdges } from "solver-utils"
 import type {
   Direction,
   DirectionDistances,

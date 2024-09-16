@@ -1,7 +1,8 @@
 import {
   getSimpleRouteJson,
+  type SolutionWithDebugInfo,
   type SimplifiedPcbTrace,
-} from "autorouting-dataset"
+} from "solver-utils"
 import type {
   AnySoupElement,
   PcbFabricationNotePath,
@@ -16,7 +17,6 @@ import Debug from "debug"
 import { Timer } from "../../module/lib/solver-utils/timer"
 import { constructGraphFromPoisWithQuadtree } from "./lib/construct-graph-from-pois-quadtree"
 import { constructGraphFromPoisWithDelaunay } from "./lib/construct-graph-from-pois-quadtree-mesh"
-import type { SolutionWithDebugInfo } from "autorouting-dataset/lib/solver-utils/ProblemSolver"
 
 const debug = Debug("autorouting-dataset:gridless-poi")
 

@@ -24,7 +24,10 @@
     "noUnusedParameters": false,
     "noPropertyAccessFromIndexSignature": false,
     "paths": {
-      "autorouting-dataset": ["./module/index"],
+      "solver-utils": ["./module/lib/solver-utils"],
+      "solver-utils/*": ["./module/lib/solver-utils/*"],
+      "solver-postprocessing": ["./module/lib/solver-postprocessing"],
+      "solver-postprocessing/*": ["./module/lib/solver-postprocessing/*"],
       "autorouting-dataset/*": ["./module/*"],
       "algos/*": ["./algos/*"]
     }

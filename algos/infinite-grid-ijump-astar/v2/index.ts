@@ -1,12 +1,12 @@
 import type { AnySoupElement } from "@tscircuit/soup"
-import type { SolutionWithDebugInfo } from "autorouting-dataset/lib/solver-utils/ProblemSolver"
+import type { SolutionWithDebugInfo } from "solver-utils/ProblemSolver"
 import { IJumpAutorouter } from "./lib/IJumpAutorouter"
 import {
   getSimpleRouteJson,
   markObstaclesAsConnected,
   isPointInsideObstacle,
-} from "autorouting-dataset/lib/solver-utils/getSimpleRouteJson"
-import { getObstaclesFromCircuitJson } from "autorouting-dataset/lib/solver-utils/getObstaclesFromCircuitJson"
+} from "solver-utils/getSimpleRouteJson"
+import { getObstaclesFromCircuitJson } from "solver-utils/getObstaclesFromCircuitJson"
 import { IJumpMultiMarginAutorouter } from "./lib/IJumpMultiMarginAutorouter"
 
 export function autoroute(soup: AnySoupElement[]): SolutionWithDebugInfo {
