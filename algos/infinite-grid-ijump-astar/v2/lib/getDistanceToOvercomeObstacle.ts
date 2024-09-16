@@ -1,4 +1,4 @@
-import type { Obstacle } from "autorouting-dataset"
+import type { Obstacle } from "solver-utils"
 import Debug from "debug"
 import type {
   Direction,

@@ -3,7 +3,7 @@ import {
   type SimplifiedPcbTrace,
   type Obstacle,
   type SimpleRouteJson,
-} from "autorouting-dataset"
+} from "solver-utils"
 import type {
   AnySoupElement,
   PcbFabricationNotePath,

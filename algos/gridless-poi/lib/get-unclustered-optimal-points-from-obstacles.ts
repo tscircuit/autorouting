@@ -1,4 +1,4 @@
-import type { Obstacle } from "autorouting-dataset"
+import type { Obstacle } from "solver-utils"
 import { computeOptimalPoints } from "./compute-optimal-points"
 import { getDistanceToSegment } from "./get-distance-to-segment"
 import type { LineObstacle } from "./types"

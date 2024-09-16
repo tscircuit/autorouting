@@ -1,4 +1,4 @@
-import { runBenchmark } from "autorouting-dataset"
+import { runBenchmark } from "benchmark"
 import { autoroute } from "./v2"
 
 await runBenchmark({

@@ -1,4 +1,4 @@
-import type { Obstacle } from "autorouting-dataset"
+import type { Obstacle } from "solver-utils"
 
 export const convertObstacleToLineObstacle = (obstacle: Obstacle) => ({
   obstacleType: "line" as const,

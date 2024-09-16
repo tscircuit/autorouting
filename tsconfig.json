@@ -29,6 +29,8 @@
       "solver-postprocessing": ["./module/lib/solver-postprocessing"],
       "solver-postprocessing/*": ["./module/lib/solver-postprocessing/*"],
       "autorouting-dataset/*": ["./module/*"],
+      "benchmark": ["./module/lib/benchmark"],
+      "server": ["./module/lib/server"],
       "algos/*": ["./algos/*"]
     }
   }
