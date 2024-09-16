@@ -1,4 +1,4 @@
-import { getSimpleRouteJson } from "autorouting-dataset"
+import { getSimpleRouteJson } from "solver-utils"
 import { getKeyboardGenerator } from "autorouting-dataset/lib/generators/keyboards"
 import { test, expect } from "bun:test"
 import { MultilayerIjump } from "../MultilayerIjump"

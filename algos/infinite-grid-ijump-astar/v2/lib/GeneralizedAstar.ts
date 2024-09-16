@@ -9,11 +9,11 @@ import type {
   SimpleRouteConnection,
   SimpleRouteJson,
   SimplifiedPcbTrace,
-} from "autorouting-dataset"
-import { getObstaclesFromRoute } from "autorouting-dataset/lib/solver-utils/getObstaclesFromRoute"
+} from "solver-utils"
+import { getObstaclesFromRoute } from "solver-utils/getObstaclesFromRoute"
 import { ObstacleList } from "./ObstacleList"
-import { removePathLoops } from "autorouting-dataset/lib/solver-postprocessing/remove-path-loops"
-import { addViasWhenLayerChanges } from "autorouting-dataset/lib/solver-postprocessing/add-vias-when-layer-changes"
+import { removePathLoops } from "solver-postprocessing/remove-path-loops"
+import { addViasWhenLayerChanges } from "solver-postprocessing/add-vias-when-layer-changes"
 
 const debug = Debug("autorouting-dataset:astar")
 

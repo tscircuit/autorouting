@@ -5,7 +5,7 @@ import {
   type PointWithLayer,
   type SimpleRouteConnection,
   type SimpleRouteJson,
-} from "autorouting-dataset"
+} from "solver-utils"
 import {
   type ConnectivityMap,
   getFullConnectivityMapFromCircuitJson,

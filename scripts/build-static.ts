@@ -1,6 +1,6 @@
 #!/usr/bin/env bun
 import { autoroute } from "algos/simple-grid"
-import { startDevServer } from "autorouting-dataset"
+import { startDevServer } from "server"
 import { AVAILABLE_DATASETS } from "../module/lib/server/available-datasets"
 import { AVAILABLE_SOLVERS } from "../module/lib/server/available-solvers"
 import Path from "node:path"

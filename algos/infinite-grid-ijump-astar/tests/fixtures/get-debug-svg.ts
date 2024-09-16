@@ -1,7 +1,4 @@
-import {
-  getSimpleRouteJson,
-  type SimplifiedPcbTrace,
-} from "autorouting-dataset"
+import { getSimpleRouteJson, type SimplifiedPcbTrace } from "solver-utils"
 import { test, expect } from "bun:test"
 import { circuitJsonToPcbSvg } from "circuit-to-svg"
 import { Circuit } from "@tscircuit/core"

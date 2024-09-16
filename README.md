@@ -308,7 +308,7 @@ await startDevServer({
 If you have a Typescript solver, you can run a benchmark programmatically using:
 
 ```tsx
-import { runBenchmark } from "autorouting-dataset"
+import { runBenchmark } from "benchmark"
 import mySolver from "./my-solver"
 
 const result = await runBenchmark({

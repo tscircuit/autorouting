@@ -1,4 +1,4 @@
-import { getSimpleRouteJson } from "autorouting-dataset"
+import { getSimpleRouteJson } from "solver-utils"
 import { test, expect } from "bun:test"
 import { circuitJsonToPcbSvg } from "circuit-to-svg"
 import { Circuit } from "@tscircuit/core"

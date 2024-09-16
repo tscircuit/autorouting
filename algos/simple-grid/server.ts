@@ -1,4 +1,4 @@
-import { startDevServer } from "autorouting-dataset"
+import { startDevServer } from "server"
 import { autoroute } from "./index"
 
 await startDevServer({

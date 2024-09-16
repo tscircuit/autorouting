@@ -1,4 +1,4 @@
-import { startDevServer } from "autorouting-dataset"
+import { startDevServer } from "server"
 import { tscircuitBuiltinSolver } from "./index"
 
 await startDevServer({

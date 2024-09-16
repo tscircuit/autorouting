@@ -1,7 +1,4 @@
-import {
-  getSimpleRouteJson,
-  type SimplifiedPcbTrace,
-} from "autorouting-dataset"
+import { getSimpleRouteJson, type SimplifiedPcbTrace } from "solver-utils"
 import type { AnySoupElement } from "@tscircuit/soup"
 
 export function autoroute(soup: AnySoupElement[]): SimplifiedPcbTrace[] {

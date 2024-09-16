@@ -1,6 +1,6 @@
 // ObstacleList3d.ts
 
-import type { Obstacle, ObstacleWithEdges } from "autorouting-dataset"
+import type { Obstacle, ObstacleWithEdges } from "solver-utils"
 import type {
   Direction3d,
   DirectionDistances3d,

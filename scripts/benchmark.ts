@@ -32,11 +32,6 @@ async function runAllBenchmarks() {
       problemTypesSet.add(problemResult.problemType)
     }
   }
-  const problemTypes = Array.from(problemTypesSet)
-
-  function abbreviateProblemType(problemType: string): string {
-    return problemType.slice(0, 3).toLowerCase()
-  }
 
   type SolverData = {
     solverName: string

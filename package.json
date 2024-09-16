@@ -35,6 +35,7 @@
     "concurrently": "^8.2.2",
     "d3-delaunay": "^6.0.4",
     "debug": "^4.3.6",
+    "madge": "^8.0.0",
     "nanoid": "^5.0.7",
     "nodemon": "^3.1.4",
     "pathfinding": "^0.4.18",

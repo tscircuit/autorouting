@@ -1,4 +1,4 @@
-import type { Edge, Obstacle, ObstacleWithEdges } from "autorouting-dataset"
+import type { Edge, Obstacle, ObstacleWithEdges } from "solver-utils"
 import type { DirectionDistances } from "./types"
 import { ObstacleList } from "./ObstacleList"
 import { Quadtree, Rectangle, Circle, Line } from "@timohausmann/quadtree-ts"
