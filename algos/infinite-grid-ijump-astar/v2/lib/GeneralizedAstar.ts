@@ -40,7 +40,6 @@ export class GeneralizedAstarAutorouter {
   startNode?: Node
   goalPoint?: Point & { l: number }
   GRID_STEP: number
-  minTraceWidth: number
   OBSTACLE_MARGIN: number
   MAX_ITERATIONS: number
   isRemovePathLoopsEnabled: boolean
@@ -59,7 +58,6 @@ export class GeneralizedAstarAutorouter {
     startNode?: Node
     goalPoint?: Point
     GRID_STEP?: number
-    minTraceWidth?: number
     OBSTACLE_MARGIN?: number
     MAX_ITERATIONS?: number
     isRemovePathLoopsEnabled?: boolean
@@ -68,7 +66,6 @@ export class GeneralizedAstarAutorouter {
     this.input = opts.input
     this.allObstacles = opts.input.obstacles
     this.startNode = opts.startNode
-    this.minTraceWidth = opts.minTraceWidth ?? 0.1
     this.goalPoint = opts.goalPoint
       ? ({ l: 0, ...opts.goalPoint } as any)
       : undefined
@@ -369,7 +366,7 @@ export class GeneralizedAstarAutorouter {
               route_type: "wire" as const,
               x: point.x,
               y: point.y,
-              width: this.minTraceWidth,
+              width: this.input.minTraceWidth,
               layer: point.layer as LayerRef,
             })),
           ),

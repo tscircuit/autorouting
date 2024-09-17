@@ -19,7 +19,9 @@ export const getSimpleRouteJson = (
     connMap?: ConnectivityMap
   } = {},
 ): SimpleRouteJson => {
-  const routeJson: SimpleRouteJson = {} as any
+  const routeJson: SimpleRouteJson = {
+    minTraceWidth: 0.1,
+  } as Partial<SimpleRouteJson> as any
 
   routeJson.layerCount = opts.layerCount ?? 1
 
