@@ -89,7 +89,7 @@ export const getConnectionWithAlternativeGoalBoxes = (params: {
     },
   ])
 
-  if (goalBoxesA.length === 1 && goalBoxesB.length === 1) {
+  if (goalBoxesA.length <= 1 && goalBoxesB.length <= 1) {
     return {
       ...connection,
       startPoint: a,
