@@ -93,6 +93,7 @@ export class MultilayerIjump extends GeneralizedAstarAutorouter {
     goalPoint?: Point
     GRID_STEP?: number
     OBSTACLE_MARGIN?: number
+    minTraceWidth?: number
     MAX_ITERATIONS?: number
     VIA_COST?: number
     isRemovePathLoopsEnabled?: boolean
@@ -152,7 +153,7 @@ export class MultilayerIjump extends GeneralizedAstarAutorouter {
             y: rp.y,
             route_type: "wire",
             layer: rp.layer as LayerRef,
-            width: 0.1,
+            width: this.minTraceWidth,
           }) as Extract<PCBTrace["route"][number], { route_type: "wire" }>,
       )
       traceRoute[0].start_pcb_port_id =
