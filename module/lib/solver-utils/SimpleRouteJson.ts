@@ -15,6 +15,7 @@ export interface SimpleRouteConnection {
 
 export interface SimpleRouteJson {
   layerCount: number
+  minTraceWidth: number
   obstacles: Obstacle[]
   connections: Array<SimpleRouteConnection | ConnectionWithGoalAlternatives>
   bounds: { minX: number; maxX: number; minY: number; maxY: number }
