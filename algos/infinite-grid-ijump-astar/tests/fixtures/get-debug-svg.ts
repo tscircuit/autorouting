@@ -4,7 +4,7 @@ import { circuitJsonToPcbSvg } from "circuit-to-svg"
 import { Circuit } from "@tscircuit/core"
 import { transformPCBElements } from "@tscircuit/soup-util"
 import { translate } from "transformation-matrix"
-import type { AnySoupElement } from "@tscircuit/soup"
+import type { AnyCircuitElement } from "circuit-json"
 import type { GeneralizedAstarAutorouter } from "algos/infinite-grid-ijump-astar/v2/lib/GeneralizedAstar"
 
 export const getDebugSvg = ({
@@ -15,9 +15,9 @@ export const getDebugSvg = ({
   colWidth = 0,
   colCount = 1,
 }: {
-  inputCircuitJson: AnySoupElement[]
+  inputCircuitJson: AnyCircuitElement[]
   autorouter: GeneralizedAstarAutorouter
-  solution?: AnySoupElement[] | SimplifiedPcbTrace[]
+  solution?: AnyCircuitElement[] | SimplifiedPcbTrace[]
   rowHeight?: number
   colWidth?: number
   colCount?: number
@@ -29,7 +29,7 @@ export const getDebugSvg = ({
     }),
   )
 
-  const aggCircuitJson: AnySoupElement[] = []
+  const aggCircuitJson: AnyCircuitElement[] = []
 
   const getTranslationForIndex = (i: number) => {
     if (colCount && colWidth) {

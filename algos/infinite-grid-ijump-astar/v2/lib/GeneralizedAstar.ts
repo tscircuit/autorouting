@@ -1,4 +1,4 @@
-import type { AnySoupElement, LayerRef, PCBSMTPad } from "@tscircuit/soup"
+import type { AnyCircuitElement, LayerRef, PCBSMTPad } from "circuit-json"
 // import { QuadtreeObstacleList } from "./QuadtreeObstacleList"
 import type { Node, Point, PointWithObstacleHit } from "./types"
 import { manDist, nodeName } from "./util"
@@ -30,7 +30,7 @@ export class GeneralizedAstarAutorouter {
   closedSet: Set<string> = new Set()
   debug = false
 
-  debugSolutions?: Record<string, AnySoupElement[]>
+  debugSolutions?: Record<string, AnyCircuitElement[]>
   debugMessage: string | null = null
   debugTraceCount: number = 0
 

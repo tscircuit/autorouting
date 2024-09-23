@@ -1,4 +1,4 @@
-import type { AnySoupElement } from "@tscircuit/soup"
+import type { AnyCircuitElement } from "circuit-json"
 import { AVAILABLE_DATASETS } from "./available-datasets"
 import { AVAILABLE_SOLVERS } from "./available-solvers"
 
@@ -17,11 +17,11 @@ export const getScriptContent = ({
   solutionComputeTime,
   isSolutionCorrect,
 }: {
-  problemSoup?: AnySoupElement[]
-  problemSoupWithErrors?: AnySoupElement[] | null
-  solutionSoup?: AnySoupElement[]
+  problemSoup?: AnyCircuitElement[]
+  problemSoupWithErrors?: AnyCircuitElement[] | null
+  solutionSoup?: AnyCircuitElement[]
   solutionComputeTime?: number
-  debugSolutions?: Record<string, AnySoupElement[]> | null
+  debugSolutions?: Record<string, AnyCircuitElement[]> | null
   debugMessage?: string
   userMessage?: string
   solverName?: string

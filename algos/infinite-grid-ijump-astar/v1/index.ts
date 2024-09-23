@@ -5,11 +5,11 @@ import {
   type SimpleRouteJson,
 } from "solver-utils"
 import type {
-  AnySoupElement,
+  AnyCircuitElement,
   PcbFabricationNotePath,
   PcbFabricationNoteText,
   PCBSMTPad,
-} from "@tscircuit/soup"
+} from "circuit-json"
 import type { SolutionWithDebugInfo } from "autorouting-dataset/lib/solver-utils/ProblemSolver"
 import Debug from "debug"
 import { getObstaclesFromTrace } from "./lib/getObstaclesFromTrace"
@@ -716,7 +716,7 @@ function routeConnection(
   }
 }
 
-export function autoroute(soup: AnySoupElement[]): SolutionWithDebugInfo {
+export function autoroute(soup: AnyCircuitElement[]): SolutionWithDebugInfo {
   if (debug.enabled) {
     debugGroup = null
     debugTraceCount = 0

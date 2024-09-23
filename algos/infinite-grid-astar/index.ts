@@ -1,8 +1,8 @@
-import type { AnySoupElement } from "@tscircuit/soup"
+import type { AnyCircuitElement } from "circuit-json"
 import { InfgridAutorouter } from "./InfgridAutorouter"
 import { getSimpleRouteJson, type SolutionWithDebugInfo } from "solver-utils"
 
-export function autoroute(soup: AnySoupElement[]): SolutionWithDebugInfo {
+export function autoroute(soup: AnyCircuitElement[]): SolutionWithDebugInfo {
   const input = getSimpleRouteJson(soup)
 
   const autorouter = new InfgridAutorouter({

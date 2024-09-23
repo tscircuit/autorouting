@@ -131,7 +131,7 @@ your Typescript solver, just create a file like this:
 ```tsx
 import { startAutoroutingDevServer, getSimpleRouteJson } from "autorouting-dataset"
 
-const mySolver = (soup: AnySoupElement[]) => {
+const mySolver = (soup: AnyCircuitElement[]) => {
   const routeJson = getSimpleRouteJson(soup)
 
   // ...
@@ -208,7 +208,7 @@ url with the a JSON payload containing the following fields:
 
 ```ts
 interface Payload {
-  problem_soup: Array<AnySoupElement>
+  problem_soup: Array<AnyCircuitElement>
   simple_route_json: SimpleRouteJson
 }
 ```

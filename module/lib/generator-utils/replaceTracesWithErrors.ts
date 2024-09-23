@@ -1,10 +1,10 @@
-import type { AnySoupElement } from "@tscircuit/soup"
+import type { AnyCircuitElement } from "circuit-json"
 import { su } from "@tscircuit/soup-util"
 
 export const replaceTracesWithErrors = (
-  soup: AnySoupElement[],
-): AnySoupElement[] => {
-  const newSoup: AnySoupElement[] = []
+  soup: AnyCircuitElement[],
+): AnyCircuitElement[] => {
+  const newSoup: AnyCircuitElement[] = []
   for (const element of soup) {
     if (element.type === "pcb_trace") {
       const { pcb_component_id, source_trace_id, route, pcb_trace_id } = element

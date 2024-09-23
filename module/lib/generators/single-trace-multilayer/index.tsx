@@ -1,4 +1,4 @@
-import type { AnySoupElement } from "@tscircuit/soup"
+import type { AnyCircuitElement } from "circuit-json"
 import { renderCircuitToSoup } from "../../generator-utils/renderCircuitToSoup"
 import type { ProblemGenerator } from "../types"
 import { SingleTraceMultilayerCircuit } from "./SingleTraceMultilayerCircuit"
@@ -8,7 +8,7 @@ import { withCheckRegenerate } from "../utils/with-check-regenerate"
 export const getSingleTraceMultilayerProblemGenerator =
   (): ProblemGenerator => {
     const generateSingleTraceMultilayerProblem: ProblemGenerator["getExample"] =
-      async ({ seed }): Promise<AnySoupElement[]> => {
+      async ({ seed }): Promise<AnyCircuitElement[]> => {
         return replaceTracesWithErrors(
           await renderCircuitToSoup(
             <SingleTraceMultilayerCircuit seed={seed} />,

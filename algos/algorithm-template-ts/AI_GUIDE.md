@@ -38,7 +38,7 @@ import {
   type Obstacle,
   type SimpleRouteJson,
 } from "autorouting-dataset"
-import type { AnySoupElement } from "@tscircuit/soup"
+import type { AnyCircuitElement } from "circuit-json"
 
 export function autoroute(soup): SimplifiedPcbTrace[] {
   const input = getSimpleRouteJson(soup)

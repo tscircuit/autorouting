@@ -1,11 +1,11 @@
-import type { AnySoupElement } from "@tscircuit/soup"
+import type { AnyCircuitElement } from "circuit-json"
 import type { SimplifiedPcbTrace } from "../types"
 
-export type ValidSolutionElement = AnySoupElement | SimplifiedPcbTrace
+export type ValidSolutionElement = AnyCircuitElement | SimplifiedPcbTrace
 
 export type SolutionWithDebugInfo<
-  SolElm extends AnySoupElement | SimplifiedPcbTrace =
-    | AnySoupElement
+  SolElm extends AnyCircuitElement | SimplifiedPcbTrace =
+    | AnyCircuitElement
     | SimplifiedPcbTrace,
 > = {
   solution: SolElm[]
@@ -20,7 +20,7 @@ export type SolutionWithDebugInfo<
    * For a good example of debugSolutions, check out the gridless-poi solver
    * that outputs a visualization of it's mesh.
    */
-  debugSolutions?: Record<string, AnySoupElement[]>
+  debugSolutions?: Record<string, AnyCircuitElement[]>
 
   /**
    * Solvers can return a debugMessage, usually with the iteration count or odd
@@ -30,7 +30,7 @@ export type SolutionWithDebugInfo<
 }
 
 export type ProblemSolver = (
-  soup: AnySoupElement[],
+  soup: AnyCircuitElement[],
 ) =>
   | ValidSolutionElement[]
   | Promise<ValidSolutionElement[]>

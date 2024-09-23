@@ -4,10 +4,10 @@ import {
   type SimplifiedPcbTrace,
 } from "solver-utils"
 import type {
-  AnySoupElement,
+  AnyCircuitElement,
   PcbFabricationNotePath,
   PcbFabricationNoteText,
-} from "@tscircuit/soup"
+} from "circuit-json"
 
 import { Graph } from "@dagrejs/graphlib"
 import { getUnclusteredOptimalPointsFromObstacles } from "./lib/get-unclustered-optimal-points-from-obstacles"
@@ -20,7 +20,7 @@ import { constructGraphFromPoisWithDelaunay } from "./lib/construct-graph-from-p
 
 const debug = Debug("autorouting-dataset:gridless-poi")
 
-export function autoroute(soup: AnySoupElement[]): SolutionWithDebugInfo {
+export function autoroute(soup: AnyCircuitElement[]): SolutionWithDebugInfo {
   const timer = new Timer({ logOnEnd: debug.enabled })
 
   timer.start("getSimpleRouteJson")
@@ -28,7 +28,7 @@ export function autoroute(soup: AnySoupElement[]): SolutionWithDebugInfo {
   timer.end()
 
   const solution: (SimplifiedPcbTrace | PcbFabricationNotePath)[] = []
-  const debugSolutions: Record<string, AnySoupElement[]> = {
+  const debugSolutions: Record<string, AnyCircuitElement[]> = {
     mesh: [],
     pois: [],
   }

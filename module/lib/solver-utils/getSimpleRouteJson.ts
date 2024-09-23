@@ -1,4 +1,4 @@
-import type { AnySoupElement } from "@tscircuit/soup"
+import type { AnyCircuitElement } from "circuit-json"
 import type { SimpleRouteConnection, SimpleRouteJson } from "./SimpleRouteJson"
 import { su } from "@tscircuit/soup-util"
 import type { Obstacle } from "../types"
@@ -12,7 +12,7 @@ import {
 } from "circuit-json-to-connectivity-map"
 
 export const getSimpleRouteJson = (
-  soup: AnySoupElement[],
+  soup: AnyCircuitElement[],
   opts: {
     layerCount?: number
     optimizeWithGoalBoxes?: boolean

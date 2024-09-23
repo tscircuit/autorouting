@@ -1,4 +1,4 @@
-import type { AnySoupElement } from "@tscircuit/soup"
+import type { AnyCircuitElement } from "circuit-json"
 import type { Obstacle } from "../types"
 import { getObstaclesFromRoute } from "./getObstaclesFromRoute"
 import type { ConnectivityMap } from "circuit-json-to-connectivity-map"
@@ -6,7 +6,7 @@ import type { ConnectivityMap } from "circuit-json-to-connectivity-map"
 const EVERY_LAYER = ["top", "inner1", "inner2", "bottom"]
 
 export const getObstaclesFromCircuitJson = (
-  soup: AnySoupElement[],
+  soup: AnyCircuitElement[],
   connMap?: ConnectivityMap,
 ) => {
   const withNetId = (idList: string[]) =>

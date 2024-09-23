@@ -1,4 +1,4 @@
-import type { AnySoupElement, PCBTrace } from "@tscircuit/soup"
+import type { AnyCircuitElement, PCBTrace } from "circuit-json"
 import { buildPcbTraceElements } from "@tscircuit/builder"
 import { su } from "@tscircuit/soup-util"
 import { mm } from "@tscircuit/mm"
@@ -15,8 +15,8 @@ function getBuildContext(): any {
   }
 }
 
-export const tscircuitBuiltinSolver = (soup: AnySoupElement[]) => {
-  const newElements: AnySoupElement[] = []
+export const tscircuitBuiltinSolver = (soup: AnyCircuitElement[]) => {
+  const newElements: AnyCircuitElement[] = []
   const nm = new NetManager()
   const ctx = getBuildContext()
   for (const source_trace of su(soup).source_trace.list()) {

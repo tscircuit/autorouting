@@ -1,4 +1,4 @@
-import type { AnySoupElement } from "@tscircuit/soup"
+import type { AnyCircuitElement } from "circuit-json"
 import type { SolutionWithDebugInfo } from "solver-utils/ProblemSolver"
 import { IJumpAutorouter } from "./lib/IJumpAutorouter"
 import {
@@ -9,7 +9,7 @@ import {
 import { getObstaclesFromCircuitJson } from "solver-utils/getObstaclesFromCircuitJson"
 import { IJumpMultiMarginAutorouter } from "./lib/IJumpMultiMarginAutorouter"
 
-export function autoroute(soup: AnySoupElement[]): SolutionWithDebugInfo {
+export function autoroute(soup: AnyCircuitElement[]): SolutionWithDebugInfo {
   const input = getSimpleRouteJson(soup)
 
   const autorouter = new IJumpAutorouter({
@@ -26,7 +26,7 @@ export function autoroute(soup: AnySoupElement[]): SolutionWithDebugInfo {
 }
 
 export function autorouteMultiMargin(
-  soup: AnySoupElement[],
+  soup: AnyCircuitElement[],
 ): SolutionWithDebugInfo {
   const input = getSimpleRouteJson(soup)
 

@@ -1,4 +1,4 @@
-import type { AnySoupElement } from "@tscircuit/soup"
+import type { AnyCircuitElement } from "circuit-json"
 import { renderCircuitToSoup } from "../../generator-utils/renderCircuitToSoup"
 import type { ProblemGenerator } from "../types"
 import { replaceTracesWithErrors } from "../../generator-utils/replaceTracesWithErrors"
@@ -31,7 +31,7 @@ const progression = [
 export const getKeyboardGenerator = (): ProblemGenerator => {
   const generateKeyboardProblem: ProblemGenerator["getExample"] = async ({
     seed,
-  }): Promise<AnySoupElement[]> => {
+  }): Promise<AnyCircuitElement[]> => {
     const circuit = new Circuit()
 
     if (seed <= progression.length) {

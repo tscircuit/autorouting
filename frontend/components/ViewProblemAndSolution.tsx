@@ -1,5 +1,5 @@
 import { PCBViewer } from "@tscircuit/pcb-viewer"
-import type { AnySoupElement } from "@tscircuit/soup"
+import type { AnyCircuitElement } from "circuit-json"
 import { useState } from "react"
 import { DatasetNavigation } from "./DatasetNavigation"
 import { ErrorBoundary } from "react-error-boundary"
@@ -11,7 +11,7 @@ export default () => {
   const [selectedDebugSolution, setSelectedDebugSolution] = useState<
     null | string
   >(null)
-  const [pastedSoup, setPastedSoup] = useState<AnySoupElement[]>()
+  const [pastedSoup, setPastedSoup] = useState<AnyCircuitElement[]>()
   // Derive problem from url (if present)
   const [, , selectedProblemType, seedStr] = window.location.pathname.split("/")
   const seed = seedStr ? Number.parseInt(seedStr) : 0

@@ -1,9 +1,9 @@
 import type { ProblemSolver } from "./ProblemSolver"
-import type { AnySoupElement } from "@tscircuit/soup"
+import type { AnyCircuitElement } from "circuit-json"
 import { getSimpleRouteJson } from "./getSimpleRouteJson"
 
 export const createSolverFromUrl = (solverUrl: string): ProblemSolver => {
-  return async (problemSoup: AnySoupElement[]): Promise<AnySoupElement[]> => {
+  return async (problemSoup: AnyCircuitElement[]): Promise<AnyCircuitElement[]> => {
     const simple_route_json = await getSimpleRouteJson(problemSoup)
     const response = await fetch(solverUrl, {
       method: "POST",

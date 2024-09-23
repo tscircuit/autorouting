@@ -1,7 +1,7 @@
-import type { AnySoupElement } from "@tscircuit/soup"
+import type { AnyCircuitElement } from "circuit-json"
 import type { ProblemGenerator } from "../types"
 
-export const hasOverlappingPads = (soup: AnySoupElement[]) => {
+export const hasOverlappingPads = (soup: AnyCircuitElement[]) => {
   const pads = soup.filter((element) => element.type === "pcb_smtpad")
   for (const pad of pads) {
     for (const otherPad of pads) {
