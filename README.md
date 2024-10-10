@@ -64,14 +64,10 @@ You can create a new autorouter in minutes! Here are some tips:
 - You can feed the `AI_GUIDE.md` file into an LLM to help you
   write or debug your algorithm
 - You can also copy or import other algorithm directories and extend them!
+- Snapshot tests [(like this)](https://github.com/tscircuit/autorouting/blob/main/algos/infinite-grid-ijump-astar/tests/__snapshots__/intersection-with-margin.snap.svg) are INCREDIBLY USEFUL and easy to generate for developing your autorouter- use them!
 
-### Part 2: Creating new synthetic datasets
+[![2024-10-10_11-46](https://github.com/user-attachments/assets/b7110e0d-bff0-4f22-a9fe-e3284d38310b)](https://www.youtube.com/watch?v=f72SQGu0kws)
 
--
-
-### Part 3: Running benchmarks and understanding autorouters
-
--
 
 ## Problems
 
