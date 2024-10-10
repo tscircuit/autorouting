@@ -1,4 +1,4 @@
-# autorouting-dataset
+# tscircuit autorouting
 
 [view online](https://dataset.autorouting.com) &middot; [blog](https://blog.autorouting.com) &middot; [discord](https://tscircuit.com/community/join-redirect) &middot; [tscircuit](https://github.com/tscircuit/tscircuit) &middot; [benchmarks](./BENCHMARKS.md)
 
@@ -8,10 +8,17 @@ for developing new autorouting algorithms.
 Autorouting is the process of drawing traces (wires) to connect chips on a PCB. It is a decades-old largely unsolved
 problem.
 
+> [!TIP]
+> Check out the getting started guide and videos section!
+
 ![image](https://github.com/user-attachments/assets/bad8e749-1c84-4b6f-bbdf-12bf7e9c3e7b)
 
-- [autorouting-dataset](#autorouting-dataset)
+- [tscircuit autorouting](#tscircuit-autorouting)
   - [What is autorouting?](#what-is-autorouting)
+  - [Getting Started Guide](#getting-started-guide)
+    - [Part 1: Creating a new Autorouter](#part-1-creating-a-new-autorouter)
+    - [Part 2: Creating new synthetic datasets](#part-2-creating-new-synthetic-datasets)
+    - [Part 3: Running benchmarks and understanding autorouters](#part-3-running-benchmarks-and-understanding-autorouters)
   - [Problems](#problems)
     - [Example Problems](#example-problems)
       - [`simple-multi-point-trace`](#simple-multi-point-trace)
@@ -43,6 +50,28 @@ copper pads together. Traces can go underneath pads using a
 copper-plated hole called a "via". Traces must also avoid "obstacles"
 which are other pads or blocked areas where a trace cannot pass
 such as a hole or region designated for an antenna.
+
+## Getting Started Guide
+
+### Part 1: Creating a new Autorouter
+
+You can create a new autorouter in minutes! Here are some tips:
+
+- Run the project with `bun run start` and go to [localhost:3080](http://localhost:3080). This will use all the existing algorithms!
+- The [./algos](./algos/) has all the algorithms we have created so far
+- Copy the [./algos/algorithm-template-ts](./algos/algorithm-template-ts/) directory into a new directory to get started
+- Run `bun run --hot ./algos/my-new-algorithm/server.ts` to start _your_ algorithm development server
+- You can feed the `AI_GUIDE.md` file into an LLM to help you
+  write or debug your algorithm
+- You can also copy or import other algorithm directories and extend them!
+
+### Part 2: Creating new synthetic datasets
+
+-
+
+### Part 3: Running benchmarks and understanding autorouters
+
+-
 
 ## Problems
 

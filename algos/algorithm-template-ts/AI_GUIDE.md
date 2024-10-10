@@ -37,11 +37,13 @@ import {
   type SimplifiedPcbTrace,
   type Obstacle,
   type SimpleRouteJson,
-} from "autorouting-dataset"
-import type { AnySoupElement } from "@tscircuit/soup"
+} from "solver-utils"
+import type { AnyCircuitElement } from "circuit-json"
 
-export function autoroute(soup): SimplifiedPcbTrace[] {
-  const input = getSimpleRouteJson(soup)
+export function autoroute(
+  circuitJson: AnyCircuitElement[]
+): SimplifiedPcbTrace[] {
+  const input = getSimpleRouteJson(circuitJson)
 
   // TODO: implement your algorithm here
 

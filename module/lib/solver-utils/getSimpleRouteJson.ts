@@ -1,4 +1,3 @@
-import type { AnySoupElement } from "@tscircuit/soup"
 import type { SimpleRouteConnection, SimpleRouteJson } from "./SimpleRouteJson"
 import { su } from "@tscircuit/soup-util"
 import type { Obstacle } from "../types"
@@ -10,9 +9,10 @@ import {
   getFullConnectivityMapFromCircuitJson,
   PcbConnectivityMap,
 } from "circuit-json-to-connectivity-map"
+import type { AnyCircuitElement } from "circuit-json"
 
 export const getSimpleRouteJson = (
-  soup: AnySoupElement[],
+  circuitJson: AnyCircuitElement[],
   opts: {
     layerCount?: number
     optimizeWithGoalBoxes?: boolean
@@ -26,16 +26,16 @@ export const getSimpleRouteJson = (
   routeJson.layerCount = opts.layerCount ?? 1
 
   // Derive obstacles from pcb_smtpad, pcb_hole, and pcb_plated_hole
-  routeJson.obstacles = getObstaclesFromCircuitJson(soup, opts.connMap)
+  routeJson.obstacles = getObstaclesFromCircuitJson(circuitJson, opts.connMap)
 
   // Derive connections using source_traces, source_ports, source_nets
   routeJson.connections = []
-  for (const element of soup) {
+  for (const element of circuitJson) {
     if (element.type === "source_trace") {
       let connection: ConnectionWithGoalAlternatives | SimpleRouteConnection = {
         name: element.source_trace_id,
         pointsToConnect: element.connected_source_port_ids.map((portId) => {
-          const pcb_port = su(soup).pcb_port.getWhere({
+          const pcb_port = su(circuitJson).pcb_port.getWhere({
             source_port_id: portId,
           })
           if (!pcb_port) {
@@ -53,7 +53,7 @@ export const getSimpleRouteJson = (
       }
 
       if (opts.optimizeWithGoalBoxes) {
-        const pcbConnMap = new PcbConnectivityMap(soup)
+        const pcbConnMap = new PcbConnectivityMap(circuitJson)
         connection = getConnectionWithAlternativeGoalBoxes({
           connection,
           pcbConnMap,
