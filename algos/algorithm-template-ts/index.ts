@@ -4,7 +4,7 @@ import type { AnySoupElement } from "@tscircuit/soup"
 export function autoroute(soup: AnySoupElement[]): SimplifiedPcbTrace[] {
   const input = getSimpleRouteJson(soup)
 
-  // TODO: implement your algorithm here
+  // TODO: implement your algorithm here and return SimplifiedPcbTrace[]
 
   return []
 }
