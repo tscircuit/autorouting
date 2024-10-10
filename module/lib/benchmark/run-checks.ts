@@ -2,15 +2,15 @@ import {
   checkEachPcbPortConnected,
   checkEachPcbTraceNonOverlapping,
 } from "@tscircuit/checks"
-import type { AnySoupElement } from "@tscircuit/soup"
+import type { AnyCircuitElement } from "circuit-json"
 
 export const runChecks = (
-  problemSoup: AnySoupElement[],
-  solutionSoup: AnySoupElement[],
-): AnySoupElement[] => {
+  problemSoup: AnyCircuitElement[],
+  solutionSoup: AnyCircuitElement[],
+): AnyCircuitElement[] => {
   const errors = [
-    ...checkEachPcbTraceNonOverlapping(problemSoup.concat(solutionSoup)),
-    ...checkEachPcbPortConnected(problemSoup.concat(solutionSoup)),
+    ...checkEachPcbTraceNonOverlapping(problemSoup.concat(solutionSoup) as any),
+    ...checkEachPcbPortConnected(problemSoup.concat(solutionSoup) as any),
   ]
-  return errors
+  return errors as any
 }

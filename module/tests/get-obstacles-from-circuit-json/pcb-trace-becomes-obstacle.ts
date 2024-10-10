@@ -1,6 +1,6 @@
 import { test, expect } from "bun:test"
 import { getObstaclesFromCircuitJson } from "../../lib/solver-utils/getObstaclesFromCircuitJson"
-import type { AnySoupElement } from "@tscircuit/soup"
+import type { AnyCircuitElement as AnySoupElement } from "circuit-json"
 
 test("pcb_trace becomes an obstacle correctly", () => {
   const soupWithTrace: AnySoupElement[] = [

@@ -14,6 +14,7 @@ import { getObstaclesFromRoute } from "solver-utils/getObstaclesFromRoute"
 import { ObstacleList } from "./ObstacleList"
 import { removePathLoops } from "solver-postprocessing/remove-path-loops"
 import { addViasWhenLayerChanges } from "solver-postprocessing/add-vias-when-layer-changes"
+import type { AnyCircuitElement } from "circuit-json"
 
 const debug = Debug("autorouting-dataset:astar")
 
@@ -30,7 +31,7 @@ export class GeneralizedAstarAutorouter {
   closedSet: Set<string> = new Set()
   debug = false
 
-  debugSolutions?: Record<string, AnySoupElement[]>
+  debugSolutions?: Record<string, AnyCircuitElement[]>
   debugMessage: string | null = null
   debugTraceCount: number = 0
 
@@ -425,6 +426,7 @@ export class GeneralizedAstarAutorouter {
 
     debugSolution.push({
       type: "pcb_fabrication_note_text",
+      pcb_fabrication_note_text_id: `debug_note_${current.x}_${current.y}`,
       font: "tscircuit2024",
       font_size: 0.25,
       text: "X" + (current.l !== undefined ? current.l : ""),
@@ -442,7 +444,7 @@ export class GeneralizedAstarAutorouter {
       debugSolution.push({
         type: "pcb_fabrication_note_path",
         pcb_component_id: "",
-        fabrication_note_path_id: `note_path_${node.x}_${node.y}`,
+        pcb_fabrication_note_path_id: `note_path_${node.x}_${node.y}`,
         layer: "top",
         route: [
           [0, 0.05],
@@ -459,6 +461,7 @@ export class GeneralizedAstarAutorouter {
       // Add text that indicates the order of this point
       debugSolution.push({
         type: "pcb_fabrication_note_text",
+        pcb_fabrication_note_text_id: `debug_note_${node.x}_${node.y}`,
         font: "tscircuit2024",
         font_size: 0.03,
         text: i.toString(),
@@ -482,7 +485,7 @@ export class GeneralizedAstarAutorouter {
       debugSolution!.push({
         type: "pcb_fabrication_note_path",
         pcb_component_id: "",
-        fabrication_note_path_id: `note_path_${current.x}_${current.y}`,
+        pcb_fabrication_note_path_id: `note_path_${current.x}_${current.y}`,
         layer: "top",
         route: path,
         stroke_width: 0.01,

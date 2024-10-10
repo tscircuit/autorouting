@@ -1,4 +1,4 @@
-import type { AnySoupElement } from "@tscircuit/soup"
+import type { AnyCircuitElement as AnySoupElement } from "circuit-json"
 import type { ProblemSolver } from "../solver-utils/ProblemSolver"
 
 export type AppContext = {

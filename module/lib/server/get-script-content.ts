@@ -1,4 +1,4 @@
-import type { AnySoupElement } from "@tscircuit/soup"
+import type { AnyCircuitElement as AnySoupElement } from "circuit-json"
 import { AVAILABLE_DATASETS } from "./available-datasets"
 import { AVAILABLE_SOLVERS } from "./available-solvers"
 

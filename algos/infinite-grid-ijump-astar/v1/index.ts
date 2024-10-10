@@ -13,6 +13,7 @@ import type {
 import type { SolutionWithDebugInfo } from "autorouting-dataset/lib/solver-utils/ProblemSolver"
 import Debug from "debug"
 import { getObstaclesFromTrace } from "./lib/getObstaclesFromTrace"
+import type { AnyCircuitElement } from "circuit-json"
 
 const debug = Debug("autorouting-dataset:infinite-grid-ijump-astar")
 
@@ -716,7 +717,7 @@ function routeConnection(
   }
 }
 
-export function autoroute(soup: AnySoupElement[]): SolutionWithDebugInfo {
+export function autoroute(soup: AnyCircuitElement[]): SolutionWithDebugInfo {
   if (debug.enabled) {
     debugGroup = null
     debugTraceCount = 0
