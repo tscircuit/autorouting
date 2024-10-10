@@ -4,7 +4,7 @@ import { circuitJsonToPcbSvg } from "circuit-to-svg"
 import { Circuit } from "@tscircuit/core"
 import { transformPCBElements } from "@tscircuit/soup-util"
 import { translate } from "transformation-matrix"
-import type { AnySoupElement } from "@tscircuit/soup"
+import type { AnyCircuitElement as AnySoupElement } from "circuit-json"
 import { getDebugSvg } from "../../infinite-grid-ijump-astar/tests/fixtures/get-debug-svg"
 import { MultilayerIjump } from "../MultilayerIjump"
 

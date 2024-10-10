@@ -4,7 +4,10 @@ import { circuitJsonToPcbSvg } from "circuit-to-svg"
 import { Circuit } from "@tscircuit/core"
 import { transformPCBElements } from "@tscircuit/soup-util"
 import { translate } from "transformation-matrix"
-import type { AnySoupElement } from "@tscircuit/soup"
+import type {
+  AnyCircuitElement,
+  AnyCircuitElement as AnySoupElement,
+} from "circuit-json"
 import type { GeneralizedAstarAutorouter } from "algos/infinite-grid-ijump-astar/v2/lib/GeneralizedAstar"
 
 export const getDebugSvg = ({
@@ -15,7 +18,7 @@ export const getDebugSvg = ({
   colWidth = 0,
   colCount = 1,
 }: {
-  inputCircuitJson: AnySoupElement[]
+  inputCircuitJson: AnyCircuitElement[]
   autorouter: GeneralizedAstarAutorouter
   solution?: AnySoupElement[] | SimplifiedPcbTrace[]
   rowHeight?: number
@@ -29,7 +32,7 @@ export const getDebugSvg = ({
     }),
   )
 
-  const aggCircuitJson: AnySoupElement[] = []
+  const aggCircuitJson: AnyCircuitElement[] = []
 
   const getTranslationForIndex = (i: number) => {
     if (colCount && colWidth) {
@@ -46,31 +49,34 @@ export const getDebugSvg = ({
     const translatedCircuitJson = transformPCBElements(
       JSON.parse(
         JSON.stringify(
-          solutionCircuitJson.concat(inputCircuitJson).concat({
-            type: "pcb_fabrication_note_text",
-            text: debugSolutionName,
-            pcb_component_id: "unknown",
-            layer: "top",
-            font: "tscircuit2024",
-            font_size: 0.2,
-            anchor_position: { x: -5, y: 0 },
-            anchor_alignment: "center",
-          }),
+          solutionCircuitJson.concat(inputCircuitJson).concat([
+            {
+              type: "pcb_fabrication_note_text",
+              text: debugSolutionName,
+              pcb_component_id: "unknown",
+              layer: "top",
+              font: "tscircuit2024",
+              font_size: 0.2,
+              anchor_position: { x: -5, y: 0 },
+              anchor_alignment: "center",
+              pcb_fabrication_note_text_id: `debug_note_${i}`, // Add a unique ID
+            },
+          ]),
         ),
       ),
       getTranslationForIndex(i),
     )
-    aggCircuitJson.push(...translatedCircuitJson)
+    aggCircuitJson.push(...(translatedCircuitJson as any))
   }
 
   const finalCircuitJson = JSON.parse(
     JSON.stringify(inputCircuitJson.concat((solution as any) ?? [])),
   )
   aggCircuitJson.push(
-    ...transformPCBElements(
-      finalCircuitJson,
+    ...(transformPCBElements(
+      finalCircuitJson as any,
       getTranslationForIndex(debugSolutions.length),
-    ),
+    ) as any),
   )
 
   return circuitJsonToPcbSvg(aggCircuitJson)

@@ -1,4 +1,4 @@
-import type { AnySoupElement } from "@tscircuit/soup"
+import type { AnyCircuitElement as AnySoupElement } from "circuit-json"
 import { su } from "@tscircuit/soup-util"
 
 export const replaceTracesWithErrors = (

@@ -1,5 +1,5 @@
 import type { ProblemSolver } from "./ProblemSolver"
-import type { AnySoupElement } from "@tscircuit/soup"
+import type { AnyCircuitElement as AnySoupElement } from "circuit-json"
 import { getSimpleRouteJson } from "./getSimpleRouteJson"
 
 export const createSolverFromUrl = (solverUrl: string): ProblemSolver => {

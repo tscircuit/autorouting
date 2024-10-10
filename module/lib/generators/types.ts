@@ -1,4 +1,4 @@
-import type { AnySoupElement } from "@tscircuit/soup"
+import type { AnyCircuitElement } from "circuit-json"
 
 export type ProblemType =
   | "single-trace"
@@ -8,5 +8,5 @@ export type ProblemType =
   | "keyboards"
 
 export type ProblemGenerator = {
-  getExample: (params: { seed: number }) => Promise<AnySoupElement[]>
+  getExample: (params: { seed: number }) => Promise<AnyCircuitElement[]>
 }

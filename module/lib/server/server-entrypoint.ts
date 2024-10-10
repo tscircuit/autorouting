@@ -6,7 +6,8 @@ import frontendJs from "../../../frontend-dist/assets/index.js" with {
 }
 import { getScriptContent } from "./get-script-content"
 import { getDatasetGenerator } from "../generators"
-import type { AnySoupElement, LayerRef } from "@tscircuit/soup"
+import type { LayerRef } from "@tscircuit/soup"
+import type { AnyCircuitElement } from "circuit-json"
 import type { AppContext } from "./app-context"
 import type { IncomingMessage, ServerResponse } from "node:http"
 import {
@@ -14,7 +15,7 @@ import {
   checkEachPcbTraceNonOverlapping,
 } from "@tscircuit/checks"
 import { runChecks } from "../benchmark/run-checks"
-import { tscircuitBuiltinSolver } from "../../../algos/tscircuit-builtin"
+import { autoroute as simpleGridSolver } from "../../../algos/simple-grid"
 import { isValidSolution } from "../benchmark/is-valid-solution"
 import { AVAILABLE_DATASETS } from "./available-datasets"
 import getRawBody from "raw-body"
@@ -29,9 +30,9 @@ export const serverEntrypoint = async (
   res: ServerResponse<IncomingMessage>,
   ctx: AppContext,
 ) => {
-  let { solver = tscircuitBuiltinSolver } = ctx
-  let problemSoup: AnySoupElement[] | undefined
-  let solutionSoup: AnySoupElement[] | undefined
+  let { solver = simpleGridSolver } = ctx
+  let problemSoup: AnyCircuitElement[] | undefined
+  let solutionSoup: AnyCircuitElement[] | undefined
   let userMessage: string | undefined
 
   // If the url is /problem/single-trace/1/simple-grid, then set the solver
@@ -100,14 +101,14 @@ export const serverEntrypoint = async (
   }
 
   let solutionComputeTime: number | undefined
-  let debugSolutions: Record<string, AnySoupElement[]> | undefined
+  let debugSolutions: Record<string, AnyCircuitElement[]> | undefined
   let debugMessage: string | undefined
 
   if (problemSoup) {
     const startTime = performance.now()
     try {
       const solverResult = await normalizeSolution(
-        solver(problemSoup as AnySoupElement[]),
+        solver(problemSoup as AnyCircuitElement[]),
       )
       debugSolutions = solverResult.debugSolutions
       debugMessage = solverResult.debugMessage!

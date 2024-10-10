@@ -1,6 +1,6 @@
 import { Grid, AStarFinder, DiagonalMovement } from "pathfinding"
 import { getSimpleRouteJson, type SimplifiedPcbTrace } from "solver-utils"
-import type { AnySoupElement } from "@tscircuit/soup"
+import type { AnyCircuitElement as AnySoupElement } from "circuit-json"
 
 export function autoroute(soup: AnySoupElement[]): SimplifiedPcbTrace[] {
   const input = getSimpleRouteJson(soup)

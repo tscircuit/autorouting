@@ -1,5 +1,5 @@
 import { PCBViewer } from "@tscircuit/pcb-viewer"
-import type { AnySoupElement } from "@tscircuit/soup"
+import type { AnyCircuitElement as AnySoupElement } from "circuit-json"
 import { useState } from "react"
 import { DatasetNavigation } from "./DatasetNavigation"
 import { ErrorBoundary } from "react-error-boundary"

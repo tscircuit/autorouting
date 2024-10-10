@@ -5,7 +5,7 @@ import { IJumpAutorouter } from "../v2"
 import { Circuit } from "@tscircuit/core"
 import { transformPCBElements } from "@tscircuit/soup-util"
 import { translate } from "transformation-matrix"
-import type { AnySoupElement } from "@tscircuit/soup"
+import type { AnyCircuitElement as AnySoupElement } from "circuit-json"
 import { getDebugSvg } from "./fixtures/get-debug-svg"
 
 const OneByOnePad = (props: { name: string; pcbX?: number; pcbY?: number }) => (

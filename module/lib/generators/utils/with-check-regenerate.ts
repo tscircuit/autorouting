@@ -1,4 +1,4 @@
-import type { AnySoupElement } from "@tscircuit/soup"
+import type { AnyCircuitElement as AnySoupElement } from "circuit-json"
 import type { ProblemGenerator } from "../types"
 
 export const hasOverlappingPads = (soup: AnySoupElement[]) => {

@@ -1,4 +1,4 @@
-import type { AnySoupElement } from "@tscircuit/soup"
+import type { AnyCircuitElement as AnySoupElement } from "circuit-json"
 import { renderCircuitToSoup } from "../../generator-utils/renderCircuitToSoup"
 import type { ProblemGenerator } from "../types"
 import { replaceTracesWithErrors } from "../../generator-utils/replaceTracesWithErrors"
