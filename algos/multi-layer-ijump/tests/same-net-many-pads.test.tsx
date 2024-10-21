@@ -1,13 +1,9 @@
-import { getSimpleRouteJson } from "solver-utils"
-import { test, expect } from "bun:test"
-import { circuitJsonToPcbSvg } from "circuit-to-svg"
 import { Circuit } from "@tscircuit/core"
-import { transformPCBElements } from "@tscircuit/soup-util"
-import { translate } from "transformation-matrix"
-import type { AnyCircuitElement as AnySoupElement } from "circuit-json"
-import { getDebugSvg } from "../../infinite-grid-ijump-astar/tests/fixtures/get-debug-svg"
-import { MultilayerIjump } from "../MultilayerIjump"
+import { expect, test } from "bun:test"
 import { getFullConnectivityMapFromCircuitJson } from "circuit-json-to-connectivity-map"
+import { convertCircuitJsonToPcbSvg } from "circuit-to-svg"
+import { getSimpleRouteJson } from "solver-utils"
+import { MultilayerIjump } from "../MultilayerIjump"
 
 test("multimargin-ijump-astar simple", () => {
   const circuit = new Circuit()
@@ -29,15 +25,15 @@ test("multimargin-ijump-astar simple", () => {
       <trace from={`.R0 > .pin1`} to={`.R0 > .pin2`} />
       {Array.from({ length: 9 }).map((_, i) => [
         <trace
-          // @ts-ignore
           key={`t1_${i}`}
+          // @ts-ignore
           name={`U${i}`}
           from={`.R0 > .pin1`}
           to={`.R${i + 1} > .pin1`}
         />,
         <trace
-          // @ts-ignore
           key={`t2_${i}`}
+          // @ts-ignore
           name={`U${i}`}
           from={`.R${i} > .pin2`}
           to={`.R${i + 1} > .pin2`}
@@ -66,8 +62,8 @@ test("multimargin-ijump-astar simple", () => {
   const solution = autorouter.solveAndMapToTraces()
 
   expect(
-    circuitJsonToPcbSvg(
-      inputCircuitJson.concat(solution as any),
+    convertCircuitJsonToPcbSvg(
+      inputCircuitJson.concat(solution as any) as any,
       // .map((a) => (a.type === "pcb_smtpad" ? { ...a, layer: "bottom" } : a)),
     ),
   ).toMatchSvgSnapshot(import.meta.path)

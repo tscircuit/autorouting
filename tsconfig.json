@@ -33,5 +33,6 @@
       "server": ["./module/lib/server"],
       "algos/*": ["./algos/*"]
     }
-  }
+  },
+  "exclude": ["node_modules"]
 }

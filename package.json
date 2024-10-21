@@ -52,7 +52,7 @@
     "@dagrejs/graphlib": "^2.2.3",
     "@tscircuit/checks": "0.0.26",
     "@tscircuit/math-utils": "^0.0.4",
-    "circuit-json": "^0.0.85",
+    "circuit-json": "^0.0.86",
     "circuit-json-to-connectivity-map": "^0.0.17",
     "commander": "^12.1.0",
     "kleur": "^4.1.5",
