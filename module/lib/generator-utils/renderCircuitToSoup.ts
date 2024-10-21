@@ -1,11 +1,14 @@
-import type { AnyCircuitElement as AnySoupElement } from "circuit-json"
-import { createRoot } from "@tscircuit/react-fiber"
-import { createProjectBuilder } from "@tscircuit/builder"
+import { useRenderedCircuit } from "@tscircuit/core"
+import type { AnyCircuitElement } from "circuit-json"
 
 export const renderCircuitToSoup = (
   circuitReact: any,
-): Promise<AnySoupElement[]> => {
-  const project = createProjectBuilder()
+): Promise<AnyCircuitElement[]> => {
+  const {
+    circuitJson: circuitJsonFromChildren,
+    error: errorFromChildren,
+    isLoading,
+  } = useRenderedCircuit(circuitReact)
 
-  return createRoot().render(circuitReact, project) as any
+  return circuitJsonFromChildren as any
 }
