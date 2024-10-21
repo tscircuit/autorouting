@@ -1,13 +1,9 @@
-import { getSimpleRouteJson, type SimplifiedPcbTrace } from "solver-utils"
-import { test, expect } from "bun:test"
-import { convertCircuitJsonToPcbSvg } from "circuit-to-svg"
-import { Circuit } from "@tscircuit/core"
 import { transformPCBElements } from "@tscircuit/soup-util"
-import { translate } from "transformation-matrix"
-import type {
-  AnyCircuitElement,
-} from "circuit-json"
 import type { GeneralizedAstarAutorouter } from "algos/infinite-grid-ijump-astar/v2/lib/GeneralizedAstar"
+import type { AnyCircuitElement } from "circuit-json"
+import { convertCircuitJsonToPcbSvg } from "circuit-to-svg"
+import { type SimplifiedPcbTrace } from "solver-utils"
+import { translate } from "transformation-matrix"
 
 export const getDebugSvg = ({
   inputCircuitJson,
