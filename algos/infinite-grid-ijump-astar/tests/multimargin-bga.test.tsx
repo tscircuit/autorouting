@@ -1,13 +1,9 @@
-import { getSimpleRouteJson } from "solver-utils"
-import { test, expect } from "bun:test"
-import { circuitJsonToPcbSvg } from "circuit-to-svg"
-import { IJumpAutorouter } from "../v2"
 import { Circuit } from "@tscircuit/core"
-import { transformPCBElements } from "@tscircuit/soup-util"
-import { translate } from "transformation-matrix"
-import type { AnyCircuitElement as AnySoupElement } from "circuit-json"
-import { getDebugSvg } from "./fixtures/get-debug-svg"
+import { expect, test } from "bun:test"
+import type { AnyCircuitElement } from "circuit-json"
+import { getSimpleRouteJson } from "solver-utils"
 import { IJumpMultiMarginAutorouter } from "../v2/lib/IJumpMultiMarginAutorouter"
+import { getDebugSvg } from "./fixtures/get-debug-svg"
 
 const OneByOnePad = (props: { name: string; pcbX?: number; pcbY?: number }) => (
   <chip name={props.name} pcbX={props.pcbX} pcbY={props.pcbY}>
@@ -36,7 +32,7 @@ test("multimargin-ijump-astar: bga9", () => {
 
   const inputCircuitJson = circuit.getCircuitJson()
 
-  const input = getSimpleRouteJson(inputCircuitJson)
+  const input = getSimpleRouteJson(inputCircuitJson as AnyCircuitElement[])
 
   const autorouter = new IJumpMultiMarginAutorouter({
     input,

@@ -1,8 +1,8 @@
-import { getSimpleRouteJson } from "solver-utils"
 import { getKeyboardGenerator } from "autorouting-dataset/lib/generators/keyboards"
-import { test, expect } from "bun:test"
+import { expect, test } from "bun:test"
+import { convertCircuitJsonToPcbSvg } from "circuit-to-svg"
+import { getSimpleRouteJson } from "solver-utils"
 import { MultilayerIjump } from "../MultilayerIjump"
-import { circuitJsonToPcbSvg } from "circuit-to-svg"
 
 test("multi-layer ijump keyboard", async () => {
   const soup = await getKeyboardGenerator().getExample({ seed: 2 })
@@ -15,7 +15,7 @@ test("multi-layer ijump keyboard", async () => {
 
   const result = autorouter.solveAndMapToTraces()
 
-  expect(circuitJsonToPcbSvg(soup.concat(result as any))).toMatchSvgSnapshot(
-    import.meta.path,
-  )
+  expect(
+    convertCircuitJsonToPcbSvg(soup.concat(result as any) as any),
+  ).toMatchSvgSnapshot(import.meta.path)
 })
