@@ -1,14 +1,10 @@
-import { useRenderedCircuit } from "@tscircuit/core"
+import { Circuit } from "@tscircuit/core"
 import type { AnyCircuitElement } from "circuit-json"
 
-export const renderCircuitToSoup = (
+export const renderCircuitToSoup = async (
   circuitReact: any,
 ): Promise<AnyCircuitElement[]> => {
-  const {
-    circuitJson: circuitJsonFromChildren,
-    error: errorFromChildren,
-    isLoading,
-  } = useRenderedCircuit(circuitReact)
-
-  return circuitJsonFromChildren as any
+  const circuit = new Circuit()
+  circuit.add(circuitReact)
+  return circuit.getCircuitJson() as AnyCircuitElement[]
 }
