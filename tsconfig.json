@@ -32,7 +32,6 @@
       "server": ["./module/lib/server"],
       "algos/*": ["./algos/*"]
     },
-    "incremental": true,
     "esModuleInterop": true,
     "resolveJsonModule": true
   },
