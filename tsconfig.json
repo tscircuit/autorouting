@@ -5,25 +5,24 @@
     "target": "ESNext",
     "module": "ESNext",
     "moduleDetection": "force",
-    "jsx": "react-jsx",
+    "jsx": "preserve",
     "allowJs": true,
-
     // Bundler mode
     "moduleResolution": "bundler",
     "allowImportingTsExtensions": true,
+    "allowArbitraryExtensions": true,
     "verbatimModuleSyntax": true,
     "noEmit": true,
-
     // Best practices
     "strict": true,
     "skipLibCheck": true,
     "noFallthroughCasesInSwitch": true,
-
     // Some stricter flags (disabled by default)
     "noUnusedLocals": false,
     "noUnusedParameters": false,
     "noPropertyAccessFromIndexSignature": false,
     "paths": {
+      "dist/*": ["./dist/*"],
       "solver-utils": ["./module/lib/solver-utils"],
       "solver-utils/*": ["./module/lib/solver-utils/*"],
       "solver-postprocessing": ["./module/lib/solver-postprocessing"],
@@ -32,7 +31,10 @@
       "benchmark": ["./module/lib/benchmark"],
       "server": ["./module/lib/server"],
       "algos/*": ["./algos/*"]
-    }
+    },
+    "esModuleInterop": true,
+    "resolveJsonModule": true
   },
-  "exclude": ["node_modules"]
+  "exclude": ["node_modules"],
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx"]
 }
