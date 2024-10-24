@@ -1,9 +1,4 @@
-// @ts-ignore
-import frontend from "../../../frontend-dist/index.html" with { type: "text" }
-// @ts-ignore
-import frontendJs from "../../../frontend-dist/assets/index.js" with {
-  type: "text",
-}
+import frontendDist from "dist/vfs.js"
 import { getScriptContent } from "./get-script-content"
 import { getDatasetGenerator } from "../generators"
 import type { LayerRef } from "@tscircuit/soup"
@@ -21,9 +16,9 @@ import { AVAILABLE_DATASETS } from "./available-datasets"
 import getRawBody from "raw-body"
 import { getBuiltinAvailableSolver } from "./get-builtin-available-solver"
 import { AVAILABLE_SOLVERS } from "./available-solvers"
-import { normalizeSolution } from "../solver-utils/normalize-solution.js"
-import { addViasWhenLayerChanges } from "../solver-postprocessing/add-vias-when-layer-changes.js"
-import { addViasForPcbTraceRoutes } from "../solver-postprocessing/add-vias-for-pcb-trace-routes.js"
+import { normalizeSolution } from "../solver-utils/normalize-solution"
+import { addViasWhenLayerChanges } from "../solver-postprocessing/add-vias-when-layer-changes"
+import { addViasForPcbTraceRoutes } from "../solver-postprocessing/add-vias-for-pcb-trace-routes"
 
 export const serverEntrypoint = async (
   req: IncomingMessage,
@@ -148,13 +143,13 @@ export const serverEntrypoint = async (
 
   if (req.url!.includes("/assets/index.js")) {
     res.writeHead(200, { "Content-Type": "application/javascript" })
-    res.end(frontendJs)
+    res.end(frontendDist["assets/index.js"])
     return
   }
 
   res.writeHead(200, { "Content-Type": "text/html" })
   res.end(
-    frontend.replace(
+    frontendDist["index.html"].replace(
       "<!-- INJECT_SCRIPT -->",
       getScriptContent({
         problemSoup,
