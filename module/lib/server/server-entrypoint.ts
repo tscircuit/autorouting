@@ -57,7 +57,8 @@ export const serverEntrypoint = async (
     solver = (await getBuiltinAvailableSolver(solverParam))!
   }
 
-  if (req.url!.endsWith("/solve")) {
+  const urlPath = new URL(req.url!, "http://localhost")
+  if (urlPath.pathname.endsWith("/solve")) {
     // Read request body
     const reqJson = await getRawBody(req, { encoding: "utf-8" })
     const { problem_soup } = JSON.parse(reqJson)

@@ -1,9 +1,14 @@
 import { PCBViewer } from "@tscircuit/pcb-viewer"
-import type { AnyCircuitElement as AnySoupElement } from "circuit-json"
+import type {
+  AnyCircuitElement as AnySoupElement,
+  PcbSmtPad,
+  PcbSmtPadRect,
+} from "circuit-json"
 import { useState } from "react"
 import { DatasetNavigation } from "./DatasetNavigation"
 import { ErrorBoundary } from "react-error-boundary"
 import { Header } from "./Header"
+import { PastedCircuitJsonViewer } from "./PastedCircuitJsonViewer"
 
 export default () => {
   const hasPreloadedSoup = Boolean(window.PROBLEM_SOUP || window.SOLUTION_SOUP)
@@ -59,14 +64,20 @@ export default () => {
                           height: parsed.bounds.maxY - parsed.bounds.minY,
                         },
                         // Add obstacles as keepouts
-                        ...parsed.obstacles.map((obs: any) => ({
-                          type: "pcb_keepout",
-                          shape: "rect",
-                          center: obs.center,
-                          width: obs.width,
-                          height: obs.height,
-                          layers: obs.layers || ["top"],
-                        })),
+                        ...parsed.obstacles.map(
+                          (obs: any) =>
+                            ({
+                              type: "pcb_smtpad",
+                              shape: "rect",
+                              pcb_smtpad_id:
+                                obs.id || `smtpad_${Math.random()}`,
+                              x: obs.center.x,
+                              y: obs.center.y,
+                              width: obs.width,
+                              height: obs.height,
+                              layer: obs.layers ? obs.layers[0] : "top",
+                            }) as PcbSmtPadRect,
+                        ),
                         // Add connections as source traces and ports
                         ...parsed.connections.flatMap(
                           (conn: any, i: number) => [
@@ -109,20 +120,7 @@ export default () => {
             />
           </>
         ) : (
-          <div style={{ width: "100vw", height: "100vh" }}>
-            <ErrorBoundary
-              fallbackRender={({ error }) => (
-                <div>Error rendering problem: {error.message}</div>
-              )}
-            >
-              <PCBViewer
-                initialState={{
-                  is_showing_rats_nest: true,
-                }}
-                soup={pastedSoup}
-              />
-            </ErrorBoundary>
-          </div>
+          <PastedCircuitJsonViewer soup={pastedSoup} />
         )}
       </div>
     )
