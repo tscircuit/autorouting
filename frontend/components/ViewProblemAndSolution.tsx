@@ -39,12 +39,61 @@ export default () => {
             </h2>
             <textarea
               style={{ minWidth: "50vw", minHeight: "50vh" }}
+              placeholder="Paste Circuit JSON (soup) or Simple Route JSON here..."
               onChange={(e) => {
                 if (e.target.value.length > 10) {
                   try {
-                    setPastedSoup(JSON.parse(e.target.value))
+                    const parsed = JSON.parse(e.target.value)
+                    // Check if it's SimpleRouteJson by looking for key properties
+                    if (parsed.connections && parsed.obstacles && parsed.bounds) {
+                      // Convert SimpleRouteJson to soup format
+                      const soup = [
+                        // Add board
+                        {
+                          type: "board",
+                          width: parsed.bounds.maxX - parsed.bounds.minX,
+                          height: parsed.bounds.maxY - parsed.bounds.minY,
+                        },
+                        // Add obstacles as keepouts
+                        ...parsed.obstacles.map((obs: any) => ({
+                          type: "pcb_keepout",
+                          shape: "rect",
+                          center: obs.center,
+                          width: obs.width,
+                          height: obs.height,
+                          layers: obs.layers || ["top"],
+                        })),
+                        // Add connections as source traces and ports
+                        ...parsed.connections.flatMap((conn: any, i: number) => [
+                          {
+                            type: "source_trace",
+                            source_trace_id: conn.name || `trace_${i}`,
+                            connected_source_port_ids: [`port_${i}_1`, `port_${i}_2`],
+                          },
+                          {
+                            type: "pcb_port",
+                            pcb_port_id: `pcb_port_${i}_1`,
+                            source_port_id: `port_${i}_1`,
+                            x: conn.pointsToConnect[0].x,
+                            y: conn.pointsToConnect[0].y,
+                            layers: [conn.pointsToConnect[0].layer || "top"],
+                          },
+                          {
+                            type: "pcb_port",
+                            pcb_port_id: `pcb_port_${i}_2`, 
+                            source_port_id: `port_${i}_2`,
+                            x: conn.pointsToConnect[1].x,
+                            y: conn.pointsToConnect[1].y,
+                            layers: [conn.pointsToConnect[1].layer || "top"],
+                          },
+                        ]),
+                      ]
+                      setPastedSoup(soup)
+                    } else {
+                      setPastedSoup(parsed)
+                    }
                   } catch (e) {
-                    console.log("Error parsing soup json", e)
+                    console.log("Error parsing json", e)
                   }
                 }
               }}
