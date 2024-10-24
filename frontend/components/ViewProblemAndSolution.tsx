@@ -1,9 +1,14 @@
 import { PCBViewer } from "@tscircuit/pcb-viewer"
-import type { AnyCircuitElement as AnySoupElement } from "circuit-json"
+import type {
+  AnyCircuitElement as AnySoupElement,
+  PcbSmtPad,
+  PcbSmtPadRect,
+} from "circuit-json"
 import { useState } from "react"
 import { DatasetNavigation } from "./DatasetNavigation"
 import { ErrorBoundary } from "react-error-boundary"
 import { Header } from "./Header"
+import { PastedCircuitJsonViewer } from "./PastedCircuitJsonViewer"
 
 export default () => {
   const hasPreloadedSoup = Boolean(window.PROBLEM_SOUP || window.SOLUTION_SOUP)
@@ -11,7 +16,19 @@ export default () => {
   const [selectedDebugSolution, setSelectedDebugSolution] = useState<
     null | string
   >(null)
-  const [pastedSoup, setPastedSoup] = useState<AnySoupElement[]>()
+  const [pastedSoup, setPastedSoup] = useState<AnySoupElement[]>(() => {
+    // Check URL hash for circuit_json parameter on initial load
+    const hash = window.location.hash
+    if (hash.startsWith("#circuit_json=")) {
+      try {
+        const jsonStr = decodeURIComponent(hash.slice("#circuit_json=".length))
+        return JSON.parse(jsonStr)
+      } catch (e) {
+        console.error("Failed to parse circuit_json from URL:", e)
+      }
+    }
+    return undefined
+  })
   // Derive problem from url (if present)
   const [, , selectedProblemType, seedStr] = window.location.pathname.split("/")
   const seed = seedStr ? Number.parseInt(seedStr) : 0
@@ -21,10 +38,10 @@ export default () => {
   if (!hasPreloadedSoup) {
     return (
       <div>
+        <Header />
+        <h1>tscircuit autorouting</h1>
         {!pastedSoup ? (
           <>
-            <Header />
-            <h1>autorouting-dataset</h1>
             <p>
               You're viewing the{" "}
               <a href="https://github.com/tscircuit/autorouting-dataset">
@@ -39,32 +56,87 @@ export default () => {
             </h2>
             <textarea
               style={{ minWidth: "50vw", minHeight: "50vh" }}
+              placeholder="Paste Circuit JSON (soup) or Simple Route JSON here..."
               onChange={(e) => {
                 if (e.target.value.length > 10) {
                   try {
-                    setPastedSoup(JSON.parse(e.target.value))
+                    const parsed = JSON.parse(e.target.value)
+                    // Check if it's SimpleRouteJson by looking for key properties
+                    if (
+                      parsed.connections &&
+                      parsed.obstacles &&
+                      parsed.bounds
+                    ) {
+                      // Convert SimpleRouteJson to soup format
+                      const soup = [
+                        // Add board
+                        {
+                          type: "board",
+                          width: parsed.bounds.maxX - parsed.bounds.minX,
+                          height: parsed.bounds.maxY - parsed.bounds.minY,
+                        },
+                        // Add obstacles as keepouts
+                        ...parsed.obstacles.map(
+                          (obs: any) =>
+                            ({
+                              type: "pcb_smtpad",
+                              shape: "rect",
+                              pcb_smtpad_id:
+                                obs.id || `smtpad_${Math.random()}`,
+                              x: obs.center.x,
+                              y: obs.center.y,
+                              width: obs.width,
+                              height: obs.height,
+                              layer: obs.layers ? obs.layers[0] : "top",
+                            }) as PcbSmtPadRect,
+                        ),
+                        // Add connections as source traces and ports
+                        ...parsed.connections.flatMap(
+                          (conn: any, i: number) => [
+                            {
+                              type: "source_trace",
+                              source_trace_id: conn.name || `trace_${i}`,
+                              connected_source_port_ids: [
+                                `port_${i}_1`,
+                                `port_${i}_2`,
+                              ],
+                            },
+                            {
+                              type: "pcb_port",
+                              pcb_port_id: `pcb_port_${i}_1`,
+                              source_port_id: `port_${i}_1`,
+                              x: conn.pointsToConnect[0].x,
+                              y: conn.pointsToConnect[0].y,
+                              layers: [conn.pointsToConnect[0].layer || "top"],
+                            },
+                            {
+                              type: "pcb_port",
+                              pcb_port_id: `pcb_port_${i}_2`,
+                              source_port_id: `port_${i}_2`,
+                              x: conn.pointsToConnect[1].x,
+                              y: conn.pointsToConnect[1].y,
+                              layers: [conn.pointsToConnect[1].layer || "top"],
+                            },
+                          ],
+                        ),
+                      ]
+                      setPastedSoup(soup)
+                      window.location.hash = `circuit_json=${encodeURIComponent(JSON.stringify(soup))}`
+                    } else {
+                      setPastedSoup(parsed)
+                      // Update URL with the new circuit json
+                      const jsonStr = JSON.stringify(parsed)
+                      window.location.hash = `circuit_json=${encodeURIComponent(jsonStr)}`
+                    }
                   } catch (e) {
-                    console.log("Error parsing soup json", e)
+                    console.log("Error parsing json", e)
                   }
                 }
               }}
             />
           </>
         ) : (
-          <div style={{ width: "100vw", height: "100vh" }}>
-            <ErrorBoundary
-              fallbackRender={({ error }) => (
-                <div>Error rendering problem: {error.message}</div>
-              )}
-            >
-              <PCBViewer
-                initialState={{
-                  is_showing_rats_nest: true,
-                }}
-                soup={pastedSoup}
-              />
-            </ErrorBoundary>
-          </div>
+          <PastedCircuitJsonViewer soup={pastedSoup} />
         )}
       </div>
     )

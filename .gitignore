@@ -189,3 +189,4 @@ yalc.lock
 *.diff.png
 
 test.json
+.repl_history
