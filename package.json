@@ -6,6 +6,7 @@
     "start": "nodemon --watch frontend --watch module --ext ts,tsx frontend --exec 'bun run build-and-serve'",
     "start:next": "next dev",
     "build": "vite build && make-vfs --dir ./frontend-dist --content-format string --outfile ./dist/vfs.js",
+    "build:next": "npm run build && next build",
     "build:cli": "tsup ./module/cli.ts --dts --sourcemap --out-dir ./dist",
     "build-and-serve": "npm run build && bun --hot module/cli.ts server start",
     "format": "biome format --write .",
