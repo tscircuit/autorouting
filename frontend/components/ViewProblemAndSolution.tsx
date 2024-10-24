@@ -16,7 +16,19 @@ export default () => {
   const [selectedDebugSolution, setSelectedDebugSolution] = useState<
     null | string
   >(null)
-  const [pastedSoup, setPastedSoup] = useState<AnySoupElement[]>()
+  const [pastedSoup, setPastedSoup] = useState<AnySoupElement[]>(() => {
+    // Check URL hash for circuit_json parameter on initial load
+    const hash = window.location.hash
+    if (hash.startsWith("#circuit_json=")) {
+      try {
+        const jsonStr = decodeURIComponent(hash.slice("#circuit_json=".length))
+        return JSON.parse(jsonStr)
+      } catch (e) {
+        console.error("Failed to parse circuit_json from URL:", e)
+      }
+    }
+    return undefined
+  })
   // Derive problem from url (if present)
   const [, , selectedProblemType, seedStr] = window.location.pathname.split("/")
   const seed = seedStr ? Number.parseInt(seedStr) : 0
@@ -109,8 +121,12 @@ export default () => {
                         ),
                       ]
                       setPastedSoup(soup)
+                      window.location.hash = `circuit_json=${encodeURIComponent(JSON.stringify(soup))}`
                     } else {
                       setPastedSoup(parsed)
+                      // Update URL with the new circuit json
+                      const jsonStr = JSON.stringify(parsed)
+                      window.location.hash = `circuit_json=${encodeURIComponent(jsonStr)}`
                     }
                   } catch (e) {
                     console.log("Error parsing json", e)
