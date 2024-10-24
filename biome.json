@@ -16,7 +16,8 @@
       "static-server",
       "frontend-dist",
       ".vercel",
-      ".vscode"
+      ".vscode",
+      ".next"
     ]
   },
   "javascript": {
