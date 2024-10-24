@@ -21,10 +21,10 @@ export default () => {
   if (!hasPreloadedSoup) {
     return (
       <div>
+        <Header />
+        <h1>tscircuit autorouting</h1>
         {!pastedSoup ? (
           <>
-            <Header />
-            <h1>autorouting-dataset</h1>
             <p>
               You're viewing the{" "}
               <a href="https://github.com/tscircuit/autorouting-dataset">
