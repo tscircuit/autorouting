@@ -15,7 +15,8 @@ export function removePathLoops<T extends PointWithLayer>(path: T[]): T[] {
 
   for (let i = 1; i < path.length; i++) {
     const currentSegment = { start: path[i - 1], end: path[i] }
-    const isVia = path[i].route_type === "via" || path[i - 1].route_type === "via"
+    const isVia =
+      path[i].route_type === "via" || path[i - 1].route_type === "via"
 
     // Handle layer changes
     if (path[i].layer !== currentLayer || isVia) {
@@ -42,7 +43,6 @@ export function removePathLoops<T extends PointWithLayer>(path: T[]): T[] {
           intersectionPoint = {
             ...intersection,
             layer: currentLayer,
-            route_type: "wire"
           }
           intersectionIndex = j
           break
