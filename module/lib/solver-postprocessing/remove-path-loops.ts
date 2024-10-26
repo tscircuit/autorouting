@@ -4,15 +4,26 @@ interface PointWithLayer {
   x: number
   y: number
   layer: string
+  route_type?: string
 }
 
 export function removePathLoops<T extends PointWithLayer>(path: T[]): T[] {
   if (path.length < 4) return path // No loops possible with less than 4 points
 
-  const result: PointWithLayer[] = [path[0]]
+  const result: PointWithLayer[] = [{ ...path[0] }]
+  let currentLayer = path[0].layer
 
   for (let i = 1; i < path.length; i++) {
     const currentSegment = { start: path[i - 1], end: path[i] }
+    const isVia =
+      path[i].route_type === "via" || path[i - 1].route_type === "via"
+
+    // Handle layer changes
+    if (path[i].layer !== currentLayer || isVia) {
+      result.push({ ...path[i] })
+      currentLayer = path[i].layer
+      continue
+    }
 
     let intersectionFound = false
     let intersectionPoint: PointWithLayer | null = null
@@ -24,16 +35,18 @@ export function removePathLoops<T extends PointWithLayer>(path: T[]): T[] {
       if (previousSegment.start.layer !== currentSegment.start.layer) {
         continue
       }
-      const intersection = findIntersection(previousSegment, currentSegment)
-
-      if (intersection) {
-        intersectionFound = true
-        intersectionPoint = {
-          ...intersection,
-          layer: previousSegment.start.layer,
+      // Only check intersections on the same layer
+      if (previousSegment.start.layer === currentSegment.start.layer) {
+        const intersection = findIntersection(previousSegment, currentSegment)
+        if (intersection) {
+          intersectionFound = true
+          intersectionPoint = {
+            ...intersection,
+            layer: currentLayer,
+          }
+          intersectionIndex = j
+          break
         }
-        intersectionIndex = j
-        break
       }
     }
 
