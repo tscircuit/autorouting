@@ -262,9 +262,7 @@ export class GeneralizedAstarAutorouter {
         }
 
         if (this.isRemovePathLoopsEnabled) {
-          console.log("routeBefore", route)
           route = removePathLoops(route)
-          console.log("routeAfter", route)
         }
 
         return { solved: true, route, connectionName: connection.name }

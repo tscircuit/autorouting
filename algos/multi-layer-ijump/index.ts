@@ -14,7 +14,7 @@ export function autoroute(soup: AnySoupElement[]): SolutionWithDebugInfo {
   const autorouter = new MultilayerIjump({
     input,
     connMap,
-    // isRemovePathLoopsEnabled: true,
+    isRemovePathLoopsEnabled: true,
     optimizeWithGoalBoxes: true,
   })
 
