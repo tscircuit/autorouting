@@ -1,4 +1,5 @@
 import type { Point } from "@tscircuit/math-utils"
+import type { PointWithLayer } from "solver-utils"
 import {
   scale,
   fromTriangles,
@@ -7,7 +8,9 @@ import {
   applyToPoint,
 } from "transformation-matrix"
 
-export const getPathComparisonSvg = (pathMap: Record<string, Point[]>) => {
+export const getPathComparisonSvg = (
+  pathMap: Record<string, PointWithLayer[]>,
+) => {
   const svgWidth = 640
   const svgHeight = 480
 
@@ -54,14 +57,23 @@ export const getPathComparisonSvg = (pathMap: Record<string, Point[]>) => {
     for (let i = 0; i < points.length - 1; i++) {
       const start = applyToPoint(transform, points[i])
       const end = applyToPoint(transform, points[i + 1])
-      svg += `<line x1="${start.x}" y1="${start.y}" x2="${end.x}" y2="${end.y}" stroke="${color}" stroke-width="2" />`
+      start.x -= 8 * pathIndex
+      start.y -= 8 * pathIndex
+      end.x -= 8 * pathIndex
+      end.y -= 8 * pathIndex
+      const isDashed =
+        points[i].layer === "bottom" || points[i + 1].layer === "bottom"
+      svg += `<line x1="${start.x}" y1="${start.y}" x2="${end.x}" y2="${end.y}" stroke="${color}" stroke-width="2" ${isDashed ? 'stroke-dasharray="4"' : ""} />`
     }
 
     // Draw points and add index numbers
     points.forEach((point, index) => {
-      const { x, y } = applyToPoint(transform, point)
+      let { x, y } = applyToPoint(transform, point)
+      x -= 8 * pathIndex
+      y -= 8 * pathIndex
+
       svg += `<circle cx="${x}" cy="${y}" r="3" fill="${color}" />`
-      svg += `<text x="${x + 5}" y="${y - 5 + pathIndex * 14}" font-size="10" fill="${color}">${index}</text>`
+      svg += `<text x="${x + 5}" y="${y - 5}" font-size="10" fill="${color}">${index}</text>`
     })
 
     // Add legend item

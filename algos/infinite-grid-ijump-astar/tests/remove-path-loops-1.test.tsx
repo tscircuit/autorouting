@@ -7,7 +7,7 @@ import { getDebugSvg } from "./fixtures/get-debug-svg"
 import { removePathLoops } from "solver-postprocessing/remove-path-loops"
 import { getPathComparisonSvg } from "./fixtures/get-path-comparison-svg"
 
-test("remove-path-loops: simple loop", () => {
+test("remove-path-loops 1: simple loop", () => {
   /**
    * Ascii art of the path:
    *     ......
