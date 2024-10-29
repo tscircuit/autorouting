@@ -32,7 +32,7 @@ Partial results are possible, errors or notices appear on the `autorouting_resul
 REQUEST:
 POST /autorouting/solve
 {
-  "simple_route_json": { ... }
+  "input_simple_route_json": { ... }
 }
 
 RESPONSE:
