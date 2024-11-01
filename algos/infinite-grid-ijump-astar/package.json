@@ -1,7 +1,7 @@
 {
   "name": "@tscircuit/infgrid-ijump-astar",
   "type": "module",
-  "version": "0.0.23",
+  "version": "0.0.24",
   "scripts": {
     "build": "cd ../../ && bun run build:infgrid-ijump-astar && cd ../.."
   },
