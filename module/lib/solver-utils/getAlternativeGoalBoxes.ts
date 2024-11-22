@@ -40,6 +40,13 @@ export function getAlternativeGoalBoxes(params: {
   }))
 }
 
+/**
+ * Takes a connection and a connectivity map, then swaps the pointsToConnect
+ * with more optimal points.
+ *
+ * For example, we may see there is an easier or closer way to connect two
+ * points because of a trace that has already been routed.
+ */
 export const getConnectionWithAlternativeGoalBoxes = (params: {
   connection: SimpleRouteConnection
   pcbConnMap: PcbConnectivityMap
