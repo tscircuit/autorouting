@@ -34,7 +34,7 @@ import {
 } from "circuit-json-to-connectivity-map"
 import type { ConnectionWithGoalAlternatives } from "autorouting-dataset/lib/solver-utils/ConnectionWithAlternatives"
 import { nanoid } from "nanoid"
-import type { LayerRef, PCBTrace } from "@tscircuit/soup"
+import type { LayerRef, PCBTrace } from "circuit-json"
 import {
   getAlternativeGoalBoxes,
   getConnectionWithAlternativeGoalBoxes,

@@ -1,4 +1,4 @@
-import type { AnySoupElement, LayerRef, PCBSMTPad } from "@tscircuit/soup"
+import type { AnySoupElement, LayerRef, PCBSMTPad } from "circuit-json"
 // import { QuadtreeObstacleList } from "./QuadtreeObstacleList"
 import type { Node, Point, PointWithObstacleHit } from "./types"
 import { manDist, nodeName } from "./util"

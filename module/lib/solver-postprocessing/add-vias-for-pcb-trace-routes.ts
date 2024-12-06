@@ -1,4 +1,4 @@
-import type { AnySoupElement, LayerRef } from "@tscircuit/soup"
+import type { AnySoupElement, LayerRef } from "circuit-json"
 
 export function addViasForPcbTraceRoutes(solutionSoup: AnySoupElement[]) {
   for (const elm of solutionSoup ?? []) {
@@ -14,7 +14,7 @@ export function addViasForPcbTraceRoutes(solutionSoup: AnySoupElement[]) {
             layers: [point.from_layer as LayerRef, point.to_layer as LayerRef],
             from_layer: point.from_layer as LayerRef,
             to_layer: point.to_layer as LayerRef,
-          })
+          } as any)
         }
       }
     }
