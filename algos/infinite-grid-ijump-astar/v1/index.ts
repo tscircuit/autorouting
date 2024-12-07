@@ -9,7 +9,7 @@ import type {
   PcbFabricationNotePath,
   PcbFabricationNoteText,
   PCBSMTPad,
-} from "@tscircuit/soup"
+} from "circuit-json"
 import type { SolutionWithDebugInfo } from "autorouting-dataset/lib/solver-utils/ProblemSolver"
 import Debug from "debug"
 import { getObstaclesFromTrace } from "./lib/getObstaclesFromTrace"
@@ -615,14 +615,14 @@ function aStar(
           y: current.y,
         },
         anchor_alignment: "center",
-      })
+      } as any)
       // Add all the openSet as small diamonds
       for (let i = 0; i < openSet.length; i++) {
         const node = openSet[i]
         debugSolution.push({
           type: "pcb_fabrication_note_path",
           pcb_component_id: "",
-          fabrication_note_path_id: `note_path_${node.x}_${node.y}`,
+          pcb_fabrication_note_path_id: `note_path_${node.x}_${node.y}`,
           layer: "top",
           route: [
             [0, 0.1],
@@ -649,14 +649,14 @@ function aStar(
             y: node.y,
           },
           anchor_alignment: "center",
-        })
+        } as any)
       }
 
       if (current.parent) {
         debugSolution!.push({
           type: "pcb_fabrication_note_path",
           pcb_component_id: "",
-          fabrication_note_path_id: `note_path_${current.x}_${current.y}`,
+          pcb_fabrication_note_path_id: `note_path_${current.x}_${current.y}`,
           layer: "top",
           route: [
             {

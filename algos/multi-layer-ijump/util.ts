@@ -1,4 +1,3 @@
-import type { LayerRef } from "@tscircuit/soup"
 import type { Point3d, Direction3d } from "./types"
 
 export function dirFromAToB(nodeA: Point3d, nodeB: Point3d): Direction3d {

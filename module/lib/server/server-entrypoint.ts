@@ -1,7 +1,6 @@
 import frontendDist from "dist/vfs.js"
 import { getScriptContent } from "./get-script-content"
 import { getDatasetGenerator } from "../generators"
-import type { LayerRef } from "@tscircuit/soup"
 import type { AnyCircuitElement } from "circuit-json"
 import type { AppContext } from "./app-context"
 import type { IncomingMessage, ServerResponse } from "node:http"

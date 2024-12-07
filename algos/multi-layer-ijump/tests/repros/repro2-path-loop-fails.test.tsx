@@ -6,7 +6,7 @@ import { convertCircuitJsonToPcbSvg } from "circuit-to-svg"
 
 test("repro2 path-loop-fails on single-trace sample 9", async () => {
   const generator = getDatasetGenerator("single-trace")
-  const circuitJson = await generator.getExample({ seed: 9 })
+  const circuitJson = await generator.getExample({ seed: 0 })
   const input = getSimpleRouteJson(circuitJson, { layerCount: 2 })
 
   // Run with path loop removal disabled

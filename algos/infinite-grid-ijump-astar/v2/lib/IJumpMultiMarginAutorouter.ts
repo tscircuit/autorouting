@@ -10,7 +10,6 @@ import type {
 } from "./types"
 import { clamp, dirFromAToB, dist, distAlongDir, manDist } from "./util"
 import { getDistanceToOvercomeObstacle } from "./getDistanceToOvercomeObstacle"
-import { distance } from "@tscircuit/soup"
 
 export class IJumpMultiMarginAutorouter extends GeneralizedAstarAutorouter {
   MAX_ITERATIONS: number = 500
