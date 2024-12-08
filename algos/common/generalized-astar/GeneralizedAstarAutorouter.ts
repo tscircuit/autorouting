@@ -219,7 +219,6 @@ export class GeneralizedAstarAutorouter {
     }
 
     if (debug.enabled) {
-      openSet.sort((a, b) => a.f - b.f)
       this.drawDebugSolution({ current, newNeighbors })
     }
 
