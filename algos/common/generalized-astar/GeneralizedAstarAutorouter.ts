@@ -32,6 +32,7 @@ const globalGeneralizedAstarAutorouterProfiler = new Profiler()
 export class GeneralizedAstarAutorouter {
   profiler?: Profiler
   openSet: Node[] = []
+  openSetMap: Map<string, Node> = new Map()
   closedSet: Set<string> = new Set()
   debug = false
 
@@ -162,6 +163,9 @@ export class GeneralizedAstarAutorouter {
     this._sortOpenSet()
 
     const current = openSet.shift()!
+    const currentKey = this.getNodeName(current)
+    this.openSetMap.delete(currentKey)
+
     const goalDist = this.computeH(current)
     if (goalDist <= GRID_STEP * 2) {
       return {
@@ -180,9 +184,9 @@ export class GeneralizedAstarAutorouter {
       const tentativeG = this.computeG(current, neighbor)
 
       this.profiler?.startMeasurement("openSetFind")
-      const existingNeighbor = this.openSet.find((n) =>
-        this.isSameNode(n, neighbor),
-      )
+      const neighborKey = this.getNodeName(neighbor)
+      const existingNeighbor = this.openSetMap.get(neighborKey)
+
       this.profiler?.endMeasurement("openSetFind")
 
       if (!existingNeighbor || tentativeG < existingNeighbor.g) {
@@ -282,6 +286,8 @@ export class GeneralizedAstarAutorouter {
       l: this.layerToIndex(pointsToConnect[pointsToConnect.length - 1].layer),
     }
     this.openSet = [this.startNode]
+    this.openSetMap.clear()
+    this.openSetMap.set(this.getNodeName(this.startNode), this.startNode)
 
     while (this.iterations < this.MAX_ITERATIONS) {
       const { solved, current } = this.solveOneStep()
