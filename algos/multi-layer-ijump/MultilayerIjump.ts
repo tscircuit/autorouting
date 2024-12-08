@@ -217,6 +217,7 @@ export class MultilayerIjump extends GeneralizedAstarAutorouter {
 
     // return new ObstacleList3dSectionalV2(
     return new ObstacleList3dF64V3(
+      // return new ObstacleList3d(
       this.layerCount,
       this.allObstacles
         .filter((obstacle) => !obstacle.connectedTo.includes(bestConnectionId))
@@ -329,6 +330,7 @@ export class MultilayerIjump extends GeneralizedAstarAutorouter {
       forwardDir = dirFromAToB(node.parent, node)
     }
 
+    this.profiler?.startMeasurement("getNeighbors.travelDirs1")
     /**
      * Get the possible next directions (excluding backwards direction), and
      * excluding the forward direction if we just ran into a wall
@@ -357,7 +359,9 @@ export class MultilayerIjump extends GeneralizedAstarAutorouter {
         travelDirs1.push({ dx: 0, dy: 0, dl: -1 })
       }
     }
+    this.profiler?.endMeasurement("getNeighbors.travelDirs1")
 
+    this.profiler?.startMeasurement("getNeighbors.travelDirs2")
     const travelDirs2 = travelDirs1
       .filter((dir) => {
         // If we have a parent, don't go backwards towards the parent
@@ -388,7 +392,9 @@ export class MultilayerIjump extends GeneralizedAstarAutorouter {
       })
       // Filter out directions that are too close to the wall
       .filter((dir) => !(dir.wallDistance < this.OBSTACLE_MARGIN))
+    this.profiler?.endMeasurement("getNeighbors.travelDirs2")
 
+    this.profiler?.startMeasurement("getNeighbors.travelDirs3")
     /**
      * Figure out how far to travel. There are a couple reasons we would stop
      * traveling:
@@ -541,6 +547,7 @@ export class MultilayerIjump extends GeneralizedAstarAutorouter {
         }
       }
     }
+    this.profiler?.endMeasurement("getNeighbors.travelDirs3")
 
     return travelDirs3.map((dir) => ({
       x: node.x + dir.dx * dir.travelDistance,

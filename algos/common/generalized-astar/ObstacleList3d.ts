@@ -106,6 +106,7 @@ export class ObstacleList3d extends ObstacleList {
     return result
   }
 
+  // cases: any = {}
   getOrthoDirectionCollisionInfo(
     point: Point3d,
     dir: Direction3d,
@@ -113,6 +114,16 @@ export class ObstacleList3d extends ObstacleList {
   ): DirectionWithCollisionInfo3d {
     const { x, y, l } = point
     const { dx, dy, dl } = dir
+    // const xHash = [l, x.toFixed(3), dy, dl].join(",")
+    // const yHash = [l, y.toFixed(3), dx, dl].join(",")
+    // if (dy !== 0) {
+    //   this.cases[xHash] ??= []
+    //   this.cases[xHash].push(y)
+    // }
+    // if (dx !== 0) {
+    //   this.cases[yHash] ??= []
+    //   this.cases[yHash].push(x)
+    // }
     let minDistance = Infinity
     let collisionObstacle: ObstacleWithEdges | null = null
 

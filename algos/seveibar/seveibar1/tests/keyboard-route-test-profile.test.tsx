@@ -40,6 +40,8 @@ test("multi-layer ijump keyboard", async () => {
   console.table(autorouter.obstacles.profiler!.getResultsPretty())
   console.table(autorouter.profiler!.getResultsPretty())
 
+  // console.log(autorouter.obstacles.cases)
+
   expect(
     convertCircuitJsonToPcbSvg(soup.concat(result as any) as any),
   ).toMatchSvgSnapshot(import.meta.path)

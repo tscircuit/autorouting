@@ -165,8 +165,14 @@ export class GeneralizedAstarAutorouter {
     const { openSet, closedSet, GRID_STEP, goalPoint } = this
     this._sortOpenSet()
 
-    const current = openSet.shift()!
-    const currentNodeName = this.getNodeName(current)
+    let current = openSet.shift()!
+    let currentNodeName = this.getNodeName(current)
+
+    while (closedSet.has(currentNodeName)) {
+      current = openSet.shift()!
+      currentNodeName = this.getNodeName(current)
+    }
+
     this.openSetMap.delete(currentNodeName)
 
     const goalDist = this.computeH(current)
@@ -211,6 +217,9 @@ export class GeneralizedAstarAutorouter {
 
         // Insert into openSet in sorted order by f value
         this.profiler?.startMeasurement("openSetInsert")
+        if (this.openSetMap.has(neighborName)) {
+          throw new Error("Open set already has neighbor node")
+        }
         this._binarySearchOpenSetInsert(neighborNode)
         this.profiler?.endMeasurement("openSetInsert")
 
