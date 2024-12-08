@@ -179,9 +179,11 @@ export class GeneralizedAstarAutorouter {
 
       const tentativeG = this.computeG(current, neighbor)
 
+      this.profiler?.startMeasurement("openSetFind")
       const existingNeighbor = this.openSet.find((n) =>
         this.isSameNode(n, neighbor),
       )
+      this.profiler?.endMeasurement("openSetFind")
 
       if (!existingNeighbor || tentativeG < existingNeighbor.g) {
         const h = this.computeH(neighbor)
@@ -202,12 +204,14 @@ export class GeneralizedAstarAutorouter {
         }
 
         // Insert into openSet in sorted order by f value
+        this.profiler?.startMeasurement("openSetInsert")
         const insertIndex = openSet.findIndex((node) => node.f > neighborNode.f)
         if (insertIndex === -1) {
           openSet.push(neighborNode)
         } else {
           openSet.splice(insertIndex, 0, neighborNode)
         }
+        this.profiler?.endMeasurement("openSetInsert")
 
         newNeighbors.push(neighborNode)
       }

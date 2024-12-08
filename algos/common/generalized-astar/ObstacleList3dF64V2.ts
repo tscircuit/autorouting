@@ -37,6 +37,11 @@ export class ObstacleList3dF64V2 extends ObstacleList3d {
   obstaclesByTop: number[][]
   obstaclesByBottom: number[][]
 
+  minX: number
+  maxX: number
+  minY: number
+  maxY: number
+
   constructor(layerCount: number, obstacles: Array<Obstacle>) {
     super(layerCount, [])
     this.layerCount = layerCount
@@ -59,6 +64,11 @@ export class ObstacleList3dF64V2 extends ObstacleList3d {
     const count = filtered.length
     this.data = new Float64Array(count * STRIDE)
 
+    let minX = Infinity
+    let maxX = -Infinity
+    let minY = Infinity
+    let maxY = -Infinity
+
     for (let i = 0; i < count; i++) {
       const obs = filtered[i]
       const base = i * STRIDE
@@ -71,7 +81,26 @@ export class ObstacleList3dF64V2 extends ObstacleList3d {
       this.data[base + BOTTOM] = obs.bottom
       this.data[base + LEFT] = obs.left
       this.data[base + RIGHT] = obs.right
+
+      if (obs.left < minX) minX = obs.left
+      if (obs.right > maxX) maxX = obs.right
+      if (obs.bottom < minY) minY = obs.bottom
+      if (obs.top > maxY) maxY = obs.top
     }
+
+    // Compute cell sizes based on bounding box
+    // If no obstacles, handle gracefully
+    if (count === 0) {
+      minX = 0
+      maxX = 1
+      minY = 0
+      maxY = 1
+    }
+
+    this.minX = minX
+    this.maxX = maxX
+    this.minY = minY
+    this.maxY = maxY
 
     // Initialize arrays
     this.obstaclesByLeft = Array.from({ length: layerCount }, () => [])

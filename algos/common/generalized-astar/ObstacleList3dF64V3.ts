@@ -11,6 +11,7 @@ import type {
 import { getLayerIndex, getLayerNamesForLayerCount } from "./util"
 import { ObstacleList } from "./ObstacleList"
 import { ObstacleList3d } from "./ObstacleList3d"
+import { ObstacleList3dF64V2 } from "./ObstacleList3dF64V2"
 
 const CELL_COLS = 16
 const CELL_ROWS = 16
@@ -26,9 +27,7 @@ const LEFT = 7
 const RIGHT = 8
 const STRIDE = 10
 
-export class ObstacleList3dF64V3 extends ObstacleList3d {
-  data: Float64Array
-  originalObstacles: ObstacleWithEdges3d[]
+export class ObstacleList3dF64V3 extends ObstacleList3dF64V2 {
   GRID_STEP = 0.1
   layerCount: number
 
@@ -36,73 +35,13 @@ export class ObstacleList3dF64V3 extends ObstacleList3d {
   // Key: row * CELL_COLS + col
   cells: (number[] | null)[]
 
-  // Bounding box for all obstacles
-  minX: number
-  maxX: number
-  minY: number
-  maxY: number
   cellWidth: number
   cellHeight: number
 
   constructor(layerCount: number, obstacles: Array<Obstacle>) {
-    super(layerCount, [])
+    super(layerCount, obstacles)
     this.layerCount = layerCount
     const availableLayers = getLayerNamesForLayerCount(layerCount)
-
-    const filtered: ObstacleWithEdges3d[] = obstacles.flatMap((obstacle) =>
-      obstacle.layers
-        .filter((layer) => availableLayers.includes(layer))
-        .map((layer) => ({
-          ...obstacle,
-          left: obstacle.center.x - obstacle.width / 2,
-          right: obstacle.center.x + obstacle.width / 2,
-          top: obstacle.center.y + obstacle.height / 2,
-          bottom: obstacle.center.y - obstacle.height / 2,
-          l: getLayerIndex(layerCount, layer),
-        })),
-    )
-
-    this.originalObstacles = filtered
-    const count = filtered.length
-    this.data = new Float64Array(count * STRIDE)
-
-    let minX = Infinity
-    let maxX = -Infinity
-    let minY = Infinity
-    let maxY = -Infinity
-
-    for (let i = 0; i < count; i++) {
-      const obs = filtered[i]
-      const base = i * STRIDE
-      this.data[base + CENTER_X] = obs.center.x
-      this.data[base + CENTER_Y] = obs.center.y
-      this.data[base + WIDTH] = obs.width
-      this.data[base + HEIGHT] = obs.height
-      this.data[base + LAYER] = obs.l
-      this.data[base + TOP] = obs.top
-      this.data[base + BOTTOM] = obs.bottom
-      this.data[base + LEFT] = obs.left
-      this.data[base + RIGHT] = obs.right
-
-      if (obs.left < minX) minX = obs.left
-      if (obs.right > maxX) maxX = obs.right
-      if (obs.bottom < minY) minY = obs.bottom
-      if (obs.top > maxY) maxY = obs.top
-    }
-
-    // Compute cell sizes based on bounding box
-    // If no obstacles, handle gracefully
-    if (count === 0) {
-      minX = 0
-      maxX = 1
-      minY = 0
-      maxY = 1
-    }
-
-    this.minX = minX
-    this.maxX = maxX
-    this.minY = minY
-    this.maxY = maxY
 
     const totalWidth = this.maxX - this.minX || 1
     const totalHeight = this.maxY - this.minY || 1
@@ -209,169 +148,5 @@ export class ObstacleList3dF64V3 extends ObstacleList3d {
 
   isObstacleAt(x: number, y: number, l: number, m?: number): boolean {
     return this.getObstacleAt(x, y, l, m) !== null
-  }
-
-  getDirectionDistancesToNearestObstacle3d(
-    x: number,
-    y: number,
-    l: number,
-  ): DirectionDistances3d {
-    // This method is unchanged, still O(n), but can be similarly optimized if needed.
-    const { GRID_STEP, data } = this
-    const count = data.length / STRIDE
-    const result: DirectionDistances3d = {
-      left: Infinity,
-      top: Infinity,
-      bottom: Infinity,
-      right: Infinity,
-    }
-
-    for (let i = 0; i < count; i++) {
-      const base = i * STRIDE
-      if (data[base + LAYER] !== l) continue
-      const left = data[base + LEFT] - GRID_STEP
-      const right = data[base + RIGHT] + GRID_STEP
-      const top = data[base + TOP] + GRID_STEP
-      const bottom = data[base + BOTTOM] - GRID_STEP
-
-      // Check left
-      if (y >= bottom && y <= top && x > left) {
-        result.left = Math.min(result.left, x - right)
-      }
-
-      // Check right
-      if (y >= bottom && y <= top && x < right) {
-        result.right = Math.min(result.right, left - x)
-      }
-
-      // Check top
-      if (x >= left && x <= right && y < top) {
-        result.top = Math.min(result.top, bottom - y)
-      }
-
-      // Check bottom
-      if (x >= left && x <= right && y > bottom) {
-        result.bottom = Math.min(result.bottom, y - top)
-      }
-    }
-
-    return result
-  }
-
-  getOrthoDirectionCollisionInfo(
-    point: Point3d,
-    dir: Direction3d,
-    { margin = 0 }: { margin?: number } = {},
-  ): DirectionWithCollisionInfo3d {
-    // This method is unchanged. Could also be optimized using spatial partitioning if needed.
-    const { x, y, l } = point
-    const { dx, dy, dl } = dir
-    let minDistance = Infinity
-    let collisionObstacle: ObstacleWithEdges | null = null
-
-    if (dl !== 0) {
-      // Moving between layers
-      const newLayer = l + dl
-      if (this.isObstacleAt(x, y, newLayer, margin)) {
-        minDistance = 1 // Distance to obstacle is 1 (layer change)
-        collisionObstacle = this.getObstacleAt(
-          x,
-          y,
-          newLayer,
-          margin,
-        ) as ObstacleWithEdges
-      } else {
-        minDistance = 1 // No obstacle, just distance to next layer
-      }
-
-      return {
-        dx,
-        dy,
-        dl,
-        wallDistance: minDistance,
-        obstacle: collisionObstacle,
-      }
-    } else {
-      const { data } = this
-      const count = data.length / STRIDE
-
-      for (let i = 0; i < count; i++) {
-        const base = i * STRIDE
-        if (data[base + LAYER] !== l) continue
-
-        const leftMargin = data[base + LEFT] - margin
-        const rightMargin = data[base + RIGHT] + margin
-        const topMargin = data[base + TOP] + margin
-        const bottomMargin = data[base + BOTTOM] - margin
-
-        let distance: number | null = null
-
-        if (dx === 1 && dy === 0) {
-          // Right
-          if (y > bottomMargin && y < topMargin && x < leftMargin) {
-            distance = leftMargin - x
-          }
-        } else if (dx === -1 && dy === 0) {
-          // Left
-          if (y > bottomMargin && y < topMargin && x > rightMargin) {
-            distance = x - rightMargin
-          }
-        } else if (dx === 0 && dy === 1) {
-          // Up
-          if (x > leftMargin && x < rightMargin && y < bottomMargin) {
-            distance = bottomMargin - y
-          }
-        } else if (dx === 0 && dy === -1) {
-          // Down
-          if (x > leftMargin && x < rightMargin && y > topMargin) {
-            distance = y - topMargin
-          }
-        }
-
-        if (distance !== null && distance < minDistance) {
-          minDistance = distance
-          collisionObstacle = this.originalObstacles[i]
-        }
-      }
-
-      return {
-        dx,
-        dy,
-        dl: 0,
-        wallDistance: minDistance,
-        obstacle: collisionObstacle as ObstacleWithEdges,
-      }
-    }
-  }
-
-  getObstaclesOverlappingRegion(region: {
-    minX: number
-    minY: number
-    maxX: number
-    maxY: number
-    l: number // Layer to check
-  }): ObstacleWithEdges[] {
-    const { data, originalObstacles } = this
-    const count = data.length / STRIDE
-    const obstacles: ObstacleWithEdges[] = []
-    for (let i = 0; i < count; i++) {
-      const base = i * STRIDE
-      if (data[base + LAYER] !== region.l) continue
-      const left = data[base + LEFT]
-      const right = data[base + RIGHT]
-      const top = data[base + TOP]
-      const bottom = data[base + BOTTOM]
-
-      if (
-        left <= region.maxX &&
-        right >= region.minX &&
-        top >= region.minY &&
-        bottom <= region.maxY
-      ) {
-        obstacles.push(originalObstacles[i])
-      }
-    }
-
-    return obstacles
   }
 }
