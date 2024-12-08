@@ -24,10 +24,7 @@ export const dirFromAToB = (a: Point, b: Point): { dx: number; dy: number } => {
 }
 
 export const distAlongDir = (A: Point, B: Point, dir: Direction): number => {
-  return (
-    Math.abs(A.x - B.x) * Math.abs(dir.dx) +
-    Math.abs(A.y - B.y) * Math.abs(dir.dy)
-  )
+  return Math.abs((A.x - B.x) * dir.dx) + Math.abs((A.y - B.y) * dir.dy)
 }
 
 export const nodeName = (node: Point, GRID_STEP: number = 0.1): string =>

@@ -455,6 +455,7 @@ export class MultilayerIjump extends GeneralizedAstarAutorouter {
 
       let overcomeDistance: number | null = null
       if (node?.obstacleHit) {
+        this.profiler?.startMeasurement("getNeighbors.overcomeDistance")
         overcomeDistance = getDistanceToOvercomeObstacle({
           node,
           travelDir,
@@ -464,6 +465,7 @@ export class MultilayerIjump extends GeneralizedAstarAutorouter {
           OBSTACLE_MARGIN: this.OBSTACLE_MARGIN,
           SHOULD_DETECT_CONJOINED_OBSTACLES: true,
         })
+        this.profiler?.endMeasurement("getNeighbors.overcomeDistance")
       }
 
       const goalDistAlongTravelDir = distAlongDir(node, goalPoint, travelDir)
