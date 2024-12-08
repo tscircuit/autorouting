@@ -75,7 +75,13 @@ export class Profiler {
         averageTime: string
       }
     > = {}
-    for (const key in results) {
+
+    // Sort keys by totalTime in descending order
+    const sortedKeys = Object.keys(results).sort(
+      (a, b) => results[b].totalTime - results[a].totalTime,
+    )
+
+    for (const key of sortedKeys) {
       prettyResults[key] = {
         totalTime: `${results[key].totalTime.toFixed(2)}ms`,
         calls: results[key].calls,

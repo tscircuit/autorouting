@@ -67,6 +67,8 @@ export class MultilayerIjump extends GeneralizedAstarAutorouter {
 
   GOAL_RUSH_FACTOR: number = 1.1
 
+  cachedMarginOption: { margin: number }
+
   // TODO we need to travel far enough away from the goal so that we're not
   // hitting a pad, which means we need to know the bounds of the goal
   // The simplest way to do this is to change SimpleJsonInput to include a
@@ -127,6 +129,25 @@ export class MultilayerIjump extends GeneralizedAstarAutorouter {
         travelCostFactor: 2,
       },
     ]
+    this.cachedMarginOption = {
+      margin: this.OBSTACLE_MARGIN,
+    }
+
+    if (this.profiler) {
+      for (const methodName of [
+        "preprocessConnectionBeforeSolving",
+        "hasSpaceForVia",
+        "getNeighborsSurroundingGoal",
+      ]) {
+        // @ts-ignore
+        const originalMethod = this[methodName] as Function
+        // @ts-ignore
+        this[methodName as keyof ObstacleList] = this.profiler!.wrapMethod(
+          `GenerlizedAstarAutorouter.${methodName}`,
+          originalMethod.bind(this),
+        )
+      }
+    }
   }
 
   preprocessConnectionBeforeSolving(
@@ -360,9 +381,7 @@ export class MultilayerIjump extends GeneralizedAstarAutorouter {
         const collisionInfo = obstacles.getOrthoDirectionCollisionInfo(
           node,
           dir,
-          {
-            margin: this.OBSTACLE_MARGIN,
-          },
+          this.cachedMarginOption,
         )
 
         return collisionInfo
