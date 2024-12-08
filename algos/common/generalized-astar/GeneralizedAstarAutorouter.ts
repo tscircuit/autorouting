@@ -166,8 +166,8 @@ export class GeneralizedAstarAutorouter {
     this._sortOpenSet()
 
     const current = openSet.shift()!
-    const currentKey = this.getNodeName(current)
-    this.openSetMap.delete(currentKey)
+    const currentNodeName = this.getNodeName(current)
+    this.openSetMap.delete(currentNodeName)
 
     const goalDist = this.computeH(current)
     if (goalDist <= GRID_STEP * 2) {
@@ -178,21 +178,19 @@ export class GeneralizedAstarAutorouter {
       }
     }
 
-    this.closedSet.add(this.getNodeName(current))
+    this.closedSet.add(currentNodeName)
 
     let newNeighbors: Node[] = []
     for (const neighbor of this.getNeighbors(current)) {
-      if (closedSet.has(this.getNodeName(neighbor))) continue
+      const neighborName = this.getNodeName(neighbor)
+      if (closedSet.has(neighborName)) continue
 
       const tentativeG = this.computeG(current, neighbor)
 
-      this.profiler?.startMeasurement("openSetFind")
-      const neighborKey = this.getNodeName(neighbor)
-      const existingNeighbor = this.openSetMap.get(neighborKey)
-
-      this.profiler?.endMeasurement("openSetFind")
+      const existingNeighbor = this.openSetMap.get(neighborName)
 
       if (!existingNeighbor || tentativeG < existingNeighbor.g) {
+        this.profiler?.startMeasurement("createNeighborNode")
         const h = this.computeH(neighbor)
 
         const f = tentativeG + h * this.GREEDY_MULTIPLIER
@@ -209,6 +207,7 @@ export class GeneralizedAstarAutorouter {
           enterMarginCost: neighbor.enterMarginCost,
           travelMarginCostFactor: neighbor.travelMarginCostFactor,
         }
+        this.profiler?.endMeasurement("createNeighborNode")
 
         // Insert into openSet in sorted order by f value
         this.profiler?.startMeasurement("openSetInsert")
