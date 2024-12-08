@@ -48,6 +48,9 @@ export class GeneralizedAstarAutorouter {
   GRID_STEP: number
   OBSTACLE_MARGIN: number
   MAX_ITERATIONS: number
+
+  // Set this to MAX_ITERATIONS for best quality- but at the cost of some speed
+  MAX_OPEN_SET_SIZE: number = 200
   isRemovePathLoopsEnabled: boolean
   /**
    * Setting this greater than 1 makes the algorithm find suboptimal paths and
@@ -148,8 +151,8 @@ export class GeneralizedAstarAutorouter {
     // Not needed because we do an insert sort
     // this.openSet.sort((a, b) => a.f - b.f)
     // Limit the size of the openset
-    if (this.openSet.length > this.MAX_ITERATIONS) {
-      this.openSet.splice(this.MAX_ITERATIONS)
+    if (this.openSet.length > this.MAX_OPEN_SET_SIZE) {
+      this.openSet.splice(this.MAX_OPEN_SET_SIZE)
     }
   }
 
@@ -209,12 +212,7 @@ export class GeneralizedAstarAutorouter {
 
         // Insert into openSet in sorted order by f value
         this.profiler?.startMeasurement("openSetInsert")
-        const insertIndex = openSet.findIndex((node) => node.f > neighborNode.f)
-        if (insertIndex === -1) {
-          openSet.push(neighborNode)
-        } else {
-          openSet.splice(insertIndex, 0, neighborNode)
-        }
+        this._binarySearchOpenSetInsert(neighborNode)
         this.profiler?.endMeasurement("openSetInsert")
 
         newNeighbors.push(neighborNode)
@@ -231,6 +229,22 @@ export class GeneralizedAstarAutorouter {
       current,
       newNeighbors,
     }
+  }
+
+  _binarySearchOpenSetInsert(neighborNode: Node) {
+    let left = 0
+    let right = this.openSet.length - 1
+
+    while (left <= right) {
+      const mid = Math.floor((left + right) / 2)
+      if (this.openSet[mid].f > neighborNode.f) {
+        right = mid - 1
+      } else {
+        left = mid + 1
+      }
+    }
+
+    this.openSet.splice(left, 0, neighborNode)
   }
 
   getStartNode(connection: SimpleRouteConnection): Node {
