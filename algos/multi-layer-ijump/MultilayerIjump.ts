@@ -42,6 +42,7 @@ import {
 import { ObstacleList3dSectional } from "algos/common/generalized-astar/ObstacleList3dSectional"
 import { ObstacleList3dF64V1 } from "algos/common/generalized-astar/ObstacleList3dF64V1"
 import { ObstacleList3dF64V2 } from "algos/common/generalized-astar/ObstacleList3dF64V2"
+import { ObstacleList3dF64V3 } from "algos/common/generalized-astar/ObstacleList3dF64V3"
 
 export class MultilayerIjump extends GeneralizedAstarAutorouter {
   MAX_ITERATIONS: number = 500
@@ -193,7 +194,7 @@ export class MultilayerIjump extends GeneralizedAstarAutorouter {
     }
 
     // return new ObstacleList3dSectional(
-    return new ObstacleList3dF64V2(
+    return new ObstacleList3dF64V3(
       this.layerCount,
       this.allObstacles
         .filter((obstacle) => !obstacle.connectedTo.includes(bestConnectionId))
