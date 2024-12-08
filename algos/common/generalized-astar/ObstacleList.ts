@@ -5,16 +5,31 @@ import type {
   DirectionWithCollisionInfo,
   Point,
 } from "./types"
+import { Profiler } from "./Profiler"
+
+declare global {
+  namespace NodeJS {
+    interface ProcessEnv {
+      TSCIRCUIT_AUTOROUTER_PROFILING_ENABLED?: string
+    }
+  }
+}
+
+const globalObstacleListProfiler = new Profiler()
 
 /**
  * A list of obstacles with functions for fast lookups, this default implementation
  * has no optimizations, you should override this class to implement faster lookups
  */
 export class ObstacleList {
+  profiler?: Profiler
   protected obstacles: ObstacleWithEdges[]
   protected GRID_STEP = 0.1
 
   constructor(obstacles: Array<Obstacle>) {
+    if (process.env.TSCIRCUIT_AUTOROUTER_PROFILING_ENABLED) {
+      this.profiler = globalObstacleListProfiler
+    }
     this.obstacles = obstacles.map((obstacle) => ({
       ...obstacle,
       left: obstacle.center.x - obstacle.width / 2,
@@ -22,6 +37,25 @@ export class ObstacleList {
       top: obstacle.center.y + obstacle.height / 2,
       bottom: obstacle.center.y - obstacle.height / 2,
     }))
+
+    if (this.profiler) {
+      for (const methodName of [
+        "getObstacleAt",
+        "isObstacleAt",
+        "getDirectionDistancesToNearestObstacle",
+        "getOrthoDirectionCollisionInfo",
+        "getObstaclesOverlappingRegion",
+      ]) {
+        const originalMethod = this[
+          methodName as keyof ObstacleList
+        ] as Function
+        // @ts-ignore
+        this[methodName as keyof ObstacleList] = this.profiler!.wrapMethod(
+          `ObstacleList.${methodName}`,
+          originalMethod.bind(this),
+        )
+      }
+    }
   }
 
   getObstacleAt(x: number, y: number, m?: number): Obstacle | null {

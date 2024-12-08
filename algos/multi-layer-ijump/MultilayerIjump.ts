@@ -26,7 +26,7 @@ import type {
   SimpleRouteConnection,
   SimpleRouteJson,
 } from "autorouting-dataset/lib/solver-utils/SimpleRouteJson"
-import { ObstacleList3d } from "./ObstacleList3d"
+import { ObstacleList3d } from "algos/common/generalized-astar/ObstacleList3d"
 import type { Obstacle } from "autorouting-dataset/lib/types"
 import {
   PcbConnectivityMap,
