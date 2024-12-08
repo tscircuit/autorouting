@@ -18,6 +18,7 @@ test("multi-layer ijump keyboard", async () => {
     autorouter = new MultilayerIjump({
       input,
       connMap,
+      isRemovePathLoopsEnabled: true,
       optimizeWithGoalBoxes: true,
     })
 
@@ -37,8 +38,8 @@ test("multi-layer ijump keyboard", async () => {
   console.log(
     `TIME TO ROUTE: ${totalDuration[0] * 1000 + totalDuration[1] / 1e6}ms`,
   )
-  console.table(autorouter.obstacles.profiler!.getResultsPretty())
-  console.table(autorouter.profiler!.getResultsPretty())
+  console.table(autorouter.obstacles.profiler?.getResultsPretty())
+  console.table(autorouter.profiler?.getResultsPretty())
 
   // console.log(autorouter.obstacles.cases)
 

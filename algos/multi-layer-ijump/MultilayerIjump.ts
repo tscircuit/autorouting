@@ -46,7 +46,8 @@ import { ObstacleList3dF64V3 } from "algos/common/generalized-astar/ObstacleList
 import { ObstacleList3dSectionalV2 } from "algos/common/generalized-astar/ObstacleList3dSectionalV2"
 
 export class MultilayerIjump extends GeneralizedAstarAutorouter {
-  MAX_ITERATIONS: number = 500
+  MAX_ITERATIONS: number = 100_000
+  MAX_OPEN_SET_SIZE: number = 1_000
   VIA_COST: number = 4 // Define the cost for changing layers
   VIA_DIAMETER: number = 0.5
   allowLayerChange: boolean = true // Flag to allow layer changes
@@ -215,9 +216,9 @@ export class MultilayerIjump extends GeneralizedAstarAutorouter {
       )
     }
 
-    // return new ObstacleList3dSectionalV2(
-    return new ObstacleList3dF64V3(
-      // return new ObstacleList3d(
+    // return new ObstacleList3dSectionalV3(
+    // return new ObstacleList3dF64V1(
+    return new ObstacleList3d(
       this.layerCount,
       this.allObstacles
         .filter((obstacle) => !obstacle.connectedTo.includes(bestConnectionId))

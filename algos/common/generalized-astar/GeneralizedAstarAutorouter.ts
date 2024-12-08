@@ -50,7 +50,7 @@ export class GeneralizedAstarAutorouter {
   MAX_ITERATIONS: number
 
   // Set this to MAX_ITERATIONS for best quality- but at the cost of some speed
-  MAX_OPEN_SET_SIZE: number = 200
+  MAX_OPEN_SET_SIZE: number = 500
   isRemovePathLoopsEnabled: boolean
   /**
    * Setting this greater than 1 makes the algorithm find suboptimal paths and
@@ -170,6 +170,13 @@ export class GeneralizedAstarAutorouter {
 
     while (closedSet.has(currentNodeName)) {
       current = openSet.shift()!
+      if (!current) {
+        return {
+          solved: false,
+          current: null as any, // TODO
+          newNeighbors: [],
+        }
+      }
       currentNodeName = this.getNodeName(current)
     }
 
