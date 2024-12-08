@@ -143,7 +143,12 @@ export class GeneralizedAstarAutorouter {
   }
 
   _sortOpenSet() {
-    this.openSet.sort((a, b) => a.f - b.f)
+    // Not needed because we do an insert sort
+    // this.openSet.sort((a, b) => a.f - b.f)
+    // Limit the size of the openset
+    if (this.openSet.length > this.MAX_ITERATIONS) {
+      this.openSet.splice(this.MAX_ITERATIONS)
+    }
   }
 
   solveOneStep(): {
@@ -195,7 +200,14 @@ export class GeneralizedAstarAutorouter {
           travelMarginCostFactor: neighbor.travelMarginCostFactor,
         }
 
-        openSet.push(neighborNode)
+        // Insert into openSet in sorted order by f value
+        const insertIndex = openSet.findIndex((node) => node.f > neighborNode.f)
+        if (insertIndex === -1) {
+          openSet.push(neighborNode)
+        } else {
+          openSet.splice(insertIndex, 0, neighborNode)
+        }
+
         newNeighbors.push(neighborNode)
       }
     }
