@@ -38,6 +38,7 @@ test("multi-layer ijump keyboard", async () => {
     `TIME TO ROUTE: ${totalDuration[0] * 1000 + totalDuration[1] / 1e6}ms`,
   )
   console.table(autorouter.obstacles.profiler!.getResultsPretty())
+  console.table(autorouter.profiler!.getResultsPretty())
 
   expect(
     convertCircuitJsonToPcbSvg(soup.concat(result as any) as any),

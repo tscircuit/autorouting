@@ -15,6 +15,7 @@ import { ObstacleList } from "./ObstacleList"
 import { removePathLoops } from "solver-postprocessing/remove-path-loops"
 import { addViasWhenLayerChanges } from "solver-postprocessing/add-vias-when-layer-changes"
 import type { AnyCircuitElement } from "circuit-json"
+import { Profiler } from "./Profiler"
 
 const debug = Debug("autorouting-dataset:astar")
 
@@ -26,7 +27,10 @@ export type ConnectionSolveResult =
   | { solved: false; connectionName: string }
   | { solved: true; connectionName: string; route: PointWithLayer[] }
 
+const globalGeneralizedAstarAutorouterProfiler = new Profiler()
+
 export class GeneralizedAstarAutorouter {
+  profiler?: Profiler
   openSet: Node[] = []
   closedSet: Set<string> = new Set()
   debug = false
@@ -64,6 +68,9 @@ export class GeneralizedAstarAutorouter {
     isRemovePathLoopsEnabled?: boolean
     debug?: boolean
   }) {
+    if (process.env.TSCIRCUIT_AUTOROUTER_PROFILING_ENABLED) {
+      this.profiler = globalGeneralizedAstarAutorouterProfiler
+    }
     this.input = opts.input
     this.allObstacles = opts.input.obstacles
     this.startNode = opts.startNode
@@ -82,6 +89,22 @@ export class GeneralizedAstarAutorouter {
     if (debug.enabled) {
       this.debugSolutions = {}
       this.debugMessage = ""
+    }
+
+    if (this.profiler) {
+      for (const methodName of [
+        "getNeighbors",
+        "solveOneStep",
+        "_sortOpenSet",
+      ]) {
+        // @ts-ignore
+        const originalMethod = this[methodName] as Function
+        // @ts-ignore
+        this[methodName as keyof ObstacleList] = this.profiler!.wrapMethod(
+          `GenerlizedAstarAutorouter.${methodName}`,
+          originalMethod.bind(this),
+        )
+      }
     }
   }
 
@@ -119,6 +142,10 @@ export class GeneralizedAstarAutorouter {
     return nodeName(node, this.GRID_STEP)
   }
 
+  _sortOpenSet() {
+    this.openSet.sort((a, b) => a.f - b.f)
+  }
+
   solveOneStep(): {
     solved: boolean
     current: Node
@@ -126,7 +153,7 @@ export class GeneralizedAstarAutorouter {
   } {
     this.iterations += 1
     const { openSet, closedSet, GRID_STEP, goalPoint } = this
-    openSet.sort((a, b) => a.f - b.f)
+    this._sortOpenSet()
 
     const current = openSet.shift()!
     const goalDist = this.computeH(current)
