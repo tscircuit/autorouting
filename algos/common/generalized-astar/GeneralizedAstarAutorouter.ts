@@ -95,6 +95,7 @@ export class GeneralizedAstarAutorouter {
       for (const methodName of [
         "getNeighbors",
         "solveOneStep",
+        "createObstacleList",
         "_sortOpenSet",
       ]) {
         // @ts-ignore

@@ -39,6 +39,8 @@ import {
   getAlternativeGoalBoxes,
   getConnectionWithAlternativeGoalBoxes,
 } from "autorouting-dataset/lib/solver-utils/getAlternativeGoalBoxes"
+import { ObstacleList3dSectional } from "algos/common/generalized-astar/ObstacleList3dSectional"
+import { ObstacleList3dF64V1 } from "algos/common/generalized-astar/ObstacleList3dF64V1"
 
 export class MultilayerIjump extends GeneralizedAstarAutorouter {
   MAX_ITERATIONS: number = 500
@@ -189,7 +191,8 @@ export class MultilayerIjump extends GeneralizedAstarAutorouter {
       )
     }
 
-    return new ObstacleList3d(
+    // return new ObstacleList3dSectional(
+    return new ObstacleList3dF64V1(
       this.layerCount,
       this.allObstacles
         .filter((obstacle) => !obstacle.connectedTo.includes(bestConnectionId))
