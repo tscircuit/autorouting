@@ -10,7 +10,7 @@ export const PastedCircuitJsonViewer = ({
 }) => {
   const [solutionSoup, setSolutionSoup] = useState<AnySoupElement[]>()
   const [selectedSolver, setSelectedSolver] = useState(
-    window.AVAILABLE_SOLVERS?.[0] ?? "simple-grid",
+    window.AVAILABLE_SOLVERS?.[0] ?? "multilayer-ijump",
   )
 
   const handleSolve = async () => {
@@ -34,7 +34,7 @@ export const PastedCircuitJsonViewer = ({
           value={selectedSolver}
           onChange={(e) => setSelectedSolver(e.target.value)}
         >
-          {(window.AVAILABLE_SOLVERS || ["simple-grid"]).map((name) => (
+          {(window.AVAILABLE_SOLVERS || ["multilayer-ijump"]).map((name) => (
             <option key={name} value={name}>
               {name}
             </option>

@@ -26,7 +26,8 @@ program
     startDevServer({
       solver: options.solverUrl ? undefined : autoroute,
       solverName:
-        options.solveName ?? (options.solverUrl ? undefined : "simple-grid"),
+        options.solveName ??
+        (options.solverUrl ? undefined : "multilayer-ijump"),
       solverUrl: options.solverUrl,
       port: options.port || 3080,
     })
