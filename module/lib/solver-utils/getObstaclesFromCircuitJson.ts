@@ -6,7 +6,6 @@ import {
   generateApproximatingRects,
   type RotatedRect,
 } from "./generateApproximatingRects"
-import { su } from "@tscircuit/soup-util"
 
 const EVERY_LAYER = ["top", "inner1", "inner2", "bottom"]
 
@@ -21,7 +20,6 @@ export const getObstaclesFromCircuitJson = (
         )
       : idList
   const obstacles: Obstacle[] = []
-  const db = su(soup)
   for (const element of soup) {
     if (element.type === "pcb_smtpad") {
       if (element.shape === "circle") {
@@ -57,19 +55,6 @@ export const getObstaclesFromCircuitJson = (
           rotation: element.ccw_rotation,
         }
         const approximatingRects = generateApproximatingRects(rotatedRect)
-        for (const rect of approximatingRects) {
-          db.pcb_smtpad.insert({
-            type: "pcb_smtpad",
-            shape: "rect",
-            layer: "bottom",
-            x: rect.center.x,
-            y: rect.center.y,
-            width: rect.width,
-            height: rect.height,
-          } as any)
-        }
-        console.log(element)
-        console.log(approximatingRects)
         for (const rect of approximatingRects) {
           obstacles.push({
             type: "rect",
