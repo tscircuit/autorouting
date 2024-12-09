@@ -69,9 +69,16 @@ export const DatasetNavigation = () => {
               #{seed}
             </a>{" "}
             <a
+              style={{ fontSize: 12 }}
+              href={`/problem/${selectedProblemType}/${seed}.circuit.json`}
+            >
+              download (circuit json)
+            </a>
+            <a
+              style={{ marginLeft: 8, fontSize: 12 }}
               href={`/problem/${selectedProblemType}/${seed}${solverDownloadSuffix}`}
             >
-              download (json)
+              download (simple route json)
             </a>
           </h2>
           <div style={{ display: "flex", gap: 10 }}>
