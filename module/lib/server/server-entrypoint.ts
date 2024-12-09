@@ -18,6 +18,7 @@ import { AVAILABLE_SOLVERS } from "./available-solvers"
 import { normalizeSolution } from "../solver-utils/normalize-solution"
 import { addViasWhenLayerChanges } from "../solver-postprocessing/add-vias-when-layer-changes"
 import { addViasForPcbTraceRoutes } from "../solver-postprocessing/add-vias-for-pcb-trace-routes"
+import { getSimpleRouteJson } from "solver-utils"
 
 export const serverEntrypoint = async (
   req: IncomingMessage,
@@ -131,11 +132,17 @@ export const serverEntrypoint = async (
         "content-disposition": `attachment; filename=${problemType}${seed}-${ctx.solverName}.solution.json`,
       })
       res.end(JSON.stringify(solutionSoup, null, 2))
-    } else {
+    } else if (req.url!.includes(".circuit.json")) {
+      res.writeHead(200, {
+        "content-disposition": `attachment; filename=${problemType}${seed}.circuit.json`,
+      })
+      res.end(JSON.stringify(problemSoup, null, 2))
+    } else if (req.url!.includes(".problem.json")) {
       res.writeHead(200, {
         "content-disposition": `attachment; filename=${problemType}${seed}.problem.json`,
       })
-      res.end(JSON.stringify(problemSoup, null, 2))
+      const simpleRouteJson = await getSimpleRouteJson(problemSoup as any)
+      res.end(JSON.stringify(simpleRouteJson, null, 2))
     }
     return
   }
