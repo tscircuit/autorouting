@@ -98,6 +98,7 @@ export function shortenPathWithShortcuts(
         ) ||
         checkIfObstacleBetweenPoints(shortcutPoint, pointAfterShortcut)
       ) {
+        console.log("obstacle in between")
         continue
       }
 

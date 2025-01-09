@@ -100,6 +100,11 @@ export class MultilayerIjump extends GeneralizedAstarAutorouter {
     connMap?: ConnectivityMap
     pcbConnMap?: PcbConnectivityMap
     optimizeWithGoalBoxes?: boolean
+    marginsWithCosts?: Array<{
+      margin: number
+      enterCost: number
+      travelCostFactor: number
+    }>
     debug?: boolean
   }) {
     super(opts)
@@ -111,7 +116,7 @@ export class MultilayerIjump extends GeneralizedAstarAutorouter {
     // obstacle lists are created when solving currently
     this.obstacles = null as any // new ObstacleList3d(this.layerCount, this.allObstacles)
 
-    this.marginsWithCosts = [
+    this.marginsWithCosts = opts.marginsWithCosts ?? [
       {
         margin: 1,
         enterCost: 0,
