@@ -49,18 +49,18 @@ test("shorten-path-with-shortcuts 3 with obstacle", () => {
   const obstacleList = new ObstacleList(obstacles as Obstacle[])
 
   const simplifiedPath = shortenPathWithShortcuts(pathToOptimize, (A, B) => {
-    const minX = Math.min(A.x, B.x)
-    const minY = Math.min(A.y, B.y)
-    const maxX = Math.max(A.x, B.x)
-    const maxY = Math.max(A.y, B.y)
-    return (
-      obstacleList.getObstaclesOverlappingRegion({
-        minX,
-        minY,
-        maxX,
-        maxY,
-      }).length > 0
+    const collision = obstacleList.getOrthoDirectionCollisionInfo(
+      A,
+      {
+        dx: Math.sign(B.x - A.x),
+        dy: Math.sign(B.y - A.y),
+      },
+      {
+        margin: 0.05,
+      },
     )
+    const dist = Math.sqrt((A.x - B.x) ** 2 + (A.y - B.y) ** 2)
+    return collision.wallDistance < dist
   })
 
   expect(
