@@ -3,6 +3,7 @@ import { getPathComparisonSvg } from "./fixtures/get-path-comparison-svg"
 import { shortenPathWithShortcuts } from "../v2/lib/shortenPathWithShortcuts"
 import { isPointInsideObstacle, type Obstacle } from "solver-utils"
 import { ObstacleList } from "../v2/lib/ObstacleList"
+import { isObstacleBetweenPoints } from "./isObstacleBetweenPoints"
 
 test("shorten-path-with-shortcuts 3 with obstacle", () => {
   const pathToOptimize: Array<{ x: number; y: number; layer: string }> = [
@@ -48,20 +49,9 @@ test("shorten-path-with-shortcuts 3 with obstacle", () => {
   ]
   const obstacleList = new ObstacleList(obstacles as Obstacle[])
 
-  const simplifiedPath = shortenPathWithShortcuts(pathToOptimize, (A, B) => {
-    const collision = obstacleList.getOrthoDirectionCollisionInfo(
-      A,
-      {
-        dx: Math.sign(B.x - A.x),
-        dy: Math.sign(B.y - A.y),
-      },
-      {
-        margin: 0.05,
-      },
-    )
-    const dist = Math.sqrt((A.x - B.x) ** 2 + (A.y - B.y) ** 2)
-    return collision.wallDistance < dist
-  })
+  const simplifiedPath = shortenPathWithShortcuts(pathToOptimize, (A, B) =>
+    isObstacleBetweenPoints(A, B, obstacleList),
+  )
 
   expect(
     getPathComparisonSvg(

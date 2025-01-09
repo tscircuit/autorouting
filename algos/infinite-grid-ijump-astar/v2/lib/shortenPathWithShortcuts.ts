@@ -69,12 +69,14 @@ export function shortenPathWithShortcuts(
         : futureSegment.start.y
 
       let shortcutPoint: Point
+      const pointAfterShortcut = route[j + 2]
+      if (!pointAfterShortcut) continue
 
       if (futureTMax >= currentTMin && futureTMax <= currentTMax) {
         // Shortcut type 1
         shortcutPoint = {
           x: bothVertical ? otherDim : futureTMax,
-          y: bothVertical ? futureTMin : otherDim,
+          y: bothVertical ? pointAfterShortcut.y : otherDim,
           layer: currentSegment.end.layer,
         }
       } else if (futureTMin >= currentTMin && futureTMin <= currentTMax) {
@@ -88,17 +90,11 @@ export function shortenPathWithShortcuts(
         // Shortcut type 3, ignore for now
         continue
       }
-      const pointAfterShortcut = route[j + 2]
-      if (!pointAfterShortcut) continue
 
       if (
-        checkIfObstacleBetweenPoints(
-          shortened[shortened.length - 1],
-          shortcutPoint,
-        ) ||
-        checkIfObstacleBetweenPoints(shortcutPoint, pointAfterShortcut)
+        checkIfObstacleBetweenPoints(currentSegment.end, shortcutPoint) ||
+        checkIfObstacleBetweenPoints(futureSegment.start, shortcutPoint)
       ) {
-        console.log("obstacle in between")
         continue
       }
 
