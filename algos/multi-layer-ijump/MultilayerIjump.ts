@@ -96,6 +96,7 @@ export class MultilayerIjump extends GeneralizedAstarAutorouter {
     MAX_ITERATIONS?: number
     VIA_COST?: number
     isRemovePathLoopsEnabled?: boolean
+    isShortenPathWithShortcutsEnabled?: boolean
     connMap?: ConnectivityMap
     pcbConnMap?: PcbConnectivityMap
     optimizeWithGoalBoxes?: boolean

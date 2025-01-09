@@ -15,6 +15,7 @@ import { ObstacleList } from "./ObstacleList"
 import { removePathLoops } from "solver-postprocessing/remove-path-loops"
 import { addViasWhenLayerChanges } from "solver-postprocessing/add-vias-when-layer-changes"
 import type { AnyCircuitElement } from "circuit-json"
+import { shortenPathWithShortcuts } from "./shortenPathWithShortcuts"
 
 const debug = Debug("autorouting-dataset:astar")
 
@@ -44,6 +45,7 @@ export class GeneralizedAstarAutorouter {
   OBSTACLE_MARGIN: number
   MAX_ITERATIONS: number
   isRemovePathLoopsEnabled: boolean
+  isShortenPathWithShortcutsEnabled: boolean
   /**
    * Setting this greater than 1 makes the algorithm find suboptimal paths and
    * act more greedy, but at greatly improves performance.
@@ -62,6 +64,7 @@ export class GeneralizedAstarAutorouter {
     OBSTACLE_MARGIN?: number
     MAX_ITERATIONS?: number
     isRemovePathLoopsEnabled?: boolean
+    isShortenPathWithShortcutsEnabled?: boolean
     debug?: boolean
   }) {
     this.input = opts.input
@@ -75,6 +78,8 @@ export class GeneralizedAstarAutorouter {
     this.MAX_ITERATIONS = opts.MAX_ITERATIONS ?? 100
     this.debug = opts.debug ?? debug.enabled
     this.isRemovePathLoopsEnabled = opts.isRemovePathLoopsEnabled ?? false
+    this.isShortenPathWithShortcutsEnabled =
+      opts.isShortenPathWithShortcutsEnabled ?? false
     if (this.debug) {
       debug.enabled = true
     }
@@ -263,6 +268,23 @@ export class GeneralizedAstarAutorouter {
 
         if (this.isRemovePathLoopsEnabled) {
           route = removePathLoops(route)
+        }
+
+        if (this.isShortenPathWithShortcutsEnabled) {
+          route = shortenPathWithShortcuts(route, (start, end) => {
+            const minX = Math.min(start.x, end.x)
+            const maxX = Math.max(start.x, end.x)
+            const minY = Math.min(start.y, end.y)
+            const maxY = Math.max(start.y, end.y)
+            return (
+              this.obstacles!.getObstaclesOverlappingRegion({
+                minX,
+                minY,
+                maxX,
+                maxY,
+              }).length > 0
+            )
+          })
         }
 
         return { solved: true, route, connectionName: connection.name }

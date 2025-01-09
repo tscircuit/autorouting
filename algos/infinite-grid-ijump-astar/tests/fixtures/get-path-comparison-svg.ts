@@ -10,6 +10,11 @@ import {
 
 export const getPathComparisonSvg = (
   pathMap: Record<string, PointWithLayer[]>,
+  obstacles?: Array<{
+    center: { x: number; y: number }
+    width: number
+    height: number
+  }>,
 ) => {
   const svgWidth = 640
   const svgHeight = 480
@@ -81,6 +86,25 @@ export const getPathComparisonSvg = (
       `<text x="5" y="${15 * (pathIndex + 1)}" font-size="12" fill="${color}">${pathName}</text>`,
     )
   })
+
+  // Draw obstacles if provided
+  if (obstacles) {
+    obstacles.forEach((obstacle) => {
+      const { x, y } = applyToPoint(transform, obstacle.center)
+      const halfWidth = obstacle.width / 2
+      const halfHeight = obstacle.height / 2
+
+      svg += `<rect 
+          x="${x - halfWidth * transform.a}" 
+          y="${y - halfHeight * transform.d}" 
+          width="${obstacle.width * transform.a}" 
+          height="${obstacle.height * transform.d}" 
+          fill="rgba(255,0,0,0.2)" 
+          stroke="red"
+          stroke-width="1"
+        />`
+    })
+  }
 
   // Add legend
   svg += `<g transform="translate(${svgWidth - 100}, ${svgHeight - 20 - legendItems.length * 15})">`
