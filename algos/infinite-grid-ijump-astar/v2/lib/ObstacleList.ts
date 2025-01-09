@@ -154,10 +154,10 @@ export class ObstacleList {
       const { left, right, top, bottom } = obstacle
 
       if (
-        left >= region.minX &&
-        right <= region.maxX &&
-        top >= region.minY &&
-        bottom <= region.maxY
+        left <= region.maxX &&
+        right >= region.minX &&
+        top <= region.maxY &&
+        bottom >= region.minY
       ) {
         obstacles.push(obstacle)
       }

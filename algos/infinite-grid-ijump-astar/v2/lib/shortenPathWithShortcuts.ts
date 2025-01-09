@@ -91,7 +91,13 @@ export function shortenPathWithShortcuts(
       const pointAfterShortcut = route[j + 2]
       if (!pointAfterShortcut) continue
 
-      if (checkIfObstacleBetweenPoints(shortcutPoint, pointAfterShortcut)) {
+      if (
+        checkIfObstacleBetweenPoints(
+          shortened[shortened.length - 1],
+          shortcutPoint,
+        ) ||
+        checkIfObstacleBetweenPoints(shortcutPoint, pointAfterShortcut)
+      ) {
         continue
       }
 

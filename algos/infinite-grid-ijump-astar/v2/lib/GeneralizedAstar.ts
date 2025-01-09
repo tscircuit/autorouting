@@ -271,19 +271,20 @@ export class GeneralizedAstarAutorouter {
         }
 
         if (this.isShortenPathWithShortcutsEnabled) {
-          route = shortenPathWithShortcuts(route, (start, end) => {
-            const minX = Math.min(start.x, end.x)
-            const maxX = Math.max(start.x, end.x)
-            const minY = Math.min(start.y, end.y)
-            const maxY = Math.max(start.y, end.y)
-            return (
-              this.obstacles!.getObstaclesOverlappingRegion({
-                minX,
-                minY,
-                maxX,
-                maxY,
-              }).length > 0
+          route = shortenPathWithShortcuts(route, (A, B) => {
+            if (A.x === B.x && A.y === B.y) return false
+            const collision = this.obstacles!.getOrthoDirectionCollisionInfo(
+              A,
+              {
+                dx: Math.sign(B.x - A.x),
+                dy: Math.sign(B.y - A.y),
+              },
+              {
+                margin: 0.05,
+              },
             )
+            const dist = Math.sqrt((A.x - B.x) ** 2 + (A.y - B.y) ** 2)
+            return collision.wallDistance < dist
           })
         }
 
