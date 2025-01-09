@@ -16,6 +16,7 @@ import { removePathLoops } from "solver-postprocessing/remove-path-loops"
 import { addViasWhenLayerChanges } from "solver-postprocessing/add-vias-when-layer-changes"
 import type { AnyCircuitElement } from "circuit-json"
 import { shortenPathWithShortcuts } from "./shortenPathWithShortcuts"
+import type { ObstacleList3d } from "algos/multi-layer-ijump/ObstacleList3d"
 
 const debug = Debug("autorouting-dataset:astar")
 
@@ -273,11 +274,18 @@ export class GeneralizedAstarAutorouter {
         if (this.isShortenPathWithShortcutsEnabled) {
           route = shortenPathWithShortcuts(route, (A, B) => {
             if (A.x === B.x && A.y === B.y) return false
-            const collision = this.obstacles!.getOrthoDirectionCollisionInfo(
-              A,
+            const collision = (
+              this.obstacles as ObstacleList3d
+            ).getOrthoDirectionCollisionInfo(
+              {
+                x: A.x,
+                y: A.y,
+                l: this.layerToIndex(A.layer) ?? 0,
+              },
               {
                 dx: Math.sign(B.x - A.x),
                 dy: Math.sign(B.y - A.y),
+                dl: 0,
               },
               {
                 margin: 0.05,
