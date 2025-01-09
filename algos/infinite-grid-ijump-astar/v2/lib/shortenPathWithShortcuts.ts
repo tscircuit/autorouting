@@ -74,7 +74,6 @@ export function shortenPathWithShortcuts(
 
       if (futureTMax >= currentTMin && futureTMax <= currentTMax) {
         // Shortcut type 1
-        console.log("shortcut type 1")
         shortcutPoint = {
           x: bothVertical ? otherDim : futureTMax,
           y: bothVertical ? pointAfterShortcut.y : otherDim,
@@ -82,12 +81,6 @@ export function shortenPathWithShortcuts(
         }
       } else if (futureTMin >= currentTMin && futureTMin <= currentTMax) {
         // Shortcut type 2
-        console.log("shortcut type 2")
-        console.table([
-          { candidate: "1", x: otherDim, y: futureTMax },
-          { candidate: "2", x: futureTMin, y: otherDim },
-          { candidate: "3", x: otherDim, y: pointAfterShortcut.y },
-        ])
         shortcutPoint = {
           x: bothVertical ? otherDim : futureTMin,
           y: bothVertical ? futureTMax : otherDim,
@@ -97,26 +90,11 @@ export function shortenPathWithShortcuts(
         // Shortcut type 3, ignore for now
         continue
       }
-      console.log("pointAfterShortcut", pointAfterShortcut)
-      console.table([
-        ...shortened.map((s, i) => ({
-          name: i.toString(),
-          ...s,
-        })),
-        { name: "shortcut", ...shortcutPoint },
-        { name: "pointAfterShortcut", ...pointAfterShortcut },
-      ])
-
-      console.log({
-        currentSegment,
-        futureSegment,
-      })
 
       if (
         checkIfObstacleBetweenPoints(currentSegment.end, shortcutPoint) ||
         checkIfObstacleBetweenPoints(futureSegment.start, shortcutPoint)
       ) {
-        console.log("obstacle in between")
         continue
       }
 
@@ -134,9 +112,6 @@ export function shortenPathWithShortcuts(
   if (shortened[shortened.length - 1] !== route[route.length - 1]) {
     shortened.push(route[route.length - 1])
   }
-
-  console.table(route)
-  console.table(shortened)
 
   return shortened
 }
