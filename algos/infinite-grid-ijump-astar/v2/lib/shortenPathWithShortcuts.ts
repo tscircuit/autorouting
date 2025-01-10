@@ -1,5 +1,8 @@
 import { current } from "circuit-json"
 import type { PointWithLayer as Point } from "./GeneralizedAstar"
+import Debug from "debug"
+
+const debug = Debug("autorouter:shortenPathWithShortcuts")
 
 export function shortenPathWithShortcuts(
   route: Point[],
@@ -20,6 +23,8 @@ export function shortenPathWithShortcuts(
     let skipToIndex = -1
     const currentSegmentIsVertical =
       currentSegment.start.x === currentSegment.end.x
+    const currentSegmentIsHorizontal =
+      currentSegment.start.y === currentSegment.end.y
     for (let j = i + 1; j < route.length; j++) {
       if (j <= skipToIndex) continue
       const futureSegment = {
@@ -29,76 +34,107 @@ export function shortenPathWithShortcuts(
       if (!futureSegment.end) continue
       const futureSegmentIsVertical =
         futureSegment.start.x === futureSegment.end.x
+      const futureSegmentIsHorizontal =
+        futureSegment.start.y === futureSegment.end.y
 
-      const bothVertical = currentSegmentIsVertical === futureSegmentIsVertical
+      const bothVertical = currentSegmentIsVertical && futureSegmentIsVertical
       const bothHorizontal =
-        !currentSegmentIsVertical && !futureSegmentIsVertical
+        currentSegmentIsHorizontal && futureSegmentIsHorizontal
 
+      if (bothHorizontal && bothVertical) continue
       const segmentsAreParallel = bothVertical || bothHorizontal
 
       if (!segmentsAreParallel) continue
 
-      // "T" is the dimension if these lines are projected on their parallel axis
+      let overlapping = false
 
-      let currentTStart = bothVertical
-        ? currentSegment.start.y
-        : currentSegment.start.x
-      let currentTEnd = bothVertical
-        ? currentSegment.end.y
-        : currentSegment.end.x
+      const currentMinX = Math.min(currentSegment.start.x, currentSegment.end.x)
+      const currentMaxX = Math.max(currentSegment.start.x, currentSegment.end.x)
+      const futureMinX = Math.min(futureSegment.start.x, futureSegment.end.x)
+      const futureMaxX = Math.max(futureSegment.start.x, futureSegment.end.x)
 
-      let futureTStart = bothVertical
-        ? futureSegment.start.y
-        : futureSegment.start.x
-      let futureTEnd = bothVertical ? futureSegment.end.y : futureSegment.end.x
+      const currentMinY = Math.min(currentSegment.start.y, currentSegment.end.y)
+      const currentMaxY = Math.max(currentSegment.start.y, currentSegment.end.y)
+      const futureMinY = Math.min(futureSegment.start.y, futureSegment.end.y)
+      const futureMaxY = Math.max(futureSegment.start.y, futureSegment.end.y)
 
-      const currentTMin = Math.min(currentTStart, currentTEnd)
-      const currentTMax = Math.max(currentTStart, currentTEnd)
-      const futureTMin = Math.min(futureTStart, futureTEnd)
-      const futureTMax = Math.max(futureTStart, futureTEnd)
+      if (bothHorizontal) {
+        overlapping = currentMinX <= futureMaxX && currentMaxX >= futureMinX
+      } else if (bothVertical) {
+        overlapping = currentMinY <= futureMaxY && currentMaxY >= futureMinY
+      }
 
-      const overlappingInT =
-        currentTMin <= futureTMax && currentTMax >= futureTMin
+      if (!overlapping) continue
 
-      if (!overlappingInT) continue
+      const candidateShortcuts: Point[] = []
 
-      const otherDim = bothVertical
-        ? currentSegment.start.x
-        : currentSegment.start.y
-      const futureOtherDim = bothVertical
-        ? futureSegment.start.x
-        : futureSegment.start.y
-
-      let shortcutPoint: Point
       const pointBeforeShortcut = shortened[shortened.length - 1]
       const pointAfterShortcut = route[j + 2]
       if (!pointAfterShortcut) continue
 
-      if (futureTMax >= currentTMin && futureTMax <= currentTMax) {
-        // Shortcut type 1
-        shortcutPoint = {
-          x: bothVertical ? otherDim : futureTMax,
-          y: bothVertical ? pointAfterShortcut.y : otherDim,
-          layer: currentSegment.end.layer,
-        }
-      } else if (futureTMin >= currentTMin && futureTMin <= currentTMax) {
-        // Shortcut type 2
-        shortcutPoint = {
-          x: bothVertical ? otherDim : futureTMin,
-          y: bothVertical ? futureTMax : otherDim,
-          layer: currentSegment.end.layer,
-        }
-      } else {
-        // Shortcut type 3, ignore for now
-        continue
+      if (
+        bothHorizontal &&
+        futureMinX < currentMaxX &&
+        pointAfterShortcut.x === futureMinX
+      ) {
+        candidateShortcuts.push({
+          x: futureMinX,
+          y: currentSegment.start.y,
+          layer: currentSegment.start.layer,
+        })
+      }
+      if (
+        bothHorizontal &&
+        futureMaxX > currentMinX &&
+        pointAfterShortcut.x === futureMaxX
+      ) {
+        candidateShortcuts.push({
+          x: futureMaxX,
+          y: currentSegment.start.y,
+          layer: currentSegment.start.layer,
+        })
+      }
+      if (
+        bothVertical &&
+        futureMinY < currentMaxY &&
+        pointAfterShortcut.y === futureMinY
+      ) {
+        candidateShortcuts.push({
+          x: currentSegment.start.x,
+          y: futureMinY,
+          layer: currentSegment.start.layer,
+        })
+      }
+      if (
+        bothVertical &&
+        futureMaxY > currentMinY &&
+        pointAfterShortcut.y === futureMaxY
+      ) {
+        candidateShortcuts.push({
+          x: currentSegment.start.x,
+          y: futureMaxY,
+          layer: currentSegment.start.layer,
+        })
       }
 
-      if (
-        checkIfObstacleBetweenPoints(pointBeforeShortcut, shortcutPoint) ||
-        checkIfObstacleBetweenPoints(pointAfterShortcut, shortcutPoint)
-      ) {
-        continue
+      let shortcutPoint: Point | null = null
+
+      for (const candidateShortcut of candidateShortcuts) {
+        if (
+          checkIfObstacleBetweenPoints(
+            pointBeforeShortcut,
+            candidateShortcut,
+          ) ||
+          checkIfObstacleBetweenPoints(pointAfterShortcut, candidateShortcut)
+        ) {
+          continue
+        }
+
+        shortcutPoint = candidateShortcut
+        break
       }
+
+      if (!shortcutPoint) continue
 
       shortened.push(shortcutPoint)
       i = j + 1

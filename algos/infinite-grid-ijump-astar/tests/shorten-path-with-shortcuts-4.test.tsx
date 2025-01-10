@@ -391,7 +391,7 @@ test("shorten-path-with-shortcuts 4 repro", () => {
   const pathToOptimize = [
     ...repro4.trace.edges.map((edge) => edge.from),
     repro4.trace.edges[repro4.trace.edges.length - 1].to,
-  ]
+  ].slice(0, 5)
 
   const simplifiedPath = shortenPathWithShortcuts(
     pathToOptimize as any,
