@@ -64,28 +64,6 @@ export function shortenPathWithShortcuts(
         overlapping = currentMinY <= futureMaxY && currentMaxY >= futureMinY
       }
 
-      // "T" is the dimension if these lines are projected on their parallel axis
-
-      // let currentTStart = bothVertical
-      //   ? currentSegment.start.y
-      //   : currentSegment.start.x
-      // let currentTEnd = bothVertical
-      //   ? currentSegment.end.y
-      //   : currentSegment.end.x
-
-      // let futureTStart = bothVertical
-      //   ? futureSegment.start.y
-      //   : futureSegment.start.x
-      // let futureTEnd = bothVertical ? futureSegment.end.y : futureSegment.end.x
-
-      // const currentTMin = Math.min(currentTStart, currentTEnd)
-      // const currentTMax = Math.max(currentTStart, currentTEnd)
-      // const futureTMin = Math.min(futureTStart, futureTEnd)
-      // const futureTMax = Math.max(futureTStart, futureTEnd)
-
-      // const overlappingInT =
-      //   currentTMin <= futureTMax && currentTMax >= futureTMin
-
       if (!overlapping) continue
 
       const candidateShortcuts: Point[] = []
