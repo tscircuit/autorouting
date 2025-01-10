@@ -337,20 +337,20 @@ test("shorten-path-with-shortcuts 6 repro", () => {
     { x: 1.4000000000000001, y: 0.09999999999999998, layer: "top" },
   ]
 
-  // const shortenedPath = shortenPathWithShortcuts(
-  //   pathToOptimize as any,
-  //   (A, B) => isObstacleBetweenPoints(A, B, obstacleList),
-  // )
+  const shortenedPath = shortenPathWithShortcuts(
+    pathToOptimize as any,
+    (A, B) => isObstacleBetweenPoints(A, B, obstacleList),
+  )
 
-  // expect(
-  //   getPathComparisonSvg(
-  //     {
-  //       pathWithLoop: pathToOptimize as any,
-  //       simplifiedPath: shortenedPath,
-  //     },
-  //     obstacles,
-  //   ),
-  // ).toMatchSvgSnapshot(import.meta.path, "shorten-path-with-shortcuts-6-normal")
+  expect(
+    getPathComparisonSvg(
+      {
+        pathWithLoop: pathToOptimize as any,
+        simplifiedPath: shortenedPath,
+      },
+      obstacles,
+    ),
+  ).toMatchSvgSnapshot(import.meta.path, "shorten-path-with-shortcuts-6-normal")
 
   const rotatedPathToOptimize = pathToOptimize.map((p) => ({
     x: p.y,

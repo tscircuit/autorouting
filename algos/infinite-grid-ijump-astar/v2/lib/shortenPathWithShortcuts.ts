@@ -1,3 +1,4 @@
+import { current } from "circuit-json"
 import type { PointWithLayer as Point } from "./GeneralizedAstar"
 
 export function shortenPathWithShortcuts(
@@ -69,6 +70,7 @@ export function shortenPathWithShortcuts(
         : futureSegment.start.y
 
       let shortcutPoint: Point
+      const pointBeforeShortcut = shortened[shortened.length - 1]
       const pointAfterShortcut = route[j + 2]
       if (!pointAfterShortcut) continue
 
@@ -92,8 +94,8 @@ export function shortenPathWithShortcuts(
       }
 
       if (
-        checkIfObstacleBetweenPoints(currentSegment.end, shortcutPoint) ||
-        checkIfObstacleBetweenPoints(futureSegment.start, shortcutPoint)
+        checkIfObstacleBetweenPoints(pointBeforeShortcut, shortcutPoint) ||
+        checkIfObstacleBetweenPoints(pointAfterShortcut, shortcutPoint)
       ) {
         continue
       }
