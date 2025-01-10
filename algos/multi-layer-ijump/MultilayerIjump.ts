@@ -109,6 +109,7 @@ export class MultilayerIjump extends GeneralizedAstarAutorouter {
   }) {
     super(opts)
     this.layerCount = opts.input.layerCount ?? 2
+    this.MAX_ITERATIONS = opts.MAX_ITERATIONS ?? this.MAX_ITERATIONS
     this.VIA_COST = opts.VIA_COST ?? this.VIA_COST
     this.connMap = opts.connMap
     this.pcbConnMap = opts.pcbConnMap ?? new PcbConnectivityMap()
