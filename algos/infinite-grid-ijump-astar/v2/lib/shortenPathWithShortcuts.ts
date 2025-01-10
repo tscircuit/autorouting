@@ -37,15 +37,11 @@ export function shortenPathWithShortcuts(
       const futureSegmentIsHorizontal =
         futureSegment.start.y === futureSegment.end.y
 
-      const bothVertical = currentSegmentIsVertical === futureSegmentIsVertical
+      const bothVertical = currentSegmentIsVertical && futureSegmentIsVertical
       const bothHorizontal =
-        currentSegmentIsHorizontal === futureSegmentIsHorizontal
+        currentSegmentIsHorizontal && futureSegmentIsHorizontal
 
-      if (bothVertical && bothHorizontal) {
-        // two points on top of each other
-        continue
-      }
-
+      if (bothHorizontal && bothVertical) continue
       const segmentsAreParallel = bothVertical || bothHorizontal
 
       if (!segmentsAreParallel) continue
