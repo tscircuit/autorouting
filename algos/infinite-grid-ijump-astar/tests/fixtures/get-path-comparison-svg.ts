@@ -78,7 +78,7 @@ export const getPathComparisonSvg = (
       y -= 8 * pathIndex
 
       svg += `<circle cx="${x}" cy="${y}" r="3" fill="${color}" />`
-      svg += `<text x="${x + 5}" y="${y - 5}" font-size="10" fill="${color}">${index}</text>`
+      svg += `<text x="${x + 5}" y="${y - 5}" font-size="10" fill="${color}">${index} (${point.x.toFixed(2)}, ${point.y.toFixed(2)})</text>`
     })
 
     // Add legend item
