@@ -90,32 +90,48 @@ export function shortenPathWithShortcuts(
 
       const candidateShortcuts: Point[] = []
 
-      if (bothHorizontal && futureMinX < currentMaxX) {
-        console.log("case 1")
+      const pointBeforeShortcut = shortened[shortened.length - 1]
+      const pointAfterShortcut = route[j + 2]
+      if (!pointAfterShortcut) continue
+
+      if (
+        bothHorizontal &&
+        futureMinX < currentMaxX &&
+        pointAfterShortcut.x === futureMinX
+      ) {
         candidateShortcuts.push({
           x: futureMinX,
           y: currentSegment.start.y,
           layer: currentSegment.start.layer,
         })
       }
-      if (bothHorizontal && futureMaxX > currentMinX) {
-        console.log("case 2")
+      if (
+        bothHorizontal &&
+        futureMaxX > currentMinX &&
+        pointAfterShortcut.x === futureMaxX
+      ) {
         candidateShortcuts.push({
           x: futureMaxX,
           y: currentSegment.start.y,
           layer: currentSegment.start.layer,
         })
       }
-      if (bothVertical && futureMinY < currentMaxY) {
-        console.log("case 3")
+      if (
+        bothVertical &&
+        futureMinY < currentMaxY &&
+        pointAfterShortcut.y === futureMinY
+      ) {
         candidateShortcuts.push({
           x: currentSegment.start.x,
           y: futureMinY,
           layer: currentSegment.start.layer,
         })
       }
-      if (bothVertical && futureMaxY > currentMinY) {
-        console.log("case 4")
+      if (
+        bothVertical &&
+        futureMaxY > currentMinY &&
+        pointAfterShortcut.y === futureMaxY
+      ) {
         candidateShortcuts.push({
           x: currentSegment.start.x,
           y: futureMaxY,
@@ -123,26 +139,7 @@ export function shortenPathWithShortcuts(
         })
       }
 
-      const pointBeforeShortcut = shortened[shortened.length - 1]
-      const pointAfterShortcut = route[j + 2]
-      if (!pointAfterShortcut) continue
-
-      console.table([
-        pointBeforeShortcut,
-        {},
-        ...candidateShortcuts,
-        {},
-        pointAfterShortcut,
-      ])
-
       let shortcutPoint: Point | null = null
-
-      console.log({
-        shortened,
-        pointBeforeShortcut,
-        candidateShortcuts,
-        pointAfterShortcut,
-      })
 
       for (const candidateShortcut of candidateShortcuts) {
         if (
@@ -161,7 +158,6 @@ export function shortenPathWithShortcuts(
 
       if (!shortcutPoint) continue
 
-      console.log("success", shortcutPoint)
       shortened.push(shortcutPoint)
       i = j + 1
       skipToIndex = j + 1
