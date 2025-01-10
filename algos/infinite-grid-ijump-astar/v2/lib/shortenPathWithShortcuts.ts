@@ -1,5 +1,8 @@
 import { current } from "circuit-json"
 import type { PointWithLayer as Point } from "./GeneralizedAstar"
+import Debug from "debug"
+
+const debug = Debug("autorouter:shortenPathWithShortcuts")
 
 export function shortenPathWithShortcuts(
   route: Point[],
@@ -20,6 +23,8 @@ export function shortenPathWithShortcuts(
     let skipToIndex = -1
     const currentSegmentIsVertical =
       currentSegment.start.x === currentSegment.end.x
+    const currentSegmentIsHorizontal =
+      currentSegment.start.y === currentSegment.end.y
     for (let j = i + 1; j < route.length; j++) {
       if (j <= skipToIndex) continue
       const futureSegment = {
@@ -29,77 +34,138 @@ export function shortenPathWithShortcuts(
       if (!futureSegment.end) continue
       const futureSegmentIsVertical =
         futureSegment.start.x === futureSegment.end.x
+      const futureSegmentIsHorizontal =
+        futureSegment.start.y === futureSegment.end.y
 
       const bothVertical = currentSegmentIsVertical === futureSegmentIsVertical
       const bothHorizontal =
-        !currentSegmentIsVertical && !futureSegmentIsVertical
+        currentSegmentIsHorizontal === futureSegmentIsHorizontal
+
+      if (bothVertical && bothHorizontal) {
+        // two points on top of each other
+        continue
+      }
 
       const segmentsAreParallel = bothVertical || bothHorizontal
 
       if (!segmentsAreParallel) continue
 
+      let overlapping = false
+
+      const currentMinX = Math.min(currentSegment.start.x, currentSegment.end.x)
+      const currentMaxX = Math.max(currentSegment.start.x, currentSegment.end.x)
+      const futureMinX = Math.min(futureSegment.start.x, futureSegment.end.x)
+      const futureMaxX = Math.max(futureSegment.start.x, futureSegment.end.x)
+
+      const currentMinY = Math.min(currentSegment.start.y, currentSegment.end.y)
+      const currentMaxY = Math.max(currentSegment.start.y, currentSegment.end.y)
+      const futureMinY = Math.min(futureSegment.start.y, futureSegment.end.y)
+      const futureMaxY = Math.max(futureSegment.start.y, futureSegment.end.y)
+
+      if (bothHorizontal) {
+        overlapping = currentMinX <= futureMaxX && currentMaxX >= futureMinX
+      } else if (bothVertical) {
+        overlapping = currentMinY <= futureMaxY && currentMaxY >= futureMinY
+      }
+
       // "T" is the dimension if these lines are projected on their parallel axis
 
-      let currentTStart = bothVertical
-        ? currentSegment.start.y
-        : currentSegment.start.x
-      let currentTEnd = bothVertical
-        ? currentSegment.end.y
-        : currentSegment.end.x
+      // let currentTStart = bothVertical
+      //   ? currentSegment.start.y
+      //   : currentSegment.start.x
+      // let currentTEnd = bothVertical
+      //   ? currentSegment.end.y
+      //   : currentSegment.end.x
 
-      let futureTStart = bothVertical
-        ? futureSegment.start.y
-        : futureSegment.start.x
-      let futureTEnd = bothVertical ? futureSegment.end.y : futureSegment.end.x
+      // let futureTStart = bothVertical
+      //   ? futureSegment.start.y
+      //   : futureSegment.start.x
+      // let futureTEnd = bothVertical ? futureSegment.end.y : futureSegment.end.x
 
-      const currentTMin = Math.min(currentTStart, currentTEnd)
-      const currentTMax = Math.max(currentTStart, currentTEnd)
-      const futureTMin = Math.min(futureTStart, futureTEnd)
-      const futureTMax = Math.max(futureTStart, futureTEnd)
+      // const currentTMin = Math.min(currentTStart, currentTEnd)
+      // const currentTMax = Math.max(currentTStart, currentTEnd)
+      // const futureTMin = Math.min(futureTStart, futureTEnd)
+      // const futureTMax = Math.max(futureTStart, futureTEnd)
 
-      const overlappingInT =
-        currentTMin <= futureTMax && currentTMax >= futureTMin
+      // const overlappingInT =
+      //   currentTMin <= futureTMax && currentTMax >= futureTMin
 
-      if (!overlappingInT) continue
+      if (!overlapping) continue
 
-      const otherDim = bothVertical
-        ? currentSegment.start.x
-        : currentSegment.start.y
-      const futureOtherDim = bothVertical
-        ? futureSegment.start.x
-        : futureSegment.start.y
+      const candidateShortcuts: Point[] = []
 
-      let shortcutPoint: Point
+      if (bothHorizontal && futureMinX < currentMaxX) {
+        console.log("case 1")
+        candidateShortcuts.push({
+          x: futureMinX,
+          y: currentSegment.start.y,
+          layer: currentSegment.start.layer,
+        })
+      }
+      if (bothHorizontal && futureMaxX > currentMinX) {
+        console.log("case 2")
+        candidateShortcuts.push({
+          x: futureMaxX,
+          y: currentSegment.start.y,
+          layer: currentSegment.start.layer,
+        })
+      }
+      if (bothVertical && futureMinY < currentMaxY) {
+        console.log("case 3")
+        candidateShortcuts.push({
+          x: currentSegment.start.x,
+          y: futureMinY,
+          layer: currentSegment.start.layer,
+        })
+      }
+      if (bothVertical && futureMaxY > currentMinY) {
+        console.log("case 4")
+        candidateShortcuts.push({
+          x: currentSegment.start.x,
+          y: futureMaxY,
+          layer: currentSegment.start.layer,
+        })
+      }
+
       const pointBeforeShortcut = shortened[shortened.length - 1]
       const pointAfterShortcut = route[j + 2]
       if (!pointAfterShortcut) continue
 
-      if (futureTMax >= currentTMin && futureTMax <= currentTMax) {
-        // Shortcut type 1
-        shortcutPoint = {
-          x: bothVertical ? otherDim : futureTMax,
-          y: bothVertical ? pointAfterShortcut.y : otherDim,
-          layer: currentSegment.end.layer,
+      console.table([
+        pointBeforeShortcut,
+        {},
+        ...candidateShortcuts,
+        {},
+        pointAfterShortcut,
+      ])
+
+      let shortcutPoint: Point | null = null
+
+      console.log({
+        shortened,
+        pointBeforeShortcut,
+        candidateShortcuts,
+        pointAfterShortcut,
+      })
+
+      for (const candidateShortcut of candidateShortcuts) {
+        if (
+          checkIfObstacleBetweenPoints(
+            pointBeforeShortcut,
+            candidateShortcut,
+          ) ||
+          checkIfObstacleBetweenPoints(pointAfterShortcut, candidateShortcut)
+        ) {
+          continue
         }
-      } else if (futureTMin >= currentTMin && futureTMin <= currentTMax) {
-        // Shortcut type 2
-        shortcutPoint = {
-          x: bothVertical ? otherDim : futureTMin,
-          y: bothVertical ? futureTMax : otherDim,
-          layer: currentSegment.end.layer,
-        }
-      } else {
-        // Shortcut type 3, ignore for now
-        continue
+
+        shortcutPoint = candidateShortcut
+        break
       }
 
-      if (
-        checkIfObstacleBetweenPoints(pointBeforeShortcut, shortcutPoint) ||
-        checkIfObstacleBetweenPoints(pointAfterShortcut, shortcutPoint)
-      ) {
-        continue
-      }
+      if (!shortcutPoint) continue
 
+      console.log("success", shortcutPoint)
       shortened.push(shortcutPoint)
       i = j + 1
       skipToIndex = j + 1
