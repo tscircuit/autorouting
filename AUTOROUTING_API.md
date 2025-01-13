@@ -13,7 +13,7 @@ you do not need to implement Circuit Json handling or other parts of the API.
 ### POST `$BASE/autorouting/solve`
 
 Synchronously solve a routing problem. This will only return fast enough for
-smaller problems (<100 traces), use `/autorouting/autorouting_tasks/create` for larger
+smaller problems (<100 traces), use `/autorouting/jobs/create` for larger
 problems.
 
 `/autorouting/solve` accepts either `input_simple_route_json` or `input_circuit_json` in the json
@@ -39,6 +39,14 @@ RESPONSE:
 {
   "autorouting_result": {
      output_simple_route_json: { ... }
+  }
+}
+
+
+ANOTHER ALLOWED RESPONSE:
+{
+  "autorouting_result": {
+     output_traces: []
   }
 }
 ```
