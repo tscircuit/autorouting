@@ -32,6 +32,16 @@ export const getSimpleRouteJson = (
   routeJson.connections = []
   for (const element of circuitJson) {
     if (element.type === "source_trace") {
+      const alreadyConnected = circuitJson.some(
+        (e) =>
+          e.type === "pcb_trace" &&
+          e.source_trace_id === element.source_trace_id,
+      )
+
+      if (alreadyConnected) {
+        continue
+      }
+
       let connection: ConnectionWithGoalAlternatives | SimpleRouteConnection = {
         name: element.source_trace_id,
         pointsToConnect: element.connected_source_port_ids.map((portId) => {
